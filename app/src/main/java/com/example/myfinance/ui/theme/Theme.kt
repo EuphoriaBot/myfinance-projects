@@ -1,6 +1,5 @@
-package com.example.jetpackcomposebasic.ui.theme
+package com.example.myfinance.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

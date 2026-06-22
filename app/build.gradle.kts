@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.jetpackcomposebasic"
+    namespace = "com.example.myfinance"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
