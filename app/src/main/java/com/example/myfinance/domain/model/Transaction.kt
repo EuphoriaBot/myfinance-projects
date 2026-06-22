@@ -23,6 +23,6 @@ data class Transaction(
     val toAccountId: Long? = null,
     val date: Long = System.currentTimeMillis(),
     val isRecurring: Boolean = false,
-    val recurringInterval: RecurringInterval? = null, 
+    val recurringInterval: RecurringInterval? = null,
     val createdAt: Long = System.currentTimeMillis()
 )
