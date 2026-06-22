@@ -5,7 +5,7 @@ data class SavingGoal(
     val name: String,
     val targetAmount: Double,
     val currentAmount: Double = 0.0,
-    val deadline: Long? = null,  
+    val deadline: Long? = null,
     val colorHex: String = "#6C63FF",
     val icon: String = "target",
     val isCompleted: Boolean = false,
