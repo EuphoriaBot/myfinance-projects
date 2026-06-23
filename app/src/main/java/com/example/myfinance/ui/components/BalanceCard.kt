@@ -14,6 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myfinance.ui.theme.*
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.myfinance.utils.formatRupiah
 
 @Composable
 fun BalanceCard(
@@ -85,5 +87,19 @@ private fun AccountChip(
                 color = Color.White
             )
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0F1117)
+@Composable
+fun BalanceCardPreview() {
+    MyFinanceTheme {
+        BalanceCard(
+            totalBalance = 8450000.0,
+            accounts = listOf(
+                "Cash" to 450000.0,
+                "Bank BCA" to 8000000.0
+            )
+        )
     }
 }
