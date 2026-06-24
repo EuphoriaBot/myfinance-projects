@@ -37,6 +37,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             type = TransactionType.EXPENSE,
             dateLabel = "Hari ini"
         ),
+
         TransactionUiModel(
             id = 2,
             title = "Isi Gopay",
@@ -46,6 +47,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             type = TransactionType.TRANSFER,
             dateLabel = "Kemarin"
         ),
+
         TransactionUiModel(
             id = 3,
             title = "Gaji Juni",
@@ -103,7 +105,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
         item {
             SectionHeader(title = "Transaksi terakhir", onSeeAll = {})
         }
-        
+
         items(dummyTransactions) { transaction ->
             TransactionItem(transaction = transaction)
         }
