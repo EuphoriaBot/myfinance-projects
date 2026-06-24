@@ -3,8 +3,9 @@ package com.example.myfinance.ui.home
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -15,6 +16,8 @@ import com.example.myfinance.ui.theme.*
 
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier) {
+
+    var currentDestination by remember { mutableStateOf(BottomNavDestination.HOME) }
 
     val dummyAccounts = listOf(
         "Cash" to 450000.0,
@@ -37,7 +40,6 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             type = TransactionType.EXPENSE,
             dateLabel = "Hari ini"
         ),
-
         TransactionUiModel(
             id = 2,
             title = "Isi Gopay",
@@ -47,7 +49,6 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             type = TransactionType.TRANSFER,
             dateLabel = "Kemarin"
         ),
-
         TransactionUiModel(
             id = 3,
             title = "Gaji Juni",
@@ -59,55 +60,65 @@ fun HomeScreen(modifier: Modifier = Modifier) {
         )
     )
 
-    LazyColumn(
+    Scaffold(
         modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(top = 24.dp, bottom = 100.dp)
-    ) {
-        item {
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                Text(
-                    text = "Selamat datang,",
-                    fontSize = 13.sp,
-                    color = TextMuted
-                )
-                Text(
-                    text = "MyFinance",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = TextPrimary
+        containerColor = DarkBackground,
+        bottomBar = {
+            BottomNavBar(
+                currentDestination = currentDestination,
+                onDestinationChanged = { currentDestination = it },
+                onAddClick = {}
+            )
+        }
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier.padding(innerPadding),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(top = 24.dp, bottom = 16.dp)
+        ) {
+            item {
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    Text(
+                        text = "Selamat datang,",
+                        fontSize = 13.sp,
+                        color = TextMuted
+                    )
+                    Text(
+                        text = "MyFinance",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextPrimary
+                    )
+                }
+            }
+
+            item {
+                BalanceCard(
+                    totalBalance = dummyAccounts.sumOf { it.second },
+                    accounts = dummyAccounts
                 )
             }
-        }
 
-        item {
-            BalanceCard(
-                totalBalance = dummyAccounts.sumOf { it.second },
-                accounts = dummyAccounts
-            )
-        }
+            item {
+                IncomeExpenseRow(
+                    totalIncome = 5200000.0,
+                    totalExpense = 2750000.0
+                )
+            }
 
-        item {
-            IncomeExpenseRow(
-                totalIncome = 5200000.0,
-                totalExpense = 2750000.0
-            )
-        }
+            item {
+                SectionHeader(title = "Budget bulan ini", onSeeAll = {})
+            }
+            item {
+                BudgetProgressCard(budgets = dummyBudgets)
+            }
 
-        item {
-            SectionHeader(title = "Budget bulan ini", onSeeAll = {})
-        }
-
-        item {
-            BudgetProgressCard(budgets = dummyBudgets)
-        }
-
-        item {
-            SectionHeader(title = "Transaksi terakhir", onSeeAll = {})
-        }
-
-        items(dummyTransactions) { transaction ->
-            TransactionItem(transaction = transaction)
+            item {
+                SectionHeader(title = "Transaksi terakhir", onSeeAll = {})
+            }
+            items(dummyTransactions) { transaction ->
+                TransactionItem(transaction = transaction)
+            }
         }
     }
 }
