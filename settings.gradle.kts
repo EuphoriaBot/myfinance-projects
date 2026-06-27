@@ -22,5 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "JetpackComposeBasic"
+rootProject.name = "MyFinance"
 include(":app")
+ 
