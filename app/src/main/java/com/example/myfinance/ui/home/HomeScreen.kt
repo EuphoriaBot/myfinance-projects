@@ -10,55 +10,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myfinance.data.local.entity.TransactionEntity
+import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.domain.model.TransactionType
 import com.example.myfinance.ui.components.*
 import com.example.myfinance.ui.theme.*
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(
+    repository: FinanceRepository,
+    modifier: Modifier = Modifier
+) {
+    val viewModel: HomeViewModel = viewModel(
+        factory = HomeViewModel.Factory(repository)
+    )
+
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     var currentDestination by remember { mutableStateOf(BottomNavDestination.HOME) }
-
-    val dummyAccounts = listOf(
-        "Cash" to 450000.0,
-        "Bank BCA" to 8000000.0
-    )
-
-    val dummyBudgets = listOf(
-        BudgetUiModel("Makan & Minum", 680000.0, 1000000.0),
-        BudgetUiModel("Transportasi", 420000.0, 500000.0),
-        BudgetUiModel("Hiburan", 310000.0, 300000.0)
-    )
-
-    val dummyTransactions = listOf(
-        TransactionUiModel(
-            id = 1,
-            title = "Belanja Alfamart",
-            categoryName = "Makan & Minum",
-            accountName = "Cash",
-            amount = 87000.0,
-            type = TransactionType.EXPENSE,
-            dateLabel = "Hari ini"
-        ),
-        TransactionUiModel(
-            id = 2,
-            title = "Isi Gopay",
-            categoryName = "Transfer",
-            accountName = "Bank BCA",
-            amount = 200000.0,
-            type = TransactionType.TRANSFER,
-            dateLabel = "Kemarin"
-        ),
-        TransactionUiModel(
-            id = 3,
-            title = "Gaji Juni",
-            categoryName = "Pemasukan",
-            accountName = "Bank BCA",
-            amount = 5200000.0,
-            type = TransactionType.INCOME,
-            dateLabel = "25 Jun"
-        )
-    )
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -94,15 +65,15 @@ fun HomeScreen(modifier: Modifier = Modifier) {
 
             item {
                 BalanceCard(
-                    totalBalance = dummyAccounts.sumOf { it.second },
-                    accounts = dummyAccounts
+                    totalBalance = uiState.totalBalance,
+                    accounts = uiState.accounts.map { it.name to it.balance }
                 )
             }
 
             item {
                 IncomeExpenseRow(
-                    totalIncome = 5200000.0,
-                    totalExpense = 2750000.0
+                    totalIncome = uiState.totalIncome,
+                    totalExpense = uiState.totalExpense
                 )
             }
 
@@ -110,17 +81,43 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 SectionHeader(title = "Budget bulan ini", onSeeAll = {})
             }
             item {
-                BudgetProgressCard(budgets = dummyBudgets)
+                BudgetProgressCard(
+                    budgets = listOf(
+                        BudgetUiModel("Makan & Minum", 680000.0, 1000000.0),
+                        BudgetUiModel("Transportasi", 420000.0, 500000.0),
+                        BudgetUiModel("Hiburan", 310000.0, 300000.0)
+                    )
+                )
             }
-
+            
             item {
                 SectionHeader(title = "Transaksi terakhir", onSeeAll = {})
             }
-            items(dummyTransactions) { transaction ->
-                TransactionItem(transaction = transaction)
+            items(uiState.recentTransactions) { transaction ->
+                TransactionItem(
+                    transaction = mapToUiModel(transaction)
+                )
             }
         }
     }
+}
+
+private fun mapToUiModel(entity: TransactionEntity): TransactionUiModel {
+    return TransactionUiModel(
+        id = entity.id,
+        title = entity.note.ifEmpty { entity.type },
+        categoryName = entity.categoryId.toString(),
+        accountName = entity.accountId.toString(),
+        amount = entity.amount,
+        type = when (entity.type) {
+            "INCOME" -> TransactionType.INCOME
+            "EXPENSE" -> TransactionType.EXPENSE
+            else -> TransactionType.TRANSFER
+        },
+        dateLabel = android.text.format.DateFormat.format(
+            "dd MMM", entity.date
+        ).toString()
+    )
 }
 
 @Composable
@@ -145,16 +142,5 @@ private fun SectionHeader(
             fontSize = 11.sp,
             color = AccentPurple
         )
-    }
-}
-
-@androidx.compose.ui.tooling.preview.Preview(
-    showBackground = true,
-    backgroundColor = 0xFF0F1117
-)
-@Composable
-fun HomeScreenPreview() {
-    MyFinanceTheme {
-        HomeScreen()
     }
 }
