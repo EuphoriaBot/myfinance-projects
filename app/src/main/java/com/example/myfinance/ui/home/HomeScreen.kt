@@ -89,7 +89,7 @@ fun HomeScreen(
                     )
                 )
             }
-            
+
             item {
                 SectionHeader(title = "Transaksi terakhir", onSeeAll = {})
             }
