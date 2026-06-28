@@ -55,7 +55,7 @@ fun OnboardingScreen(
                 color = TextMuted
             )
             Spacer(modifier = Modifier.height(40.dp))
-            
+
             Text(
                 text = "Saldo Cash",
                 fontSize = 13.sp,
