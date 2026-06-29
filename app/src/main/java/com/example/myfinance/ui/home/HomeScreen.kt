@@ -21,6 +21,9 @@ import com.example.myfinance.ui.theme.*
 import com.example.myfinance.ui.transaction.TransactionFormScreen
 import com.example.myfinance.ui.report.ReportScreen
 import com.example.myfinance.ui.settings.SettingsScreen
+import com.example.myfinance.data.local.entity.CategoryEntity
+import com.example.myfinance.data.local.entity.AccountEntity
+
 
 @Composable
 fun HomeScreen(
@@ -125,7 +128,11 @@ fun HomeScreen(
                         }
                         items(uiState.recentTransactions) { transaction ->
                             TransactionItem(
-                                transaction = mapToUiModel(transaction)
+                                transaction = mapToUiModel(
+                                    entity = transaction,
+                                    accounts = uiState.accounts,
+                                    categories = uiState.categories
+                                )
                             )
                         }
                     }
@@ -135,12 +142,20 @@ fun HomeScreen(
     }
 }
 
-private fun mapToUiModel(entity: TransactionEntity): TransactionUiModel {
+// Tambahkan parameter uiState ke fungsi ini
+private fun mapToUiModel(
+    entity: TransactionEntity,
+    accounts: List<AccountEntity>,
+    categories: List<CategoryEntity>
+): TransactionUiModel {
+    val accountName = accounts.find { it.id == entity.accountId }?.name ?: "Akun"
+    val categoryName = categories.find { it.id == entity.categoryId }?.name ?: "Kategori"
+
     return TransactionUiModel(
         id = entity.id,
-        title = entity.note.ifEmpty { entity.type },
-        categoryName = entity.categoryId.toString(),
-        accountName = entity.accountId.toString(),
+        title = entity.note.ifEmpty { categoryName },
+        categoryName = categoryName,
+        accountName = accountName,
         amount = entity.amount,
         type = when (entity.type) {
             "INCOME" -> TransactionType.INCOME
@@ -152,7 +167,6 @@ private fun mapToUiModel(entity: TransactionEntity): TransactionUiModel {
         ).toString()
     )
 }
-
 @Composable
 private fun SectionHeader(
     title: String,
