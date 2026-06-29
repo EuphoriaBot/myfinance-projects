@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myfinance.data.local.entity.TransactionEntity
 import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.domain.model.TransactionType
+import com.example.myfinance.ui.account.AccountScreen
 import com.example.myfinance.ui.components.*
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.ui.transaction.TransactionFormScreen
@@ -50,61 +51,71 @@ fun HomeScreen(
                 )
             }
         ) { innerPadding ->
-            LazyColumn(
-                modifier = Modifier.padding(innerPadding),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(top = 24.dp, bottom = 16.dp)
-            ) {
-                item {
-                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                        Text(
-                            text = "Selamat datang,",
-                            fontSize = 13.sp,
-                            color = TextMuted
-                        )
-                        Text(
-                            text = "MyFinance",
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = TextPrimary
-                        )
+            when (currentDestination) {
+                BottomNavDestination.ACCOUNT -> {
+                    AccountScreen(
+                        repository = repository,
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.padding(innerPadding),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(top = 24.dp, bottom = 16.dp)
+                    ) {
+                        item {
+                            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                Text(
+                                    text = "Selamat datang,",
+                                    fontSize = 13.sp,
+                                    color = TextMuted
+                                )
+                                Text(
+                                    text = "MyFinance",
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = TextPrimary
+                                )
+                            }
+                        }
+
+                        item {
+                            BalanceCard(
+                                totalBalance = uiState.totalBalance,
+                                accounts = uiState.accounts.map { it.name to it.balance }
+                            )
+                        }
+
+                        item {
+                            IncomeExpenseRow(
+                                totalIncome = uiState.totalIncome,
+                                totalExpense = uiState.totalExpense
+                            )
+                        }
+
+                        item {
+                            SectionHeader(title = "Budget bulan ini", onSeeAll = {})
+                        }
+                        item {
+                            BudgetProgressCard(
+                                budgets = listOf(
+                                    BudgetUiModel("Makan & Minum", 680000.0, 1000000.0),
+                                    BudgetUiModel("Transportasi", 420000.0, 500000.0),
+                                    BudgetUiModel("Hiburan", 310000.0, 300000.0)
+                                )
+                            )
+                        }
+
+                        item {
+                            SectionHeader(title = "Transaksi terakhir", onSeeAll = {})
+                        }
+                        items(uiState.recentTransactions) { transaction ->
+                            TransactionItem(
+                                transaction = mapToUiModel(transaction)
+                            )
+                        }
                     }
-                }
-
-                item {
-                    BalanceCard(
-                        totalBalance = uiState.totalBalance,
-                        accounts = uiState.accounts.map { it.name to it.balance }
-                    )
-                }
-
-                item {
-                    IncomeExpenseRow(
-                        totalIncome = uiState.totalIncome,
-                        totalExpense = uiState.totalExpense
-                    )
-                }
-
-                item {
-                    SectionHeader(title = "Budget bulan ini", onSeeAll = {})
-                }
-                item {
-                    BudgetProgressCard(
-                        budgets = listOf(
-                            BudgetUiModel("Makan & Minum", 680000.0, 1000000.0),
-                            BudgetUiModel("Transportasi", 420000.0, 500000.0),
-                            BudgetUiModel("Hiburan", 310000.0, 300000.0)
-                        )
-                    )
-                }
-
-                item {
-                    SectionHeader(title = "Transaksi terakhir", onSeeAll = {})
-                }
-                items(uiState.recentTransactions) { transaction ->
-                    TransactionItem(
-                        transaction = mapToUiModel(transaction)
-                    )
                 }
             }
         }
