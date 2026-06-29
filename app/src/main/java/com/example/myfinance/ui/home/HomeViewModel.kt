@@ -4,18 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.myfinance.data.local.entity.AccountEntity
+import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
 import com.example.myfinance.data.repository.FinanceRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
 data class HomeUiState(
     val totalBalance: Double = 0.0,
     val accounts: List<AccountEntity> = emptyList(),
+    val categories: List<CategoryEntity> = emptyList(),
     val totalIncome: Double = 0.0,
     val totalExpense: Double = 0.0,
     val recentTransactions: List<TransactionEntity> = emptyList(),
@@ -47,13 +46,22 @@ class HomeViewModel(
                 repository.getTotalBalance(),
                 repository.getRecentTransactions(5),
                 repository.getTotalByTypeAndDateRange("INCOME", startOfMonth, endOfMonth),
-                repository.getTotalByTypeAndDateRange("EXPENSE", startOfMonth, endOfMonth)
-            ) { accounts, totalBalance, recentTransactions, totalIncome, totalExpense ->
+                repository.getTotalByTypeAndDateRange("EXPENSE", startOfMonth, endOfMonth),
+                repository.getAllCategories()
+            ) { values ->
+                val accounts = values[0] as List<AccountEntity>
+                val totalBalance = (values[1] as Double?) ?: 0.0
+                val recentTransactions = values[2] as List<TransactionEntity>
+                val totalIncome = (values[3] as Double?) ?: 0.0
+                val totalExpense = (values[4] as Double?) ?: 0.0
+                val categories = values[5] as List<CategoryEntity>
+
                 HomeUiState(
-                    totalBalance = totalBalance ?: 0.0,
+                    totalBalance = totalBalance,
                     accounts = accounts,
-                    totalIncome = totalIncome ?: 0.0,
-                    totalExpense = totalExpense ?: 0.0,
+                    categories = categories,
+                    totalIncome = totalIncome,
+                    totalExpense = totalExpense,
                     recentTransactions = recentTransactions,
                     isLoading = false
                 )
