@@ -61,7 +61,7 @@ fun ReportScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
-        
+
         item {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
