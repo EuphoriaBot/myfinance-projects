@@ -19,6 +19,7 @@ import com.example.myfinance.ui.account.AccountScreen
 import com.example.myfinance.ui.components.*
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.ui.transaction.TransactionFormScreen
+import com.example.myfinance.ui.report.ReportScreen
 
 @Composable
 fun HomeScreen(
@@ -54,6 +55,12 @@ fun HomeScreen(
             when (currentDestination) {
                 BottomNavDestination.ACCOUNT -> {
                     AccountScreen(
+                        repository = repository,
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+                BottomNavDestination.REPORT -> {
+                    ReportScreen(
                         repository = repository,
                         modifier = Modifier.padding(innerPadding)
                     )
