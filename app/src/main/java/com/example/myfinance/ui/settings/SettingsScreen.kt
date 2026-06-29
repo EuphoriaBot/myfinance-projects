@@ -40,7 +40,7 @@ fun SettingsScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
-        
+
         item {
             SettingsSection(title = "Aplikasi") {
                 SettingsItem(
