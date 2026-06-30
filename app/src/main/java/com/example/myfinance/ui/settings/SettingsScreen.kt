@@ -22,8 +22,18 @@ import com.example.myfinance.ui.theme.*
 
 @Composable
 fun SettingsScreen(
+    repository: com.example.myfinance.data.repository.FinanceRepository,
     modifier: Modifier = Modifier
 ) {
+    var showAddBudgetDialog by remember { mutableStateOf(false) }
+
+    if (showAddBudgetDialog) {
+        AddBudgetDialog(
+            repository = repository,
+            onDismiss = { showAddBudgetDialog = false }
+        )
+    }
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -40,6 +50,17 @@ fun SettingsScreen(
                 color = TextPrimary,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
+        }
+        
+        item {
+            SettingsSection(title = "Budget") {
+                SettingsItem(
+                    icon = Icons.Default.AccountBalanceWallet,
+                    title = "Tambah Budget",
+                    subtitle = "Atur limit pengeluaran per kategori",
+                    onClick = { showAddBudgetDialog = true }
+                )
+            }
         }
 
         item {
