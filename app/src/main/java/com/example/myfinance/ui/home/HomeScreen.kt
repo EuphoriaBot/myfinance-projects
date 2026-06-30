@@ -23,6 +23,7 @@ import com.example.myfinance.ui.report.ReportScreen
 import com.example.myfinance.ui.settings.SettingsScreen
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.AccountEntity
+import androidx.compose.foundation.background
 
 
 @Composable
@@ -114,13 +115,27 @@ fun HomeScreen(
                             SectionHeader(title = "Budget bulan ini", onSeeAll = {})
                         }
                         item {
-                            BudgetProgressCard(
-                                budgets = listOf(
-                                    BudgetUiModel("Makan & Minum", 680000.0, 1000000.0),
-                                    BudgetUiModel("Transportasi", 420000.0, 500000.0),
-                                    BudgetUiModel("Hiburan", 310000.0, 300000.0)
+                            if (uiState.budgets.isNotEmpty()) {
+                                BudgetProgressCard(
+                                    budgets = uiState.budgets.map {
+                                        BudgetUiModel(it.categoryName, it.spent, it.limit)
+                                    }
                                 )
-                            )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
+                                        .background(DarkCard, androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
+                                        .padding(20.dp)
+                                ) {
+                                    Text(
+                                        text = "Belum ada budget. Tambahkan budget di menu Setelan.",
+                                        fontSize = 12.sp,
+                                        color = TextMuted
+                                    )
+                                }
+                            }
                         }
 
                         item {
