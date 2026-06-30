@@ -4,12 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.myfinance.data.local.entity.AccountEntity
+import com.example.myfinance.data.local.entity.BudgetEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
 import com.example.myfinance.data.repository.FinanceRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
+
+data class BudgetWithSpending(
+    val categoryName: String,
+    val spent: Double,
+    val limit: Double
+)
 
 data class HomeUiState(
     val totalBalance: Double = 0.0,
@@ -18,6 +25,7 @@ data class HomeUiState(
     val totalIncome: Double = 0.0,
     val totalExpense: Double = 0.0,
     val recentTransactions: List<TransactionEntity> = emptyList(),
+    val budgets: List<BudgetWithSpending> = emptyList(),
     val isLoading: Boolean = true
 )
 
@@ -47,7 +55,8 @@ class HomeViewModel(
                 repository.getRecentTransactions(5),
                 repository.getTotalByTypeAndDateRange("INCOME", startOfMonth, endOfMonth),
                 repository.getTotalByTypeAndDateRange("EXPENSE", startOfMonth, endOfMonth),
-                repository.getAllCategories()
+                repository.getAllCategories(),
+                repository.getAllBudgets()
             ) { values ->
                 val accounts = values[0] as List<AccountEntity>
                 val totalBalance = (values[1] as Double?) ?: 0.0
@@ -55,6 +64,7 @@ class HomeViewModel(
                 val totalIncome = (values[3] as Double?) ?: 0.0
                 val totalExpense = (values[4] as Double?) ?: 0.0
                 val categories = values[5] as List<CategoryEntity>
+                val budgets = values[6] as List<BudgetEntity>
 
                 HomeUiState(
                     totalBalance = totalBalance,
@@ -63,8 +73,23 @@ class HomeViewModel(
                     totalIncome = totalIncome,
                     totalExpense = totalExpense,
                     recentTransactions = recentTransactions,
+                    budgets = emptyList(), // diisi di bawah setelah hitung spending
                     isLoading = false
-                )
+                ).let { state ->
+                    state.copy(
+                        budgets = budgets.map { budget ->
+                            val categoryName = categories.find { it.id == budget.categoryId }?.name ?: "Lainnya"
+                            val spent = recentTransactions
+                                .filter { it.categoryId == budget.categoryId && it.type == "EXPENSE" }
+                                .sumOf { it.amount }
+                            BudgetWithSpending(
+                                categoryName = categoryName,
+                                spent = spent,
+                                limit = budget.limitAmount
+                            )
+                        }
+                    )
+                }
             }.collect { state ->
                 _uiState.value = state
             }
