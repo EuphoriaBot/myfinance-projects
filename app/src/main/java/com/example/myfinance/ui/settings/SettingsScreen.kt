@@ -51,7 +51,7 @@ fun SettingsScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
-        
+
         item {
             SettingsSection(title = "Budget") {
                 SettingsItem(

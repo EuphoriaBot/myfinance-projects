@@ -72,6 +72,7 @@ fun HomeScreen(
                 }
                 BottomNavDestination.SETTINGS -> {
                     SettingsScreen(
+                        repository = repository,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
