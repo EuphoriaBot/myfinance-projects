@@ -24,6 +24,7 @@ import com.example.myfinance.ui.settings.SettingsScreen
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.AccountEntity
 import androidx.compose.foundation.background
+import com.example.myfinance.ui.transaction.TransactionScreen
 
 
 @Composable
@@ -58,6 +59,12 @@ fun HomeScreen(
             }
         ) { innerPadding ->
             when (currentDestination) {
+                BottomNavDestination.TRANSACTIONS -> {
+                    TransactionScreen(
+                        repository = repository,
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
                 BottomNavDestination.ACCOUNT -> {
                     AccountScreen(
                         repository = repository,
@@ -158,7 +165,6 @@ fun HomeScreen(
     }
 }
 
-// Tambahkan parameter uiState ke fungsi ini
 private fun mapToUiModel(
     entity: TransactionEntity,
     accounts: List<AccountEntity>,
