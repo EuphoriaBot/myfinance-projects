@@ -2,8 +2,10 @@ package com.example.myfinance.ui.transaction
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
@@ -29,11 +31,13 @@ fun TransactionFormScreen(
     onDismiss: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
 
     var amount by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf("EXPENSE") }
     var selectedAccount by remember { mutableStateOf<AccountEntity?>(null) }
+    var selectedToAccount by remember { mutableStateOf<AccountEntity?>(null) }
     var selectedCategory by remember { mutableStateOf<CategoryEntity?>(null) }
     var accounts by remember { mutableStateOf<List<AccountEntity>>(emptyList()) }
     var categories by remember { mutableStateOf<List<CategoryEntity>>(emptyList()) }
@@ -41,12 +45,17 @@ fun TransactionFormScreen(
 
     LaunchedEffect(Unit) {
         accounts = repository.getAllAccounts().first()
-        if (accounts.isNotEmpty()) selectedAccount = accounts[0]
+        if (accounts.isNotEmpty()) {
+            selectedAccount = accounts[0]
+            selectedToAccount = if (accounts.size > 1) accounts[1] else accounts[0]
+        }
     }
 
     LaunchedEffect(selectedType) {
-        categories = repository.getCategoriesByType(selectedType).first()
-        selectedCategory = categories.firstOrNull()
+        if (selectedType != "TRANSFER") {
+            categories = repository.getCategoriesByType(selectedType).first()
+            selectedCategory = categories.firstOrNull()
+        }
     }
 
     Box(
@@ -57,6 +66,7 @@ fun TransactionFormScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState)
                 .padding(24.dp)
         ) {
             Row(
@@ -88,7 +98,11 @@ fun TransactionFormScreen(
                     .padding(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                listOf("EXPENSE" to "Pengeluaran", "INCOME" to "Pemasukan").forEach { (type, label) ->
+                listOf(
+                    "EXPENSE" to "Pengeluaran",
+                    "INCOME" to "Pemasukan",
+                    "TRANSFER" to "Transfer"
+                ).forEach { (type, label) ->
                     Button(
                         onClick = { selectedType = type },
                         modifier = Modifier.weight(1f),
@@ -97,9 +111,10 @@ fun TransactionFormScreen(
                             contentColor = if (selectedType == type) Color.White else TextMuted
                         ),
                         shape = RoundedCornerShape(10.dp),
-                        elevation = ButtonDefaults.buttonElevation(0.dp)
+                        elevation = ButtonDefaults.buttonElevation(0.dp),
+                        contentPadding = PaddingValues(vertical = 8.dp)
                     ) {
-                        Text(text = label, fontSize = 13.sp)
+                        Text(text = label, fontSize = 12.sp)
                     }
                 }
             }
@@ -150,7 +165,11 @@ fun TransactionFormScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Akun", fontSize = 13.sp, color = TextSecondary)
+            Text(
+                text = if (selectedType == "TRANSFER") "Dari Akun" else "Akun",
+                fontSize = 13.sp,
+                color = TextSecondary
+            )
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 accounts.forEach { account ->
@@ -168,56 +187,98 @@ fun TransactionFormScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text("Kategori", fontSize = 13.sp, color = TextSecondary)
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                categories.take(4).forEach { category ->
-                    FilterChip(
-                        selected = selectedCategory?.id == category.id,
-                        onClick = { selectedCategory = category },
-                        label = { Text(category.name, fontSize = 11.sp) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = AccentPurple,
-                            selectedLabelColor = Color.White,
-                            containerColor = DarkCard,
-                            labelColor = TextMuted
+            if (selectedType == "TRANSFER") {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Ke Akun", fontSize = 13.sp, color = TextSecondary)
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    accounts.filter { it.id != selectedAccount?.id }.forEach { account ->
+                        FilterChip(
+                            selected = selectedToAccount?.id == account.id,
+                            onClick = { selectedToAccount = account },
+                            label = { Text(account.name, fontSize = 12.sp) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = IncomeGreen,
+                                selectedLabelColor = Color.White,
+                                containerColor = DarkCard,
+                                labelColor = TextMuted
+                            )
                         )
-                    )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            if (selectedType != "TRANSFER") {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Kategori", fontSize = 13.sp, color = TextSecondary)
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    categories.take(4).forEach { category ->
+                        FilterChip(
+                            selected = selectedCategory?.id == category.id,
+                            onClick = { selectedCategory = category },
+                            label = { Text(category.name, fontSize = 11.sp) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = AccentPurple,
+                                selectedLabelColor = Color.White,
+                                containerColor = DarkCard,
+                                labelColor = TextMuted
+                            )
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(40.dp))
 
             Button(
                 onClick = {
                     val amountValue = amount.toDoubleOrNull() ?: return@Button
                     val account = selectedAccount ?: return@Button
-                    val category = selectedCategory ?: return@Button
 
                     scope.launch {
                         isLoading = true
-                        repository.insertTransaction(
-                            TransactionEntity(
-                                amount = amountValue,
-                                note = note,
-                                type = selectedType,
-                                categoryId = category.id,
-                                accountId = account.id,
-                                date = System.currentTimeMillis()
+                        if (selectedType == "TRANSFER") {
+                            val toAccount = selectedToAccount ?: return@launch
+                            repository.insertTransaction(
+                                TransactionEntity(
+                                    amount = amountValue,
+                                    note = note.ifEmpty { "Transfer ke ${toAccount.name}" },
+                                    type = "TRANSFER",
+                                    categoryId = 0,
+                                    accountId = account.id,
+                                    toAccountId = toAccount.id,
+                                    date = System.currentTimeMillis()
+                                )
                             )
-                        )
-                        // Update account balance
-                        val newBalance = if (selectedType == "INCOME") {
-                            account.balance + amountValue
+                            repository.updateAccount(
+                                account.copy(balance = account.balance - amountValue)
+                            )
+                            repository.updateAccount(
+                                toAccount.copy(balance = toAccount.balance + amountValue)
+                            )
                         } else {
-                            account.balance - amountValue
+                            val category = selectedCategory ?: return@launch
+                            repository.insertTransaction(
+                                TransactionEntity(
+                                    amount = amountValue,
+                                    note = note,
+                                    type = selectedType,
+                                    categoryId = category.id,
+                                    accountId = account.id,
+                                    date = System.currentTimeMillis()
+                                )
+                            )
+                            val newBalance = if (selectedType == "INCOME") {
+                                account.balance + amountValue
+                            } else {
+                                account.balance - amountValue
+                            }
+                            repository.updateAccount(account.copy(balance = newBalance))
                         }
-                        repository.updateAccount(account.copy(balance = newBalance))
                         isLoading = false
                         onDismiss()
                     }
@@ -229,12 +290,20 @@ fun TransactionFormScreen(
                 shape = RoundedCornerShape(14.dp),
                 enabled = !isLoading && amount.isNotEmpty()
             ) {
-                Text(
-                    text = "Simpan",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.White
-                )
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        text = "Simpan",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White
+                    )
+                }
             }
         }
     }
