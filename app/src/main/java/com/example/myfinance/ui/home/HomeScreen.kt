@@ -25,7 +25,7 @@ import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.AccountEntity
 import androidx.compose.foundation.background
 import com.example.myfinance.ui.transaction.TransactionScreen
-
+import com.example.myfinance.ui.saving.SavingGoalScreen
 
 @Composable
 fun HomeScreen(
@@ -40,6 +40,15 @@ fun HomeScreen(
 
     var currentDestination by remember { mutableStateOf(BottomNavDestination.HOME) }
     var showTransactionForm by remember { mutableStateOf(false) }
+    var showGoalScreen by remember { mutableStateOf(false) }
+
+    if (showGoalScreen) {
+        SavingGoalScreen(
+            repository = repository,
+            modifier = Modifier.fillMaxSize()
+        )
+        return
+    }
 
     if (showTransactionForm) {
         TransactionFormScreen(
