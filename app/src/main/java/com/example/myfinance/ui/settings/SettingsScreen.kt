@@ -23,6 +23,7 @@ import com.example.myfinance.ui.theme.*
 @Composable
 fun SettingsScreen(
     repository: com.example.myfinance.data.repository.FinanceRepository,
+    onNavigateToGoals: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var showAddBudgetDialog by remember { mutableStateOf(false) }
@@ -109,6 +110,12 @@ fun SettingsScreen(
                     icon = Icons.AutoMirrored.Filled.TrendingUp,
                     title = "Laporan",
                     subtitle = "Ringkasan bulanan"
+                )
+                SettingsItem(
+                    icon = Icons.Default.Savings,
+                    title = "Target Nabung",
+                    subtitle = "Kelola goal tabungan kamu",
+                    onClick = onNavigateToGoals
                 )
             }
         }
