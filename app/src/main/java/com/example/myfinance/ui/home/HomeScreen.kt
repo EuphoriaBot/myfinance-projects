@@ -89,6 +89,7 @@ fun HomeScreen(
                 BottomNavDestination.SETTINGS -> {
                     SettingsScreen(
                         repository = repository,
+                        onNavigateToGoals = { showGoalScreen = true },
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
