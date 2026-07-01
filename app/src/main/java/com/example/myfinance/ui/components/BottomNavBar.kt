@@ -25,8 +25,9 @@ enum class BottomNavDestination(
     val icon: ImageVector
 ) {
     HOME("Home", Icons.Default.Home),
-    REPORT("Laporan", Icons.Default.BarChart),
+    TRANSACTIONS("Transaksi", Icons.Default.Receipt),
     ACCOUNT("Akun", Icons.Default.AccountBalanceWallet),
+    REPORT("Laporan", Icons.Default.BarChart),
     SETTINGS("Setelan", Icons.Default.Settings)
 }
 
