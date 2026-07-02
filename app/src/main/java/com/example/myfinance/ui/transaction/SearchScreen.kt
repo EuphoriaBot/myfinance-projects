@@ -24,10 +24,12 @@ import com.example.myfinance.domain.model.TransactionType
 import com.example.myfinance.ui.components.TransactionItem
 import com.example.myfinance.ui.components.TransactionUiModel
 import com.example.myfinance.ui.theme.*
+import androidx.compose.material.icons.filled.ArrowBack
 
 @Composable
 fun SearchScreen(
     repository: FinanceRepository,
+    onBack: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val allTransactions by repository.getAllTransactions()
@@ -59,6 +61,27 @@ fun SearchScreen(
         }
 
         matchesQuery && matchesFilter
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 4.dp, end = 16.dp, top = 8.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onBack) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Kembali",
+                tint = TextMuted
+            )
+        }
+        Text(
+            text = "Cari Transaksi",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = TextPrimary
+        )
     }
 
     Column(
