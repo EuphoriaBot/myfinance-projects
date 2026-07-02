@@ -4,6 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,23 +39,43 @@ fun TransactionScreen(
     val categories by repository.getAllCategories()
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
+    var showSearch by remember { mutableStateOf(false) }
+
+    if (showSearch) {
+        SearchScreen(
+            repository = repository,
+            onBack = { showSearch = false },
+            modifier = Modifier.fillMaxSize()
+        )
+        return
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(DarkBackground)
     ) {
-        Text(
-            text = "Transaksi",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = TextPrimary,
-            modifier = Modifier.padding(
-                start = 16.dp,
-                end = 16.dp,
-                top = 16.dp,
-                bottom = 8.dp
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 8.dp, top = 16.dp, bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Transaksi",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextPrimary
             )
-        )
+            IconButton(onClick = { showSearch = true }) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Cari",
+                    tint = TextMuted
+                )
+            }
+        }
 
         if (transactions.isEmpty()) {
             Box(
