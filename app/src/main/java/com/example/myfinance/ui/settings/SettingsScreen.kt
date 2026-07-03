@@ -1,5 +1,6 @@
 package com.example.myfinance.ui.settings
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,18 +16,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
+import com.example.myfinance.utils.exportTransactionsToCsv
+import com.example.myfinance.utils.shareFile
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(
-    repository: com.example.myfinance.data.repository.FinanceRepository,
+    repository: FinanceRepository,
     onNavigateToGoals: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var showAddBudgetDialog by remember { mutableStateOf(false) }
+    var isExporting by remember { mutableStateOf(false) }
 
     if (showAddBudgetDialog) {
         AddBudgetDialog(
@@ -65,36 +75,6 @@ fun SettingsScreen(
         }
 
         item {
-            SettingsSection(title = "Aplikasi") {
-                SettingsItem(
-                    icon = Icons.Default.Info,
-                    title = "Versi Aplikasi",
-                    subtitle = "1.0.0"
-                )
-                SettingsItem(
-                    icon = Icons.Default.Person,
-                    title = "Dibuat untuk",
-                    subtitle = "Penggunaan Pribadi"
-                )
-            }
-        }
-
-        item {
-            SettingsSection(title = "Data") {
-                SettingsItem(
-                    icon = Icons.Default.Storage,
-                    title = "Database",
-                    subtitle = "Room Database (SQLite)"
-                )
-                SettingsItem(
-                    icon = Icons.Default.Lock,
-                    title = "Privasi",
-                    subtitle = "Data tersimpan lokal di perangkat"
-                )
-            }
-        }
-
-        item {
             SettingsSection(title = "Fitur") {
                 SettingsItem(
                     icon = Icons.Default.AccountBalanceWallet,
@@ -116,6 +96,54 @@ fun SettingsScreen(
                     title = "Target Nabung",
                     subtitle = "Kelola goal tabungan kamu",
                     onClick = onNavigateToGoals
+                )
+            }
+        }
+
+        item {
+            SettingsSection(title = "Data") {
+                SettingsItem(
+                    icon = Icons.Default.FileDownload,
+                    title = "Export ke CSV",
+                    subtitle = "Simpan semua transaksi ke file CSV",
+                    onClick = {
+                        scope.launch {
+                            isExporting = true
+                            val transactions = repository.getAllTransactions().first()
+                            val accounts = repository.getAllAccounts().first()
+                            val categories = repository.getAllCategories().first()
+                            val uri = exportTransactionsToCsv(
+                                context, transactions, accounts, categories
+                            )
+                            if (uri != null) shareFile(context, uri)
+                            isExporting = false
+                        }
+                    }
+                )
+                SettingsItem(
+                    icon = Icons.Default.Storage,
+                    title = "Database",
+                    subtitle = "Room Database (SQLite)"
+                )
+                SettingsItem(
+                    icon = Icons.Default.Lock,
+                    title = "Privasi",
+                    subtitle = "Data tersimpan lokal di perangkat"
+                )
+            }
+        }
+
+        item {
+            SettingsSection(title = "Aplikasi") {
+                SettingsItem(
+                    icon = Icons.Default.Info,
+                    title = "Versi Aplikasi",
+                    subtitle = "1.0.0"
+                )
+                SettingsItem(
+                    icon = Icons.Default.Person,
+                    title = "Dibuat untuk",
+                    subtitle = "Penggunaan Pribadi"
                 )
             }
         }
