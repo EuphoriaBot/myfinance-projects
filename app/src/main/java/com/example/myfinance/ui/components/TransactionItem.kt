@@ -1,6 +1,7 @@
 package com.example.myfinance.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -33,7 +34,8 @@ data class TransactionUiModel(
 @Composable
 fun TransactionItem(
     transaction: TransactionUiModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     val (amountColor, amountPrefix, icon) = when (transaction.type) {
         TransactionType.INCOME -> Triple(IncomeGreen, "+", Icons.Default.ArrowUpward)
@@ -44,6 +46,7 @@ fun TransactionItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
             .padding(horizontal = 16.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
