@@ -24,7 +24,7 @@ import com.example.myfinance.domain.model.TransactionType
 import com.example.myfinance.ui.components.TransactionItem
 import com.example.myfinance.ui.components.TransactionUiModel
 import com.example.myfinance.ui.theme.*
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 @Composable
 fun SearchScreen(
@@ -71,7 +71,7 @@ fun SearchScreen(
     ) {
         IconButton(onClick = onBack) {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Kembali",
                 tint = TextMuted
             )
