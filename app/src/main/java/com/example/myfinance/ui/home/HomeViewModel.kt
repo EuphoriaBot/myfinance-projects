@@ -54,17 +54,18 @@ class HomeViewModel(
                 repository.getTotalBalance(),
                 repository.getRecentTransactions(5),
                 repository.getTotalByTypeAndDateRange("INCOME", startOfMonth, endOfMonth),
-                repository.getTotalByTypeAndDateRange("EXPENSE", startOfMonth, endOfMonth),
-                repository.getAllCategories(),
-                repository.getAllBudgets()
-            ) { values ->
-                val accounts = values[0] as List<AccountEntity>
-                val totalBalance = (values[1] as Double?) ?: 0.0
-                val recentTransactions = values[2] as List<TransactionEntity>
-                val totalIncome = (values[3] as Double?) ?: 0.0
-                val totalExpense = (values[4] as Double?) ?: 0.0
-                val categories = values[5] as List<CategoryEntity>
-                val budgets = values[6] as List<BudgetEntity>
+                repository.getTotalByTypeAndDateRange("EXPENSE", startOfMonth, endOfMonth)
+            ) { accounts, totalBalance, recentTransactions, totalIncome, totalExpense ->
+                Quintuple(accounts, totalBalance, recentTransactions, totalIncome, totalExpense)
+            }.combine(repository.getAllCategories()) { quint, categories ->
+                Sextuple(quint.a, quint.b, quint.c, quint.d, quint.e, categories)
+            }.combine(repository.getAllBudgets()) { sext, budgets ->
+                val accounts = sext.a
+                val totalBalance = sext.b ?: 0.0
+                val recentTransactions = sext.c
+                val totalIncome = sext.d ?: 0.0
+                val totalExpense = sext.e ?: 0.0
+                val categories = sext.f
 
                 HomeUiState(
                     totalBalance = totalBalance,
@@ -73,23 +74,20 @@ class HomeViewModel(
                     totalIncome = totalIncome,
                     totalExpense = totalExpense,
                     recentTransactions = recentTransactions,
-                    budgets = emptyList(),
+                    budgets = budgets.map { budget ->
+                        val categoryName = categories
+                            .find { it.id == budget.categoryId }?.name ?: "Lainnya"
+                        val spent = recentTransactions
+                            .filter { it.categoryId == budget.categoryId && it.type == "EXPENSE" }
+                            .sumOf { it.amount }
+                        BudgetWithSpending(
+                            categoryName = categoryName,
+                            spent = spent,
+                            limit = budget.limitAmount
+                        )
+                    },
                     isLoading = false
-                ).let { state ->
-                    state.copy(
-                        budgets = budgets.map { budget ->
-                            val categoryName = categories.find { it.id == budget.categoryId }?.name ?: "Lainnya"
-                            val spent = recentTransactions
-                                .filter { it.categoryId == budget.categoryId && it.type == "EXPENSE" }
-                                .sumOf { it.amount }
-                            BudgetWithSpending(
-                                categoryName = categoryName,
-                                spent = spent,
-                                limit = budget.limitAmount
-                            )
-                        }
-                    )
-                }
+                )
             }.collect { state ->
                 _uiState.value = state
             }
@@ -118,3 +116,6 @@ class HomeViewModel(
         }
     }
 }
+
+private data class Quintuple<A, B, C, D, E>(val a: A, val b: B, val c: C, val d: D, val e: E)
+private data class Sextuple<A, B, C, D, E, F>(val a: A, val b: B, val c: C, val d: D, val e: E, val f: F)
