@@ -1,0 +1,176 @@
+package com.example.myfinance.ui.transaction
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import com.example.myfinance.data.local.entity.AccountEntity
+import com.example.myfinance.data.local.entity.CategoryEntity
+import com.example.myfinance.data.local.entity.TransactionEntity
+import com.example.myfinance.data.repository.FinanceRepository
+import com.example.myfinance.ui.theme.*
+import com.example.myfinance.utils.formatRupiah
+import kotlinx.coroutines.launch
+
+@Composable
+fun TransactionDetailSheet(
+    transaction: TransactionEntity,
+    accounts: List<AccountEntity>,
+    categories: List<CategoryEntity>,
+    repository: FinanceRepository,
+    onDismiss: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    val accountName = accounts.find { it.id == transaction.accountId }?.name ?: "Akun"
+    val categoryName = categories.find { it.id == transaction.categoryId }?.name ?: "Kategori"
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = {
+                Text(
+                    text = "Hapus Transaksi?",
+                    color = TextPrimary
+                )
+            },
+            text = {
+                Text(
+                    text = "Transaksi ini akan dihapus permanen dan saldo akun akan dikembalikan.",
+                    color = TextSecondary
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            val account = accounts.find { it.id == transaction.accountId }
+                            if (account != null) {
+                                val restoredBalance = when (transaction.type) {
+                                    "INCOME" -> account.balance - transaction.amount
+                                    "EXPENSE" -> account.balance + transaction.amount
+                                    else -> account.balance
+                                }
+                                repository.updateAccount(
+                                    account.copy(balance = restoredBalance)
+                                )
+                            }
+                            repository.deleteTransaction(transaction)
+                            onDismiss()
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = ExpenseRed)
+                ) {
+                    Text("Hapus", color = Color.White)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { showDeleteConfirm = false }) {
+                    Text("Batal", color = TextMuted)
+                }
+            },
+            containerColor = DarkCard
+        )
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(DarkCard, RoundedCornerShape(16.dp))
+                .padding(20.dp)
+        ) {
+            Column {
+                Text(
+                    text = "Detail Transaksi",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                DetailRow("Jenis", when (transaction.type) {
+                    "INCOME" -> "Pemasukan"
+                    "EXPENSE" -> "Pengeluaran"
+                    else -> "Transfer"
+                })
+                DetailRow("Jumlah", formatRupiah(transaction.amount))
+                DetailRow("Kategori", categoryName)
+                DetailRow("Akun", accountName)
+                if (transaction.note.isNotEmpty()) {
+                    DetailRow("Catatan", transaction.note)
+                }
+                DetailRow(
+                    "Tanggal",
+                    android.text.format.DateFormat.format(
+                        "dd MMMM yyyy, HH:mm", transaction.date
+                    ).toString()
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedButton(
+                        onClick = { showDeleteConfirm = true },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = ExpenseRed
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Hapus",
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Hapus")
+                    }
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = DarkBackground
+                        )
+                    ) {
+                        Text("Tutup", color = TextMuted)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DetailRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, fontSize = 13.sp, color = TextMuted)
+        Text(
+            text = value,
+            fontSize = 13.sp,
+            color = TextPrimary,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
