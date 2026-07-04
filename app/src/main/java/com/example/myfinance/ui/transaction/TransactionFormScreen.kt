@@ -32,7 +32,6 @@ fun TransactionFormScreen(
 ) {
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
-
     var amount by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf("EXPENSE") }
@@ -42,6 +41,8 @@ fun TransactionFormScreen(
     var accounts by remember { mutableStateOf<List<AccountEntity>>(emptyList()) }
     var categories by remember { mutableStateOf<List<CategoryEntity>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
+    var isRecurring by remember { mutableStateOf(false) }
+    var recurringInterval by remember { mutableStateOf("MONTHLY") }
 
     LaunchedEffect(Unit) {
         accounts = repository.getAllAccounts().first()
@@ -232,6 +233,60 @@ fun TransactionFormScreen(
                 }
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Transaksi Berulang",
+                        fontSize = 13.sp,
+                        color = TextSecondary
+                    )
+                    Text(
+                        text = "Generate otomatis secara berkala",
+                        fontSize = 11.sp,
+                        color = TextMuted
+                    )
+                }
+                Switch(
+                    checked = isRecurring,
+                    onCheckedChange = { isRecurring = it },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = AccentPurple
+                    )
+                )
+            }
+
+            if (isRecurring) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text("Interval", fontSize = 13.sp, color = TextSecondary)
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf(
+                        "DAILY" to "Harian",
+                        "WEEKLY" to "Mingguan",
+                        "MONTHLY" to "Bulanan"
+                    ).forEach { (interval, label) ->
+                        FilterChip(
+                            selected = recurringInterval == interval,
+                            onClick = { recurringInterval = interval },
+                            label = { Text(label, fontSize = 11.sp) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = AccentPurple,
+                                selectedLabelColor = Color.White,
+                                containerColor = DarkCard,
+                                labelColor = TextMuted
+                            )
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(40.dp))
 
             Button(
@@ -251,7 +306,9 @@ fun TransactionFormScreen(
                                     categoryId = 0,
                                     accountId = account.id,
                                     toAccountId = toAccount.id,
-                                    date = System.currentTimeMillis()
+                                    date = System.currentTimeMillis(),
+                                    isRecurring = isRecurring,
+                                    recurringInterval = if (isRecurring) recurringInterval else null
                                 )
                             )
                             repository.updateAccount(
@@ -269,7 +326,9 @@ fun TransactionFormScreen(
                                     type = selectedType,
                                     categoryId = category.id,
                                     accountId = account.id,
-                                    date = System.currentTimeMillis()
+                                    date = System.currentTimeMillis(),
+                                    isRecurring = isRecurring,
+                                    recurringInterval = if (isRecurring) recurringInterval else null
                                 )
                             )
                             val newBalance = if (selectedType == "INCOME") {
