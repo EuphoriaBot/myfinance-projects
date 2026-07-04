@@ -15,6 +15,7 @@ import com.example.myfinance.ui.onboarding.OnboardingScreen
 import com.example.myfinance.ui.theme.DarkBackground
 import com.example.myfinance.ui.theme.MyFinanceTheme
 import com.example.myfinance.utils.PreferencesManager
+import com.example.myfinance.data.worker.RecurringTransactionWorker
 
 class MainActivity : ComponentActivity() {
 
@@ -33,6 +34,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        RecurringTransactionWorker.schedule(this)
         setContent {
             MyFinanceTheme {
                 Surface(
