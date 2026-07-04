@@ -40,6 +40,17 @@ fun TransactionScreen(
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
     var showSearch by remember { mutableStateOf(false) }
+    var selectedTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
+
+    if (selectedTransaction != null) {
+        TransactionDetailSheet(
+            transaction = selectedTransaction!!,
+            accounts = accounts,
+            categories = categories,
+            repository = repository,
+            onDismiss = { selectedTransaction = null }
+        )
+    }
 
     if (showSearch) {
         SearchScreen(
@@ -126,7 +137,8 @@ fun TransactionScreen(
                                 entity = transaction,
                                 accounts = accounts,
                                 categories = categories
-                            )
+                            ),
+                            onClick = { selectedTransaction = transaction }
                         )
                     }
                 }
