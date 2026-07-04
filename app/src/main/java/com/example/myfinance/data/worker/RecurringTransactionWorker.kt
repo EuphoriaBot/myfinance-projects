@@ -1,0 +1,101 @@
+package com.example.myfinance.data.worker
+
+import android.content.Context
+import androidx.work.*
+import com.example.myfinance.data.local.database.AppDatabase
+import com.example.myfinance.data.local.entity.TransactionEntity
+import com.example.myfinance.data.repository.FinanceRepository
+import kotlinx.coroutines.flow.first
+import java.util.concurrent.TimeUnit
+
+class RecurringTransactionWorker(
+    context: Context,
+    params: WorkerParameters
+) : CoroutineWorker(context, params) {
+
+    override suspend fun doWork(): Result {
+        return try {
+            val database = AppDatabase.getInstance(applicationContext)
+            val repository = FinanceRepository(
+                accountDao = database.accountDao(),
+                categoryDao = database.categoryDao(),
+                transactionDao = database.transactionDao(),
+                budgetDao = database.budgetDao(),
+                savingGoalDao = database.savingGoalDao()
+            )
+
+            val allTransactions = repository.getAllTransactions().first()
+            val recurringTransactions = allTransactions.filter { it.isRecurring }
+
+            val now = System.currentTimeMillis()
+            val oneDayMs = 24 * 60 * 60 * 1000L
+            val oneWeekMs = 7 * oneDayMs
+            val oneMonthMs = 30 * oneDayMs
+
+            recurringTransactions.forEach { transaction ->
+                val interval = when (transaction.recurringInterval) {
+                    "DAILY" -> oneDayMs
+                    "WEEKLY" -> oneWeekMs
+                    "MONTHLY" -> oneMonthMs
+                    "YEARLY" -> 365 * oneDayMs
+                    else -> return@forEach
+                }
+
+                val timeSinceLast = now - transaction.date
+                if (timeSinceLast >= interval) {
+                    // Generate transaksi baru
+                    repository.insertTransaction(
+                        TransactionEntity(
+                            amount = transaction.amount,
+                            note = transaction.note,
+                            type = transaction.type,
+                            categoryId = transaction.categoryId,
+                            accountId = transaction.accountId,
+                            date = now,
+                            isRecurring = true,
+                            recurringInterval = transaction.recurringInterval
+                        )
+                    )
+
+                    // Update saldo akun
+                    val accounts = repository.getAllAccounts().first()
+                    val account = accounts.find { it.id == transaction.accountId }
+                    if (account != null) {
+                        val newBalance = if (transaction.type == "INCOME") {
+                            account.balance + transaction.amount
+                        } else {
+                            account.balance - transaction.amount
+                        }
+                        repository.updateAccount(account.copy(balance = newBalance))
+                    }
+                }
+            }
+
+            Result.success()
+        } catch (e: Exception) {
+            Result.failure()
+        }
+    }
+
+    companion object {
+        const val WORK_NAME = "recurring_transaction_work"
+
+        fun schedule(context: Context) {
+            val request = PeriodicWorkRequestBuilder<RecurringTransactionWorker>(
+                1, TimeUnit.DAYS
+            )
+                .setConstraints(
+                    Constraints.Builder()
+                        .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+                        .build()
+                )
+                .build()
+
+            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+                WORK_NAME,
+                ExistingPeriodicWorkPolicy.KEEP,
+                request
+            )
+        }
+    }
+}
