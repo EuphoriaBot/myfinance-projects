@@ -22,7 +22,6 @@ import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatRupiah
-import kotlinx.coroutines.flow.map
 
 @Composable
 fun AccountScreen(
@@ -33,24 +32,51 @@ fun AccountScreen(
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
     val totalBalance = accounts.sumOf { it.balance }
+    var showAddDialog by remember { mutableStateOf(false) }
+
+    if (showAddDialog) {
+        AddAccountDialog(
+            repository = repository,
+            onDismiss = { showAddDialog = false }
+        )
+    }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(DarkBackground)
-            .padding(16.dp)
     ) {
-        Text(
-            text = "Akun",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = TextPrimary,
-            modifier = Modifier.padding(top = 8.dp, bottom = 24.dp)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Akun",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextPrimary
+            )
+            FloatingActionButton(
+                onClick = { showAddDialog = true },
+                containerColor = AccentPurple,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Tambah Akun",
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 16.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(AccentPurple)
                 .padding(20.dp)
@@ -71,21 +97,41 @@ fun AccountScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Text(
             text = "Daftar Akun",
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
             color = TextPrimary,
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
         )
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            items(accounts) { account ->
-                AccountItem(account = account)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (accounts.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Belum ada akun",
+                    fontSize = 14.sp,
+                    color = TextMuted
+                )
+            }
+        } else {
+            LazyColumn(
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    bottom = 24.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(accounts) { account ->
+                    AccountItem(account = account)
+                }
             }
         }
     }
@@ -128,7 +174,11 @@ private fun AccountItem(account: AccountEntity) {
                     color = TextPrimary
                 )
                 Text(
-                    text = account.type,
+                    text = when (account.type) {
+                        "BANK" -> "Bank"
+                        "E_WALLET" -> "E-Wallet"
+                        else -> "Cash"
+                    },
                     fontSize = 11.sp,
                     color = TextMuted
                 )

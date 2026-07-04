@@ -73,7 +73,7 @@ class HomeViewModel(
                     totalIncome = totalIncome,
                     totalExpense = totalExpense,
                     recentTransactions = recentTransactions,
-                    budgets = emptyList(), // diisi di bawah setelah hitung spending
+                    budgets = emptyList(),
                     isLoading = false
                 ).let { state ->
                     state.copy(
