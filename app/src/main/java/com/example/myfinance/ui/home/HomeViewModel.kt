@@ -46,6 +46,7 @@ class HomeViewModel(
             calendar.set(Calendar.DAY_OF_MONTH, 1)
             calendar.set(Calendar.HOUR_OF_DAY, 0)
             calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
             val startOfMonth = calendar.timeInMillis
             val endOfMonth = System.currentTimeMillis()
 
@@ -53,19 +54,25 @@ class HomeViewModel(
                 repository.getAllAccounts(),
                 repository.getTotalBalance(),
                 repository.getRecentTransactions(5),
-                repository.getTotalByTypeAndDateRange("INCOME", startOfMonth, endOfMonth),
-                repository.getTotalByTypeAndDateRange("EXPENSE", startOfMonth, endOfMonth)
-            ) { accounts, totalBalance, recentTransactions, totalIncome, totalExpense ->
-                Quintuple(accounts, totalBalance, recentTransactions, totalIncome, totalExpense)
-            }.combine(repository.getAllCategories()) { quint, categories ->
-                Sextuple(quint.a, quint.b, quint.c, quint.d, quint.e, categories)
-            }.combine(repository.getAllBudgets()) { sext, budgets ->
-                val accounts = sext.a
-                val totalBalance = sext.b ?: 0.0
-                val recentTransactions = sext.c
-                val totalIncome = sext.d ?: 0.0
-                val totalExpense = sext.e ?: 0.0
-                val categories = sext.f
+                repository.getTransactionsByDateRange(startOfMonth, endOfMonth)
+            ) { accounts, totalBalance, recentTransactions, monthTransactions ->
+                Quadruple(accounts, totalBalance, recentTransactions, monthTransactions)
+            }.combine(repository.getAllCategories()) { quad, categories ->
+                Quintuple(quad.a, quad.b, quad.c, quad.d, categories)
+            }.combine(repository.getAllBudgets()) { quint, budgets ->
+                val accounts = quint.a
+                val totalBalance = quint.b ?: 0.0
+                val recentTransactions = quint.c
+                val monthTransactions = quint.d
+                val categories = quint.e
+
+                val totalIncome = monthTransactions
+                    .filter { it.type == "INCOME" }
+                    .sumOf { it.amount }
+
+                val totalExpense = monthTransactions
+                    .filter { it.type == "EXPENSE" }
+                    .sumOf { it.amount }
 
                 HomeUiState(
                     totalBalance = totalBalance,
@@ -77,7 +84,7 @@ class HomeViewModel(
                     budgets = budgets.map { budget ->
                         val categoryName = categories
                             .find { it.id == budget.categoryId }?.name ?: "Lainnya"
-                        val spent = recentTransactions
+                        val spent = monthTransactions
                             .filter { it.categoryId == budget.categoryId && it.type == "EXPENSE" }
                             .sumOf { it.amount }
                         BudgetWithSpending(
@@ -117,5 +124,5 @@ class HomeViewModel(
     }
 }
 
+private data class Quadruple<A, B, C, D>(val a: A, val b: B, val c: C, val d: D)
 private data class Quintuple<A, B, C, D, E>(val a: A, val b: B, val c: C, val d: D, val e: E)
-private data class Sextuple<A, B, C, D, E, F>(val a: A, val b: B, val c: C, val d: D, val e: E, val f: F)
