@@ -90,6 +90,8 @@ fun HomeScreen(
                     SettingsScreen(
                         repository = repository,
                         onNavigateToGoals = { showGoalScreen = true },
+                        onNavigateToAccount = { currentDestination = BottomNavDestination.ACCOUNT },
+                        onNavigateToReport = { currentDestination = BottomNavDestination.REPORT },
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
