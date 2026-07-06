@@ -31,6 +31,8 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(
     repository: FinanceRepository,
     onNavigateToGoals: () -> Unit = {},
+    onNavigateToAccount: () -> Unit = {},
+    onNavigateToReport: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -64,38 +66,30 @@ fun SettingsScreen(
         }
 
         item {
-            SettingsSection(title = "Budget") {
+            SettingsSection(title = "Keuangan") {
+                SettingsItem(
+                    icon = Icons.Default.AccountBalanceWallet,
+                    title = "Kelola Akun",
+                    subtitle = "Lihat dan tambah akun",
+                    onClick = onNavigateToAccount
+                )
                 SettingsItem(
                     icon = Icons.Default.AccountBalanceWallet,
                     title = "Tambah Budget",
                     subtitle = "Atur limit pengeluaran per kategori",
                     onClick = { showAddBudgetDialog = true }
                 )
-            }
-        }
-
-        item {
-            SettingsSection(title = "Fitur") {
-                SettingsItem(
-                    icon = Icons.Default.AccountBalanceWallet,
-                    title = "Multi Akun",
-                    subtitle = "Cash, Bank, E-Wallet"
-                )
-                SettingsItem(
-                    icon = Icons.Default.Category,
-                    title = "Kategori",
-                    subtitle = "Pemasukan & Pengeluaran"
-                )
-                SettingsItem(
-                    icon = Icons.AutoMirrored.Filled.TrendingUp,
-                    title = "Laporan",
-                    subtitle = "Ringkasan bulanan"
-                )
                 SettingsItem(
                     icon = Icons.Default.Savings,
                     title = "Target Nabung",
                     subtitle = "Kelola goal tabungan kamu",
                     onClick = onNavigateToGoals
+                )
+                SettingsItem(
+                    icon = Icons.AutoMirrored.Filled.TrendingUp,
+                    title = "Laporan",
+                    subtitle = "Lihat ringkasan keuangan bulanan",
+                    onClick = onNavigateToReport
                 )
             }
         }
@@ -121,29 +115,14 @@ fun SettingsScreen(
                     }
                 )
                 SettingsItem(
-                    icon = Icons.Default.Storage,
-                    title = "Database",
-                    subtitle = "Room Database (SQLite)"
-                )
-                SettingsItem(
                     icon = Icons.Default.Lock,
                     title = "Privasi",
-                    subtitle = "Data tersimpan lokal di perangkat"
+                    subtitle = "Data tersimpan lokal di perangkat kamu"
                 )
-            }
-        }
-
-        item {
-            SettingsSection(title = "Aplikasi") {
                 SettingsItem(
                     icon = Icons.Default.Info,
                     title = "Versi Aplikasi",
                     subtitle = "1.0.0"
-                )
-                SettingsItem(
-                    icon = Icons.Default.Person,
-                    title = "Dibuat untuk",
-                    subtitle = "Penggunaan Pribadi"
                 )
             }
         }
