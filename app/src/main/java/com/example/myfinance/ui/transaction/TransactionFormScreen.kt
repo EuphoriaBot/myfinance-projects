@@ -24,7 +24,10 @@ import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TransactionFormScreen(
     repository: FinanceRepository,
@@ -213,11 +216,13 @@ fun TransactionFormScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Kategori", fontSize = 13.sp, color = TextSecondary)
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(
+                @OptIn(ExperimentalLayoutApi::class)
+                FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    categories.take(4).forEach { category ->
+                    categories.take(6).forEach { category ->
                         FilterChip(
                             selected = selectedCategory?.id == category.id,
                             onClick = { selectedCategory = category },
