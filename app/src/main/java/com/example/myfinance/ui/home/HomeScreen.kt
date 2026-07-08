@@ -26,6 +26,8 @@ import com.example.myfinance.data.local.entity.AccountEntity
 import androidx.compose.foundation.background
 import com.example.myfinance.ui.transaction.TransactionScreen
 import com.example.myfinance.ui.saving.SavingGoalScreen
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 
 @Composable
 fun HomeScreen(

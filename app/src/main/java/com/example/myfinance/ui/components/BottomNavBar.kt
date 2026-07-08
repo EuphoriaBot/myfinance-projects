@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myfinance.ui.theme.*
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 enum class BottomNavDestination(
     val label: String,
@@ -41,6 +42,7 @@ fun BottomNavBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .navigationBarsPadding()
             .background(DarkSurface)
     ) {
         Box(
