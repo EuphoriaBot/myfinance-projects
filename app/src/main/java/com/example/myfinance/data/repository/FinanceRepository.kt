@@ -2,6 +2,7 @@ package com.example.myfinance.data.repository
 
 import com.example.myfinance.data.local.dao.*
 import com.example.myfinance.data.local.entity.*
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.Flow
 
 class FinanceRepository(
@@ -93,4 +94,19 @@ class FinanceRepository(
 
     suspend fun deleteSavingGoal(goal: SavingGoalEntity) =
         savingGoalDao.delete(goal)
+
+    suspend fun resetAllData() {
+        // Hapus semua data
+        val accounts = getAllAccounts().first()
+        accounts.forEach { deleteAccount(it) }
+
+        val transactions = getAllTransactions().first()
+        transactions.forEach { deleteTransaction(it) }
+
+        val budgets = getAllBudgets().first()
+        budgets.forEach { deleteBudget(it) }
+
+        val goals = getAllSavingGoals().first()
+        goals.forEach { deleteSavingGoal(it) }
+    }
 }
