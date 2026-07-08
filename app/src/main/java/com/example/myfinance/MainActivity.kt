@@ -16,6 +16,7 @@ import com.example.myfinance.ui.theme.DarkBackground
 import com.example.myfinance.ui.theme.MyFinanceTheme
 import com.example.myfinance.utils.PreferencesManager
 import com.example.myfinance.data.worker.RecurringTransactionWorker
+import androidx.core.view.WindowCompat
 
 class MainActivity : ComponentActivity() {
 
@@ -34,6 +35,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         RecurringTransactionWorker.schedule(this)
         setContent {
             MyFinanceTheme {
