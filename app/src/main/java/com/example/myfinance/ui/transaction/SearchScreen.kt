@@ -25,7 +25,9 @@ import com.example.myfinance.ui.components.TransactionItem
 import com.example.myfinance.ui.components.TransactionUiModel
 import com.example.myfinance.ui.theme.*
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SearchScreen(
     repository: FinanceRepository,
@@ -131,9 +133,10 @@ fun SearchScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(horizontal = 16.dp)
         ) {
             listOf(
                 "SEMUA" to "Semua",
