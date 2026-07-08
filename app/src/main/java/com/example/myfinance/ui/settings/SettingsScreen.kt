@@ -26,6 +26,10 @@ import com.example.myfinance.utils.exportTransactionsToCsv
 import com.example.myfinance.utils.shareFile
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 
 @Composable
 fun SettingsScreen(
@@ -39,11 +43,65 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     var showAddBudgetDialog by remember { mutableStateOf(false) }
     var isExporting by remember { mutableStateOf(false) }
+    var showResetConfirm by remember { mutableStateOf(false) }
 
     if (showAddBudgetDialog) {
         AddBudgetDialog(
             repository = repository,
             onDismiss = { showAddBudgetDialog = false }
+        )
+    }
+
+    if (showResetConfirm) {
+        AlertDialog(
+            onDismissRequest = { showResetConfirm = false },
+            title = {
+                Text("Reset Semua Data?", color = TextPrimary)
+            },
+            text = {
+                Text(
+                    "Semua transaksi, akun, budget, dan goal akan dihapus permanen. App akan kembali ke tampilan awal.",
+                    color = TextSecondary
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            repository.resetAllData()
+
+                            val prefs = context.getSharedPreferences(
+                                "myfinance_prefs",
+                                Context.MODE_PRIVATE
+                            )
+                            prefs.edit().clear().apply()
+
+                            showResetConfirm = false
+
+                            val intent = context.packageManager
+                                .getLaunchIntentForPackage(context.packageName)
+
+                            intent?.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP)
+
+                            context.startActivity(intent)
+                            (context as? android.app.Activity)?.finish()
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ExpenseRed
+                    )
+                ) {
+                    Text("Reset")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { showResetConfirm = false }
+                ) {
+                    Text("Batal")
+                }
+            },
+            containerColor = DarkCard
         )
     }
 
@@ -112,6 +170,14 @@ fun SettingsScreen(
                             if (uri != null) shareFile(context, uri)
                             isExporting = false
                         }
+                    }
+                )
+                SettingsItem(
+                    icon = Icons.Default.RestartAlt,
+                    title = "Reset Semua Data",
+                    subtitle = "Hapus semua data dan mulai dari awal",
+                    onClick = {
+                        showResetConfirm = true
                     }
                 )
                 SettingsItem(
