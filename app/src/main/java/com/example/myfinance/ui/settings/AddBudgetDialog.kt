@@ -19,7 +19,10 @@ import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AddBudgetDialog(
     repository: FinanceRepository,
@@ -54,10 +57,12 @@ fun AddBudgetDialog(
 
                 Text("Kategori", fontSize = 12.sp, color = TextSecondary)
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    categories.take(3).forEach { category ->
+                    categories.forEach { category ->
                         FilterChip(
                             selected = selectedCategory?.id == category.id,
                             onClick = { selectedCategory = category },
