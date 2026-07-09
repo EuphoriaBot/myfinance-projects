@@ -28,6 +28,7 @@ import com.example.myfinance.ui.transaction.TransactionScreen
 import com.example.myfinance.ui.saving.SavingGoalScreen
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.clickable
 
 @Composable
 fun HomeScreen(
@@ -43,11 +44,29 @@ fun HomeScreen(
     var currentDestination by remember { mutableStateOf(BottomNavDestination.HOME) }
     var showTransactionForm by remember { mutableStateOf(false) }
     var showGoalScreen by remember { mutableStateOf(false) }
+    var showAllTransactions by remember { mutableStateOf(false) }
+    var showAddBudgetDialog by remember { mutableStateOf(false) }
 
     if (showGoalScreen) {
         SavingGoalScreen(
             repository = repository,
             modifier = Modifier.fillMaxSize()
+        )
+        return
+    }
+
+    if (showAllTransactions) {
+        TransactionScreen(
+            repository = repository,
+            modifier = Modifier.fillMaxSize()
+        )
+        return
+    }
+
+    if (showAddBudgetDialog) {
+        com.example.myfinance.ui.settings.AddBudgetDialog(
+            repository = repository,
+            onDismiss = { showAddBudgetDialog = false }
         )
         return
     }
@@ -134,7 +153,10 @@ fun HomeScreen(
                         }
 
                         item {
-                            SectionHeader(title = "Budget bulan ini", onSeeAll = {})
+                            SectionHeader(
+                                title = "Budget bulan ini",
+                                onSeeAll = { showAddBudgetDialog = true }
+                            )
                         }
                         item {
                             if (uiState.budgets.isNotEmpty()) {
@@ -161,7 +183,10 @@ fun HomeScreen(
                         }
 
                         item {
-                            SectionHeader(title = "Transaksi terakhir", onSeeAll = {})
+                            SectionHeader(
+                                title = "Transaksi terakhir",
+                                onSeeAll = { showAllTransactions = true }
+                            )
                         }
                         items(uiState.recentTransactions) { transaction ->
                             TransactionItem(
@@ -223,7 +248,10 @@ private fun SectionHeader(
         Text(
             text = "Lihat semua",
             fontSize = 11.sp,
-            color = AccentPurple
+            color = AccentPurple,
+            modifier = Modifier.clickable {
+                onSeeAll()
+            }
         )
     }
 }
