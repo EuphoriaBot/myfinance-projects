@@ -20,6 +20,13 @@ import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatRupiah
 import kotlinx.coroutines.launch
 
+fun formatInputRupiah(input: String): String {
+    if (input.isEmpty()) return ""
+    return input.reversed()
+        .chunked(3)
+        .joinToString(".")
+        .reversed()
+}
 @Composable
 fun OnboardingScreen(
     repository: FinanceRepository,
@@ -29,7 +36,7 @@ fun OnboardingScreen(
 
     var cashBalance by remember { mutableStateOf("") }
     var bankBalance by remember { mutableStateOf("") }
-    var bankName by remember { mutableStateOf("Bank BCA") }
+    var bankName by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
     Box(
@@ -63,8 +70,12 @@ fun OnboardingScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             OutlinedTextField(
-                value = cashBalance,
-                onValueChange = { cashBalance = it.filter { c -> c.isDigit() } },
+                value = if (cashBalance.isEmpty()) "" else formatInputRupiah(cashBalance),
+                onValueChange = { newValue ->
+                    cashBalance = newValue
+                        .replace(".", "")
+                        .filter { it.isDigit() }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("0", color = TextMuted) },
                 prefix = { Text("Rp ", color = TextMuted) },
@@ -114,8 +125,12 @@ fun OnboardingScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             OutlinedTextField(
-                value = bankBalance,
-                onValueChange = { bankBalance = it.filter { c -> c.isDigit() } },
+                value = if (bankBalance.isEmpty()) "" else formatInputRupiah(bankBalance),
+                onValueChange = { newValue ->
+                    bankBalance = newValue
+                        .replace(".", "")
+                        .filter { it.isDigit() }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("0", color = TextMuted) },
                 prefix = { Text("Rp ", color = TextMuted) },
