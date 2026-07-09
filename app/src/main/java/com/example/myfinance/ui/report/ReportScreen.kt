@@ -40,9 +40,36 @@ fun ReportScreen(
     val transactions by repository.getTransactionsByDateRange(startOfMonth, endOfMonth)
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
+    val categories by repository.getAllCategories()
+        .collectAsStateWithLifecycle(initialValue = emptyList())
+
+    val accounts by repository.getAllAccounts()
+        .collectAsStateWithLifecycle(initialValue = emptyList())
+
     val income = totalIncome ?: 0.0
     val expense = totalExpense ?: 0.0
     val net = income - expense
+
+    val top5Categories = transactions
+        .filter { it.type == "EXPENSE" }
+        .groupBy { it.categoryId }
+        .map { (categoryId, txList) ->
+            val name = categories.find { it.id == categoryId }?.name ?: "Lainnya"
+            name to txList.sumOf { it.amount }
+        }
+        .sortedByDescending { it.second }
+        .take(5)
+
+    val expensePerAccount = transactions
+        .filter { it.type == "EXPENSE" }
+        .groupBy { it.accountId }
+        .map { (accountId, txList) ->
+            val name = accounts.find { it.id == accountId }?.name ?: "Akun"
+            name to txList.sumOf { it.amount }
+        }
+        .sortedByDescending { it.second }
+
+    val monthName = android.text.format.DateFormat.format("MMMM yyyy", calendar).toString()
 
     LazyColumn(
         modifier = modifier
@@ -54,11 +81,11 @@ fun ReportScreen(
     ) {
         item {
             Text(
-                text = "Laporan Bulan Ini",
+                text = "Laporan $monthName",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextPrimary,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 4.dp)
             )
         }
 
@@ -95,11 +122,7 @@ fun ReportScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Selisih bulan ini",
-                        fontSize = 13.sp,
-                        color = TextSecondary
-                    )
+                    Text("Selisih bulan ini", fontSize = 13.sp, color = TextSecondary)
                     Text(
                         text = formatRupiah(net),
                         fontSize = 16.sp,
@@ -130,15 +153,15 @@ fun ReportScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(12.dp)
-                            .clip(RoundedCornerShape(6.dp))
+                            .height(10.dp)
+                            .clip(RoundedCornerShape(5.dp))
                             .background(Color.White.copy(alpha = 0.07f))
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(ratio)
-                                .height(12.dp)
-                                .clip(RoundedCornerShape(6.dp))
+                                .height(10.dp)
+                                .clip(RoundedCornerShape(5.dp))
                                 .background(
                                     when {
                                         ratio >= 1f -> ExpenseRed
@@ -166,22 +189,121 @@ fun ReportScreen(
                     .background(DarkCard)
                     .padding(16.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(
-                        text = "Total transaksi bulan ini",
+                        text = "Statistik Bulan Ini",
                         fontSize = 13.sp,
-                        color = TextSecondary
-                    )
-                    Text(
-                        text = "${transactions.size} transaksi",
-                        fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         color = TextPrimary
                     )
+                    StatRow("Total transaksi", "${transactions.size} transaksi")
+                    StatRow(
+                        "Transaksi pemasukan",
+                        "${transactions.count { it.type == "INCOME" }} transaksi"
+                    )
+                    StatRow(
+                        "Transaksi pengeluaran",
+                        "${transactions.count { it.type == "EXPENSE" }} transaksi"
+                    )
+                    if (transactions.isNotEmpty()) {
+                        val avgExpense = if (transactions.count { it.type == "EXPENSE" } > 0) {
+                            expense / transactions.count { it.type == "EXPENSE" }
+                        } else 0.0
+                        StatRow("Rata-rata pengeluaran", formatRupiah(avgExpense))
+                    }
+                }
+            }
+        }
+
+        if (top5Categories.isNotEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(DarkCard)
+                        .padding(16.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(
+                            text = "Top Pengeluaran per Kategori",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = TextPrimary
+                        )
+                        top5Categories.forEachIndexed { index, (name, amount) ->
+                            val maxAmount = top5Categories.first().second
+                            val ratio = (amount / maxAmount).toFloat()
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "${index + 1}. $name",
+                                        fontSize = 12.sp,
+                                        color = TextSecondary
+                                    )
+                                    Text(
+                                        text = formatRupiah(amount),
+                                        fontSize = 12.sp,
+                                        color = ExpenseRed,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(4.dp)
+                                        .clip(RoundedCornerShape(2.dp))
+                                        .background(Color.White.copy(alpha = 0.07f))
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth(ratio)
+                                            .height(4.dp)
+                                            .clip(RoundedCornerShape(2.dp))
+                                            .background(ExpenseRed.copy(alpha = 0.7f + 0.3f * (1f - index * 0.2f)))
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (expensePerAccount.isNotEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(DarkCard)
+                        .padding(16.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(
+                            text = "Pengeluaran per Akun",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = TextPrimary
+                        )
+                        expensePerAccount.forEach { (name, amount) ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(name, fontSize = 12.sp, color = TextSecondary)
+                                Text(
+                                    formatRupiah(amount),
+                                    fontSize = 12.sp,
+                                    color = TextPrimary,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -192,7 +314,7 @@ fun ReportScreen(
 private fun SummaryCard(
     label: String,
     amount: Double,
-    color: androidx.compose.ui.graphics.Color,
+    color: Color,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -202,11 +324,7 @@ private fun SummaryCard(
             .padding(16.dp)
     ) {
         Column {
-            Text(
-                text = label,
-                fontSize = 11.sp,
-                color = TextMuted
-            )
+            Text(text = label, fontSize = 11.sp, color = TextMuted)
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = formatRupiah(amount),
@@ -215,5 +333,21 @@ private fun SummaryCard(
                 color = color
             )
         }
+    }
+}
+
+@Composable
+private fun StatRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, fontSize = 12.sp, color = TextMuted)
+        Text(
+            text = value,
+            fontSize = 12.sp,
+            color = TextPrimary,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
