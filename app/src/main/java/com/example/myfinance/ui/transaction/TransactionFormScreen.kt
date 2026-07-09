@@ -27,6 +27,11 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 
+private fun formatInputNumber(input: String): String {
+    if (input.isEmpty()) return ""
+    return input.reversed().chunked(3).joinToString(".").reversed()
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TransactionFormScreen(
@@ -128,8 +133,10 @@ fun TransactionFormScreen(
             Text("Jumlah", fontSize = 13.sp, color = TextSecondary)
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
-                value = amount,
-                onValueChange = { amount = it.filter { c -> c.isDigit() } },
+                value = if (amount.isEmpty()) "" else formatInputNumber(amount),
+                onValueChange = { newValue ->
+                    amount = newValue.replace(".", "").filter { it.isDigit() }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("0", color = TextMuted) },
                 prefix = { Text("Rp ", color = TextMuted) },
