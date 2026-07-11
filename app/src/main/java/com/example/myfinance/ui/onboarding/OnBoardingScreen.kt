@@ -19,6 +19,7 @@ import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatRupiah
 import kotlinx.coroutines.launch
+import com.example.myfinance.ui.components.BackgroundPattern
 
 fun formatInputRupiah(input: String): String {
     if (input.isEmpty()) return ""
@@ -43,10 +44,13 @@ fun OnboardingScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(DarkBackground)
-            .padding(24.dp)
     ) {
+        BackgroundPattern()
+
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
             verticalArrangement = Arrangement.Center
         ) {
             Text(
