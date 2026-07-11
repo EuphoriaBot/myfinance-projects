@@ -25,6 +25,7 @@ import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatRupiah
 import kotlinx.coroutines.launch
+import com.example.myfinance.ui.components.BackgroundPattern
 
 @Composable
 fun SavingGoalScreen(
@@ -43,73 +44,79 @@ fun SavingGoalScreen(
         )
     }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(DarkBackground)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Target Nabung",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextPrimary
-            )
-            FloatingActionButton(
-                onClick = { showAddDialog = true },
-                containerColor = AccentPurple,
-                modifier = Modifier.size(40.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Tambah Goal",
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
+        BackgroundPattern()
 
-        if (goals.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                Text(
+                    text = "Target Nabung",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary
+                )
+                FloatingActionButton(
+                    onClick = { showAddDialog = true },
+                    containerColor = AccentPurple,
+                    modifier = Modifier.size(40.dp)
                 ) {
-                    Text(
-                        text = "Belum ada target nabung",
-                        fontSize = 15.sp,
-                        color = TextSecondary
-                    )
-                    Text(
-                        text = "Tekan + untuk menambah target",
-                        fontSize = 12.sp,
-                        color = TextMuted
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Tambah Goal",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
-        } else {
-            LazyColumn(
-                contentPadding = PaddingValues(
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 24.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(goals) { goal ->
-                    SavingGoalItem(
-                        goal = goal,
-                        repository = repository
-                    )
+
+            if (goals.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Belum ada target nabung",
+                            fontSize = 15.sp,
+                            color = TextSecondary
+                        )
+                        Text(
+                            text = "Tekan + untuk menambah target",
+                            fontSize = 12.sp,
+                            color = TextMuted
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 24.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(goals) { goal ->
+                        SavingGoalItem(
+                            goal = goal,
+                            repository = repository
+                        )
+                    }
                 }
             }
         }
