@@ -29,6 +29,7 @@ import com.example.myfinance.ui.saving.SavingGoalScreen
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.clickable
+import com.example.myfinance.ui.components.BackgroundPattern
 
 @Composable
 fun HomeScreen(
@@ -117,85 +118,101 @@ fun HomeScreen(
                     )
                 }
                 else -> {
-                    LazyColumn(
-                        modifier = Modifier.padding(innerPadding),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(top = 24.dp, bottom = 16.dp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
                     ) {
-                        item {
-                            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                                Text(
-                                    text = "Selamat datang,",
-                                    fontSize = 13.sp,
-                                    color = TextMuted
-                                )
-                                Text(
-                                    text = "MyFinance",
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = TextPrimary
-                                )
-                            }
-                        }
+                        BackgroundPattern()
 
-                        item {
-                            BalanceCard(
-                                totalBalance = uiState.totalBalance,
-                                accounts = uiState.accounts.map { it.name to it.balance }
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            contentPadding = PaddingValues(
+                                top = 24.dp,
+                                bottom = 16.dp
                             )
-                        }
-
-                        item {
-                            IncomeExpenseRow(
-                                totalIncome = uiState.totalIncome,
-                                totalExpense = uiState.totalExpense
-                            )
-                        }
-
-                        item {
-                            SectionHeader(
-                                title = "Budget bulan ini",
-                                onSeeAll = { showAddBudgetDialog = true }
-                            )
-                        }
-                        item {
-                            if (uiState.budgets.isNotEmpty()) {
-                                BudgetProgressCard(
-                                    budgets = uiState.budgets.map {
-                                        BudgetUiModel(it.categoryName, it.spent, it.limit)
-                                    }
-                                )
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp)
-                                        .background(DarkCard, androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
-                                        .padding(20.dp)
-                                ) {
+                        ) {
+                            item {
+                                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                                     Text(
-                                        text = "Belum ada budget. Tambahkan budget di menu Setelan.",
-                                        fontSize = 12.sp,
+                                        text = "Selamat datang,",
+                                        fontSize = 13.sp,
                                         color = TextMuted
+                                    )
+                                    Text(
+                                        text = "MyFinance",
+                                        fontSize = 22.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = TextPrimary
                                     )
                                 }
                             }
-                        }
 
-                        item {
-                            SectionHeader(
-                                title = "Transaksi terakhir",
-                                onSeeAll = { showAllTransactions = true }
-                            )
-                        }
-                        items(uiState.recentTransactions) { transaction ->
-                            TransactionItem(
-                                transaction = mapToUiModel(
-                                    entity = transaction,
-                                    accounts = uiState.accounts,
-                                    categories = uiState.categories
+                            item {
+                                BalanceCard(
+                                    totalBalance = uiState.totalBalance,
+                                    accounts = uiState.accounts.map { it.name to it.balance }
                                 )
-                            )
+                            }
+
+                            item {
+                                IncomeExpenseRow(
+                                    totalIncome = uiState.totalIncome,
+                                    totalExpense = uiState.totalExpense
+                                )
+                            }
+
+                            item {
+                                SectionHeader(
+                                    title = "Budget bulan ini",
+                                    onSeeAll = { showAddBudgetDialog = true }
+                                )
+                            }
+
+                            item {
+                                if (uiState.budgets.isNotEmpty()) {
+                                    BudgetProgressCard(
+                                        budgets = uiState.budgets.map {
+                                            BudgetUiModel(it.categoryName, it.spent, it.limit)
+                                        }
+                                    )
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp)
+                                            .background(
+                                                DarkCard,
+                                                androidx.compose.foundation.shape.RoundedCornerShape(14.dp)
+                                            )
+                                            .padding(20.dp)
+                                    ) {
+                                        Text(
+                                            text = "Belum ada budget. Tambahkan budget di menu Setelan.",
+                                            fontSize = 12.sp,
+                                            color = TextMuted
+                                        )
+                                    }
+                                }
+                            }
+
+                            item {
+                                SectionHeader(
+                                    title = "Transaksi terakhir",
+                                    onSeeAll = { showAllTransactions = true }
+                                )
+                            }
+
+                            items(uiState.recentTransactions) { transaction ->
+                                TransactionItem(
+                                    transaction = mapToUiModel(
+                                        entity = transaction,
+                                        accounts = uiState.accounts,
+                                        categories = uiState.categories
+                                    )
+                                )
+                            }
                         }
                     }
                 }
