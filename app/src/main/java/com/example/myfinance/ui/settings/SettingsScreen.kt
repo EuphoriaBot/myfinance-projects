@@ -30,6 +30,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
+import com.example.myfinance.ui.components.BackgroundPattern
 
 @Composable
 fun SettingsScreen(
@@ -105,91 +106,101 @@ fun SettingsScreen(
         )
     }
 
-    LazyColumn(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(DarkBackground)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp)
     ) {
-        item {
-            Text(
-                text = "Setelan",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextPrimary,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        }
+        BackgroundPattern()
 
-        item {
-            SettingsSection(title = "Keuangan") {
-                SettingsItem(
-                    icon = Icons.Default.AccountBalanceWallet,
-                    title = "Kelola Akun",
-                    subtitle = "Lihat dan tambah akun",
-                    onClick = onNavigateToAccount
-                )
-                SettingsItem(
-                    icon = Icons.Default.AccountBalanceWallet,
-                    title = "Tambah Budget",
-                    subtitle = "Atur limit pengeluaran per kategori",
-                    onClick = { showAddBudgetDialog = true }
-                )
-                SettingsItem(
-                    icon = Icons.Default.Savings,
-                    title = "Target Nabung",
-                    subtitle = "Kelola goal tabungan kamu",
-                    onClick = onNavigateToGoals
-                )
-                SettingsItem(
-                    icon = Icons.AutoMirrored.Filled.TrendingUp,
-                    title = "Laporan",
-                    subtitle = "Lihat ringkasan keuangan bulanan",
-                    onClick = onNavigateToReport
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(
+                top = 8.dp,
+                bottom = 24.dp
+            )
+        ) {
+            item {
+                Text(
+                    text = "Setelan",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
-        }
 
-        item {
-            SettingsSection(title = "Data") {
-                SettingsItem(
-                    icon = Icons.Default.FileDownload,
-                    title = "Export ke CSV",
-                    subtitle = "Simpan semua transaksi ke file CSV",
-                    onClick = {
-                        scope.launch {
-                            isExporting = true
-                            val transactions = repository.getAllTransactions().first()
-                            val accounts = repository.getAllAccounts().first()
-                            val categories = repository.getAllCategories().first()
-                            val uri = exportTransactionsToCsv(
-                                context, transactions, accounts, categories
-                            )
-                            if (uri != null) shareFile(context, uri)
-                            isExporting = false
+            item {
+                SettingsSection(title = "Keuangan") {
+                    SettingsItem(
+                        icon = Icons.Default.AccountBalanceWallet,
+                        title = "Kelola Akun",
+                        subtitle = "Lihat dan tambah akun",
+                        onClick = onNavigateToAccount
+                    )
+                    SettingsItem(
+                        icon = Icons.Default.AccountBalanceWallet,
+                        title = "Tambah Budget",
+                        subtitle = "Atur limit pengeluaran per kategori",
+                        onClick = { showAddBudgetDialog = true }
+                    )
+                    SettingsItem(
+                        icon = Icons.Default.Savings,
+                        title = "Target Nabung",
+                        subtitle = "Kelola goal tabungan kamu",
+                        onClick = onNavigateToGoals
+                    )
+                    SettingsItem(
+                        icon = Icons.AutoMirrored.Filled.TrendingUp,
+                        title = "Laporan",
+                        subtitle = "Lihat ringkasan keuangan bulanan",
+                        onClick = onNavigateToReport
+                    )
+                }
+            }
+
+            item {
+                SettingsSection(title = "Data") {
+                    SettingsItem(
+                        icon = Icons.Default.FileDownload,
+                        title = "Export ke CSV",
+                        subtitle = "Simpan semua transaksi ke file CSV",
+                        onClick = {
+                            scope.launch {
+                                isExporting = true
+                                val transactions = repository.getAllTransactions().first()
+                                val accounts = repository.getAllAccounts().first()
+                                val categories = repository.getAllCategories().first()
+                                val uri = exportTransactionsToCsv(
+                                    context, transactions, accounts, categories
+                                )
+                                if (uri != null) shareFile(context, uri)
+                                isExporting = false
+                            }
                         }
-                    }
-                )
-                SettingsItem(
-                    icon = Icons.Default.RestartAlt,
-                    title = "Reset Semua Data",
-                    subtitle = "Hapus semua data dan mulai dari awal",
-                    onClick = {
-                        showResetConfirm = true
-                    }
-                )
-                SettingsItem(
-                    icon = Icons.Default.Lock,
-                    title = "Privasi",
-                    subtitle = "Data tersimpan lokal di perangkat kamu"
-                )
-                SettingsItem(
-                    icon = Icons.Default.Info,
-                    title = "Versi Aplikasi",
-                    subtitle = "1.0.0"
-                )
+                    )
+                    SettingsItem(
+                        icon = Icons.Default.RestartAlt,
+                        title = "Reset Semua Data",
+                        subtitle = "Hapus semua data dan mulai dari awal",
+                        onClick = {
+                            showResetConfirm = true
+                        }
+                    )
+                    SettingsItem(
+                        icon = Icons.Default.Lock,
+                        title = "Privasi",
+                        subtitle = "Data tersimpan lokal di perangkat kamu"
+                    )
+                    SettingsItem(
+                        icon = Icons.Default.Info,
+                        title = "Versi Aplikasi",
+                        subtitle = "1.0.0"
+                    )
+                }
             }
         }
     }
