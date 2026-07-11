@@ -22,6 +22,7 @@ import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatRupiah
+import com.example.myfinance.ui.components.BackgroundPattern
 
 @Composable
 fun AccountScreen(
@@ -41,96 +42,102 @@ fun AccountScreen(
         )
     }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(DarkBackground)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Akun",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextPrimary
-            )
-            FloatingActionButton(
-                onClick = { showAddDialog = true },
-                containerColor = AccentPurple,
-                modifier = Modifier.size(40.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Tambah Akun",
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
+        BackgroundPattern()
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(AccentPurple)
-                .padding(20.dp)
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = "Total Saldo",
-                    fontSize = 12.sp,
-                    color = Color.White.copy(alpha = 0.7f)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = formatRupiah(totalBalance),
-                    fontSize = 26.sp,
+                    text = "Akun",
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.White
+                    color = TextPrimary
                 )
+                FloatingActionButton(
+                    onClick = { showAddDialog = true },
+                    containerColor = AccentPurple,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Tambah Akun",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(
-            text = "Daftar Akun",
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            color = TextPrimary,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        if (accounts.isEmpty()) {
             Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(AccentPurple)
+                    .padding(20.dp)
             ) {
-                Text(
-                    text = "Belum ada akun",
-                    fontSize = 14.sp,
-                    color = TextMuted
-                )
+                Column {
+                    Text(
+                        text = "Total Saldo",
+                        fontSize = 12.sp,
+                        color = Color.White.copy(alpha = 0.7f)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = formatRupiah(totalBalance),
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White
+                    )
+                }
             }
-        } else {
-            LazyColumn(
-                contentPadding = PaddingValues(
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 24.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                items(accounts) { account ->
-                    AccountItem(account = account)
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = "Daftar Akun",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+                color = TextPrimary,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (accounts.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Belum ada akun",
+                        fontSize = 14.sp,
+                        color = TextMuted
+                    )
+                }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 24.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    items(accounts) { account ->
+                        AccountItem(account = account)
+                    }
                 }
             }
         }
