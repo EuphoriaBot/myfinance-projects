@@ -24,6 +24,7 @@ import com.example.myfinance.domain.model.TransactionType
 import com.example.myfinance.ui.components.TransactionItem
 import com.example.myfinance.ui.components.TransactionUiModel
 import com.example.myfinance.ui.theme.*
+import com.example.myfinance.ui.components.BackgroundPattern
 
 @Composable
 fun TransactionScreen(
@@ -61,85 +62,91 @@ fun TransactionScreen(
         return
     }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(DarkBackground)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 8.dp, top = 16.dp, bottom = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Transaksi",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextPrimary
-            )
-            IconButton(onClick = { showSearch = true }) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Cari",
-                    tint = TextMuted
-                )
-            }
-        }
+        BackgroundPattern()
 
-        if (transactions.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 8.dp, top = 16.dp, bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = "Belum ada transaksi",
-                        fontSize = 15.sp,
-                        color = TextSecondary
-                    )
-                    Text(
-                        text = "Tekan tombol + untuk menambah transaksi",
-                        fontSize = 12.sp,
-                        color = TextMuted
+                Text(
+                    text = "Transaksi",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary
+                )
+                IconButton(onClick = { showSearch = true }) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Cari",
+                        tint = TextMuted
                     )
                 }
             }
-        } else {
-            val grouped = transactions.groupBy { transaction ->
-                android.text.format.DateFormat.format(
-                    "dd MMMM yyyy", transaction.date
-                ).toString()
-            }
 
-            LazyColumn(
-                contentPadding = PaddingValues(bottom = 24.dp)
-            ) {
-                grouped.forEach { (date, dayTransactions) ->
-                    item {
+            if (transactions.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         Text(
-                            text = date,
+                            text = "Belum ada transaksi",
+                            fontSize = 15.sp,
+                            color = TextSecondary
+                        )
+                        Text(
+                            text = "Tekan tombol + untuk menambah transaksi",
                             fontSize = 12.sp,
-                            color = TextMuted,
-                            modifier = Modifier.padding(
-                                horizontal = 16.dp,
-                                vertical = 8.dp
-                            )
+                            color = TextMuted
                         )
                     }
-                    items(dayTransactions) { transaction ->
-                        TransactionItem(
-                            transaction = mapToUiModel(
-                                entity = transaction,
-                                accounts = accounts,
-                                categories = categories
-                            ),
-                            onClick = { selectedTransaction = transaction }
-                        )
+                }
+            } else {
+                val grouped = transactions.groupBy { transaction ->
+                    android.text.format.DateFormat.format(
+                        "dd MMMM yyyy", transaction.date
+                    ).toString()
+                }
+
+                LazyColumn(
+                    contentPadding = PaddingValues(bottom = 24.dp)
+                ) {
+                    grouped.forEach { (date, dayTransactions) ->
+                        item {
+                            Text(
+                                text = date,
+                                fontSize = 12.sp,
+                                color = TextMuted,
+                                modifier = Modifier.padding(
+                                    horizontal = 16.dp,
+                                    vertical = 8.dp
+                                )
+                            )
+                        }
+                        items(dayTransactions) { transaction ->
+                            TransactionItem(
+                                transaction = mapToUiModel(
+                                    entity = transaction,
+                                    accounts = accounts,
+                                    categories = categories
+                                ),
+                                onClick = { selectedTransaction = transaction }
+                            )
+                        }
                     }
                 }
             }
