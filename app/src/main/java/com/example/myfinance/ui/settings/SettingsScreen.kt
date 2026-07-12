@@ -38,6 +38,7 @@ fun SettingsScreen(
     onNavigateToGoals: () -> Unit = {},
     onNavigateToAccount: () -> Unit = {},
     onNavigateToReport: () -> Unit = {},
+    onNavigateToCategory: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -158,6 +159,12 @@ fun SettingsScreen(
                         title = "Laporan",
                         subtitle = "Lihat ringkasan keuangan bulanan",
                         onClick = onNavigateToReport
+                    )
+                    SettingsItem(
+                        icon = Icons.Default.Category,
+                        title = "Kelola Kategori",
+                        subtitle = "Tambah dan hapus kategori transaksi",
+                        onClick = onNavigateToCategory
                     )
                 }
             }
