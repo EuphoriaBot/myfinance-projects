@@ -23,6 +23,7 @@ import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatRupiah
 import kotlinx.coroutines.launch
+import com.example.myfinance.ui.transaction.EditTransactionScreen
 
 @Composable
 fun TransactionDetailSheet(
@@ -34,7 +35,7 @@ fun TransactionDetailSheet(
 ) {
     val scope = rememberCoroutineScope()
     var showDeleteConfirm by remember { mutableStateOf(false) }
-
+    var showEditScreen by remember { mutableStateOf(false) }
     val accountName = accounts.find { it.id == transaction.accountId }?.name ?: "Akun"
     val categoryName = categories.find { it.id == transaction.categoryId }?.name ?: "Kategori"
 
@@ -86,6 +87,18 @@ fun TransactionDetailSheet(
         )
     }
 
+    if (showEditScreen) {
+        EditTransactionScreen(
+            transaction = transaction,
+            repository = repository,
+            onDismiss = {
+                showEditScreen = false
+                onDismiss()
+            }
+        )
+        return
+    }
+
     Dialog(onDismissRequest = onDismiss) {
         Box(
             modifier = Modifier
@@ -124,8 +137,8 @@ fun TransactionDetailSheet(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     OutlinedButton(
                         onClick = { showDeleteConfirm = true },
@@ -142,14 +155,24 @@ fun TransactionDetailSheet(
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("Hapus")
                     }
+
                     Button(
-                        onClick = onDismiss,
+                        onClick = { showEditScreen = true },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = DarkBackground
+                            containerColor = AccentPurple
                         )
                     ) {
-                        Text("Tutup", color = TextMuted)
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit",
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Edit",
+                            color = Color.White
+                        )
                     }
                 }
             }
