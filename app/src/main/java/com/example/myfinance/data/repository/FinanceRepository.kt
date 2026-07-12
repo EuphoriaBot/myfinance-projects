@@ -33,6 +33,12 @@ class FinanceRepository(
     fun getCategoriesByType(type: String): Flow<List<CategoryEntity>> =
         categoryDao.getByType(type)
 
+    suspend fun insertCategory(category: CategoryEntity): Long =
+        categoryDao.insert(category)
+
+    suspend fun deleteCategory(category: CategoryEntity) =
+        categoryDao.delete(category)
+
     fun getAllTransactions(): Flow<List<TransactionEntity>> =
         transactionDao.getAll()
 
@@ -96,7 +102,6 @@ class FinanceRepository(
         savingGoalDao.delete(goal)
 
     suspend fun resetAllData() {
-        // Hapus semua data
         val accounts = getAllAccounts().first()
         accounts.forEach { deleteAccount(it) }
 
