@@ -30,6 +30,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.clickable
 import com.example.myfinance.ui.components.BackgroundPattern
+import androidx.activity.compose.BackHandler
+import com.example.myfinance.ui.category.CategoryScreen
 
 @Composable
 fun HomeScreen(
@@ -45,12 +47,48 @@ fun HomeScreen(
     var currentDestination by remember { mutableStateOf(BottomNavDestination.HOME) }
     var showTransactionForm by remember { mutableStateOf(false) }
     var showGoalScreen by remember { mutableStateOf(false) }
+    var showCategoryScreen by remember { mutableStateOf(false) }
     var showAllTransactions by remember { mutableStateOf(false) }
     var showAddBudgetDialog by remember { mutableStateOf(false) }
+
+    BackHandler(
+        enabled =
+            showTransactionForm ||
+                    showGoalScreen ||
+                    showCategoryScreen ||
+                    currentDestination != BottomNavDestination.HOME
+    ) {
+        when {
+            showTransactionForm -> {
+                showTransactionForm = false
+            }
+
+            showGoalScreen -> {
+                showGoalScreen = false
+            }
+
+            showCategoryScreen -> {
+                showCategoryScreen = false
+            }
+
+            currentDestination != BottomNavDestination.HOME -> {
+                currentDestination = BottomNavDestination.HOME
+            }
+        }
+    }
 
     if (showGoalScreen) {
         SavingGoalScreen(
             repository = repository,
+            modifier = Modifier.fillMaxSize()
+        )
+        return
+    }
+
+    if (showCategoryScreen) {
+        CategoryScreen(
+            repository = repository,
+            onBack = { showCategoryScreen = false },
             modifier = Modifier.fillMaxSize()
         )
         return
@@ -112,8 +150,15 @@ fun HomeScreen(
                     SettingsScreen(
                         repository = repository,
                         onNavigateToGoals = { showGoalScreen = true },
-                        onNavigateToAccount = { currentDestination = BottomNavDestination.ACCOUNT },
-                        onNavigateToReport = { currentDestination = BottomNavDestination.REPORT },
+                        onNavigateToAccount = {
+                            currentDestination = BottomNavDestination.ACCOUNT
+                        },
+                        onNavigateToReport = {
+                            currentDestination = BottomNavDestination.REPORT
+                        },
+                        onNavigateToCategory = {
+                            showCategoryScreen = true
+                        },
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
