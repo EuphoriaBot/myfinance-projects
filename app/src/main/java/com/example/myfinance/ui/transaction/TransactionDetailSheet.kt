@@ -23,7 +23,6 @@ import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatRupiah
 import kotlinx.coroutines.launch
-import com.example.myfinance.ui.transaction.EditTransactionScreen
 
 @Composable
 fun TransactionDetailSheet(
@@ -36,21 +35,31 @@ fun TransactionDetailSheet(
     val scope = rememberCoroutineScope()
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showEditScreen by remember { mutableStateOf(false) }
+
     val accountName = accounts.find { it.id == transaction.accountId }?.name ?: "Akun"
     val categoryName = categories.find { it.id == transaction.categoryId }?.name ?: "Kategori"
 
+    // Edit screen — tampil fullscreen, return supaya dialog tidak render
+    if (showEditScreen) {
+        EditTransactionScreen(
+            transaction = transaction,
+            repository = repository,
+            onDismiss = {
+                showEditScreen = false
+                onDismiss()
+            }
+        )
+        return
+    }
+
+    // Delete confirm dialog
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = {
-                Text(
-                    text = "Hapus Transaksi?",
-                    color = TextPrimary
-                )
-            },
+            title = { Text("Hapus Transaksi?", color = TextPrimary) },
             text = {
                 Text(
-                    text = "Transaksi ini akan dihapus permanen dan saldo akun akan dikembalikan.",
+                    "Transaksi ini akan dihapus permanen dan saldo akun akan dikembalikan.",
                     color = TextSecondary
                 )
             },
@@ -65,9 +74,7 @@ fun TransactionDetailSheet(
                                     "EXPENSE" -> account.balance + transaction.amount
                                     else -> account.balance
                                 }
-                                repository.updateAccount(
-                                    account.copy(balance = restoredBalance)
-                                )
+                                repository.updateAccount(account.copy(balance = restoredBalance))
                             }
                             repository.deleteTransaction(transaction)
                             onDismiss()
@@ -85,20 +92,10 @@ fun TransactionDetailSheet(
             },
             containerColor = DarkCard
         )
-    }
-
-    if (showEditScreen) {
-        EditTransactionScreen(
-            transaction = transaction,
-            repository = repository,
-            onDismiss = {
-                showEditScreen = false
-                onDismiss()
-            }
-        )
         return
     }
 
+    // Detail dialog
     Dialog(onDismissRequest = onDismiss) {
         Box(
             modifier = Modifier
@@ -116,11 +113,13 @@ fun TransactionDetailSheet(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                DetailRow("Jenis", when (transaction.type) {
-                    "INCOME" -> "Pemasukan"
-                    "EXPENSE" -> "Pengeluaran"
-                    else -> "Transfer"
-                })
+                DetailRow(
+                    "Jenis", when (transaction.type) {
+                        "INCOME" -> "Pemasukan"
+                        "EXPENSE" -> "Pengeluaran"
+                        else -> "Transfer"
+                    }
+                )
                 DetailRow("Jumlah", formatRupiah(transaction.amount))
                 DetailRow("Kategori", categoryName)
                 DetailRow("Akun", accountName)
@@ -155,13 +154,10 @@ fun TransactionDetailSheet(
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("Hapus")
                     }
-
                     Button(
                         onClick = { showEditScreen = true },
                         modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = AccentPurple
-                        )
+                        colors = ButtonDefaults.buttonColors(containerColor = AccentPurple)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
@@ -169,10 +165,7 @@ fun TransactionDetailSheet(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Edit",
-                            color = Color.White
-                        )
+                        Text("Edit", color = Color.White)
                     }
                 }
             }
