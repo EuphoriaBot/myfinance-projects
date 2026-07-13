@@ -30,29 +30,15 @@ fun TransactionDetailSheet(
     accounts: List<AccountEntity>,
     categories: List<CategoryEntity>,
     repository: FinanceRepository,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onEdit: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     var showDeleteConfirm by remember { mutableStateOf(false) }
-    var showEditScreen by remember { mutableStateOf(false) }
 
     val accountName = accounts.find { it.id == transaction.accountId }?.name ?: "Akun"
     val categoryName = categories.find { it.id == transaction.categoryId }?.name ?: "Kategori"
 
-    // Edit screen — tampil fullscreen, return supaya dialog tidak render
-    if (showEditScreen) {
-        EditTransactionScreen(
-            transaction = transaction,
-            repository = repository,
-            onDismiss = {
-                showEditScreen = false
-                onDismiss()
-            }
-        )
-        return
-    }
-
-    // Delete confirm dialog
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
@@ -95,7 +81,6 @@ fun TransactionDetailSheet(
         return
     }
 
-    // Detail dialog
     Dialog(onDismissRequest = onDismiss) {
         Box(
             modifier = Modifier
@@ -155,7 +140,7 @@ fun TransactionDetailSheet(
                         Text("Hapus")
                     }
                     Button(
-                        onClick = { showEditScreen = true },
+                        onClick = onEdit,
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = AccentPurple)
                     ) {

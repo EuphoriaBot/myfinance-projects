@@ -25,6 +25,7 @@ import com.example.myfinance.ui.theme.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 private fun formatInputNumber(input: String): String {
     if (input.isEmpty()) return ""
@@ -74,6 +75,7 @@ fun EditTransactionScreen(
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .padding(24.dp)
+                .navigationBarsPadding()
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -97,7 +99,6 @@ fun EditTransactionScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Type selector
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -122,6 +123,7 @@ fun EditTransactionScreen(
                     ) {
                         Text(text = label, fontSize = 12.sp)
                     }
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
             }
 
@@ -226,7 +228,6 @@ fun EditTransactionScreen(
                     scope.launch {
                         isLoading = true
 
-                        // Kembalikan saldo akun lama
                         val oldAccount = accounts.find { it.id == transaction.accountId }
                         if (oldAccount != null) {
                             val restoredBalance = when (transaction.type) {
@@ -237,7 +238,6 @@ fun EditTransactionScreen(
                             repository.updateAccount(oldAccount.copy(balance = restoredBalance))
                         }
 
-                        // Update transaksi
                         repository.updateTransaction(
                             transaction.copy(
                                 amount = amountValue,
@@ -248,7 +248,6 @@ fun EditTransactionScreen(
                             )
                         )
 
-                        // Update saldo akun baru
                         val freshAccounts = repository.getAllAccounts().first()
                         val newAccount = freshAccounts.find { it.id == account.id }
                         if (newAccount != null) {

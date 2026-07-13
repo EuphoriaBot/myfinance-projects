@@ -42,6 +42,18 @@ fun TransactionScreen(
 
     var showSearch by remember { mutableStateOf(false) }
     var selectedTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
+    var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
+
+    if (editingTransaction != null) {
+        EditTransactionScreen(
+            transaction = editingTransaction!!,
+            repository = repository,
+            onDismiss = {
+                editingTransaction = null
+            }
+        )
+        return
+    }
 
     if (selectedTransaction != null) {
         TransactionDetailSheet(
@@ -49,7 +61,13 @@ fun TransactionScreen(
             accounts = accounts,
             categories = categories,
             repository = repository,
-            onDismiss = { selectedTransaction = null }
+            onDismiss = {
+                selectedTransaction = null
+            },
+            onEdit = {
+                editingTransaction = selectedTransaction
+                selectedTransaction = null
+            }
         )
     }
 
