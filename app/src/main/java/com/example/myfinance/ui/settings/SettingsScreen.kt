@@ -31,15 +31,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import com.example.myfinance.ui.components.BackgroundPattern
+import androidx.core.content.edit
 
 @Composable
 fun SettingsScreen(
     repository: FinanceRepository,
+    modifier: Modifier = Modifier,
     onNavigateToGoals: () -> Unit = {},
     onNavigateToAccount: () -> Unit = {},
     onNavigateToReport: () -> Unit = {},
     onNavigateToCategory: () -> Unit = {},
-    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -76,7 +77,7 @@ fun SettingsScreen(
                                 "myfinance_prefs",
                                 Context.MODE_PRIVATE
                             )
-                            prefs.edit().clear().apply()
+                            prefs.edit { clear() }
 
                             showResetConfirm = false
 
