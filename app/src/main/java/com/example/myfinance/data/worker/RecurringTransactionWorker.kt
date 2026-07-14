@@ -70,7 +70,7 @@ class RecurringTransactionWorker(
             }
 
             Result.success()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             Result.failure()
         }
     }
