@@ -31,8 +31,8 @@ import androidx.compose.foundation.layout.FlowRow
 @Composable
 fun SearchScreen(
     repository: FinanceRepository,
-    onBack: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit = {}
 ) {
     val allTransactions by repository.getAllTransactions()
         .collectAsStateWithLifecycle(initialValue = emptyList())
