@@ -43,7 +43,6 @@ class RecurringTransactionWorker(
 
                 val timeSinceLast = now - transaction.date
                 if (timeSinceLast >= interval) {
-                    // Generate transaksi baru
                     repository.insertTransaction(
                         TransactionEntity(
                             amount = transaction.amount,
@@ -57,7 +56,6 @@ class RecurringTransactionWorker(
                         )
                     )
 
-                    // Update saldo akun
                     val accounts = repository.getAllAccounts().first()
                     val account = accounts.find { it.id == transaction.accountId }
                     if (account != null) {

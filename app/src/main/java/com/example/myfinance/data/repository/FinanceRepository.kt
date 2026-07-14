@@ -58,13 +58,6 @@ class FinanceRepository(
     ): Flow<Double?> =
         transactionDao.getTotalByTypeAndDateRange(type, startDate, endDate)
 
-    fun getTotalByCategoryAndDateRange(
-        categoryId: Long,
-        startDate: Long,
-        endDate: Long
-    ): Flow<Double?> =
-        transactionDao.getTotalByCategoryAndDateRange(categoryId, startDate, endDate)
-
     suspend fun insertTransaction(transaction: TransactionEntity): Long =
         transactionDao.insert(transaction)
 
@@ -80,17 +73,11 @@ class FinanceRepository(
     suspend fun insertBudget(budget: BudgetEntity): Long =
         budgetDao.insert(budget)
 
-    suspend fun updateBudget(budget: BudgetEntity) =
-        budgetDao.update(budget)
-
     suspend fun deleteBudget(budget: BudgetEntity) =
         budgetDao.delete(budget)
 
     fun getAllSavingGoals(): Flow<List<SavingGoalEntity>> =
         savingGoalDao.getAll()
-
-    fun getActiveSavingGoals(): Flow<List<SavingGoalEntity>> =
-        savingGoalDao.getActive()
 
     suspend fun insertSavingGoal(goal: SavingGoalEntity): Long =
         savingGoalDao.insert(goal)
