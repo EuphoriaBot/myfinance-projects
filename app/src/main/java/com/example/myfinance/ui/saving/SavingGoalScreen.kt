@@ -128,7 +128,6 @@ private fun SavingGoalItem(
     goal: SavingGoalEntity,
     repository: FinanceRepository
 ) {
-    val scope = rememberCoroutineScope()
     var showAddFundsDialog by remember { mutableStateOf(false) }
 
     val progress = (goal.currentAmount / goal.targetAmount).coerceIn(0.0, 1.0).toFloat()
@@ -225,7 +224,7 @@ private fun SavingGoalItem(
                 OutlinedButton(
                     onClick = { showAddFundsDialog = true },
                     modifier = Modifier.fillMaxWidth(),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
+                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
                         brush = androidx.compose.ui.graphics.SolidColor(AccentPurple)
                     ),
                     shape = RoundedCornerShape(10.dp)
