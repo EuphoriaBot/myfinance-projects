@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.myfinance.data.local.entity.AccountEntity
-import com.example.myfinance.data.local.entity.BudgetEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
 import com.example.myfinance.data.repository.FinanceRepository
@@ -61,7 +60,7 @@ class HomeViewModel(
                 Quintuple(quad.a, quad.b, quad.c, quad.d, categories)
             }.combine(repository.getAllBudgets()) { quint, budgets ->
                 val accounts = quint.a
-                val totalBalance = quint.b ?: 0.0
+                val totalBalance = quint.b
                 val recentTransactions = quint.c
                 val monthTransactions = quint.d
                 val categories = quint.e
@@ -98,18 +97,6 @@ class HomeViewModel(
             }.collect { state ->
                 _uiState.value = state
             }
-        }
-    }
-
-    fun insertTransaction(transaction: TransactionEntity) {
-        viewModelScope.launch {
-            repository.insertTransaction(transaction)
-        }
-    }
-
-    fun insertAccount(account: AccountEntity) {
-        viewModelScope.launch {
-            repository.insertAccount(account)
         }
     }
 
