@@ -197,7 +197,7 @@ fun EditTransactionScreen(
 
             Text("Kategori", fontSize = 13.sp, color = TextSecondary)
             Spacer(modifier = Modifier.height(8.dp))
-            androidx.compose.foundation.layout.FlowRow(
+            FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
