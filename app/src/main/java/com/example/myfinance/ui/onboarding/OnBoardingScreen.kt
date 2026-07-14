@@ -6,9 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -17,7 +15,6 @@ import androidx.compose.ui.unit.sp
 import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
-import com.example.myfinance.utils.formatRupiah
 import kotlinx.coroutines.launch
 import com.example.myfinance.ui.components.BackgroundPattern
 
