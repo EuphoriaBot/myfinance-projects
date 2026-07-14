@@ -52,6 +52,7 @@ fun ReportScreen(
     val net = income - expense
 
     val top5Categories = transactions
+        .asSequence()
         .filter { it.type == "EXPENSE" }
         .groupBy { it.categoryId }
         .map { (categoryId, txList) ->
@@ -60,8 +61,10 @@ fun ReportScreen(
         }
         .sortedByDescending { it.second }
         .take(5)
+        .toList()
 
     val expensePerAccount = transactions
+        .asSequence()
         .filter { it.type == "EXPENSE" }
         .groupBy { it.accountId }
         .map { (accountId, txList) ->
@@ -69,6 +72,7 @@ fun ReportScreen(
             name to txList.sumOf { it.amount }
         }
         .sortedByDescending { it.second }
+        .toList()
 
     val monthName = android.text.format.DateFormat.format("MMMM yyyy", calendar).toString()
 
