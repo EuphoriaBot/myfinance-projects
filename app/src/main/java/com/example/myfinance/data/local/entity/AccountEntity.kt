@@ -2,6 +2,7 @@ package com.example.myfinance.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.Index
 
 @Entity(
     tableName = "accounts",
