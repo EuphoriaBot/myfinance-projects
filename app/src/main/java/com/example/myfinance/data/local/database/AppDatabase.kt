@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.myfinance.data.local.dao.*
 import com.example.myfinance.data.local.entity.*
@@ -19,7 +20,7 @@ import kotlinx.coroutines.launch
         BudgetEntity::class,
         SavingGoalEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -31,8 +32,45 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun savingGoalDao(): SavingGoalDao
 
     companion object {
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
+
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_transactions_date ON transactions(date)"
+                )
+
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_transactions_type ON transactions(type)"
+                )
+
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_transactions_accountId ON transactions(accountId)"
+                )
+
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_transactions_categoryId ON transactions(categoryId)"
+                )
+
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_transactions_date_type ON transactions(date, type)"
+                )
+
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_accounts_isActive ON accounts(isActive)"
+                )
+
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_budgets_categoryId ON budgets(categoryId)"
+                )
+
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_saving_goals_isCompleted ON saving_goals(isCompleted)"
+                )
+            }
+        }
 
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
@@ -41,8 +79,10 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "myfinance_database"
                 )
+                    .addMigrations(MIGRATION_1_2)
                     .addCallback(PrepopulateCallback())
                     .build()
+
                 INSTANCE = instance
                 instance
             }
@@ -51,10 +91,13 @@ abstract class AppDatabase : RoomDatabase() {
 }
 
 private class PrepopulateCallback : RoomDatabase.Callback() {
+
     override fun onCreate(db: SupportSQLiteDatabase) {
         super.onCreate(db)
+
         CoroutineScope(Dispatchers.IO).launch {
-            db.execSQL("""
+            db.execSQL(
+                """
                 INSERT INTO categories (name, icon, type, colorHex) VALUES
                 ('Makan & Minum', 'restaurant', 'EXPENSE', '#FF5C5C'),
                 ('Transportasi', 'directions_car', 'EXPENSE', '#F5A623'),
@@ -69,7 +112,8 @@ private class PrepopulateCallback : RoomDatabase.Callback() {
                 ('Investasi', 'trending_up', 'INCOME', '#00C896'),
                 ('Hadiah', 'card_giftcard', 'INCOME', '#F5A623'),
                 ('Lainnya', 'more_horiz', 'INCOME', '#7B7F9E')
-            """.trimIndent())
+                """.trimIndent()
+            )
         }
     }
 }

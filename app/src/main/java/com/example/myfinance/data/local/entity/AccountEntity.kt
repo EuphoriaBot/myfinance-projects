@@ -3,7 +3,11 @@ package com.example.myfinance.data.local.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "accounts")
+@Entity(
+    tableName = "accounts",
+    indices = [Index(value = ["isActive"])]
+)
+
 data class AccountEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
