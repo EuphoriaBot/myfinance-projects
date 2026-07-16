@@ -14,20 +14,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.myfinance.data.local.entity.AccountEntity
-import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
-import kotlinx.coroutines.launch
 
 @Composable
 fun AddAccountDialog(
-    repository: FinanceRepository,
+    onSave: (AccountEntity) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     var name by remember { mutableStateOf("") }
     var balance by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf("CASH") }
-    var isLoading by remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = onDismiss) {
         Box(
@@ -37,6 +33,7 @@ fun AddAccountDialog(
                 .padding(20.dp)
         ) {
             Column {
+
                 Text(
                     text = "Tambah Akun",
                     fontSize = 16.sp,
@@ -46,30 +43,50 @@ fun AddAccountDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text("Tipe Akun", fontSize = 12.sp, color = TextSecondary)
+                Text(
+                    text = "Tipe Akun",
+                    fontSize = 12.sp,
+                    color = TextSecondary
+                )
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(DarkBackground, RoundedCornerShape(10.dp))
+                        .background(
+                            DarkBackground,
+                            RoundedCornerShape(10.dp)
+                        )
                         .padding(4.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
+
                     listOf(
                         "CASH" to "Cash",
                         "BANK" to "Bank",
                         "E_WALLET" to "E-Wallet"
                     ).forEach { (type, label) ->
+
                         Button(
-                            onClick = { selectedType = type },
+                            onClick = {
+                                selectedType = type
+                            },
                             modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (selectedType == type) AccentPurple
-                                else Color.Transparent,
-                                contentColor = if (selectedType == type) Color.White
-                                else TextMuted
-                            ),
                             shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor =
+                                    if (selectedType == type)
+                                        AccentPurple
+                                    else
+                                        Color.Transparent,
+
+                                contentColor =
+                                    if (selectedType == type)
+                                        Color.White
+                                    else
+                                        TextMuted
+                            ),
                             elevation = ButtonDefaults.buttonElevation(0.dp),
                             contentPadding = PaddingValues(vertical = 6.dp)
                         ) {
@@ -80,11 +97,19 @@ fun AddAccountDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text("Nama Akun", fontSize = 12.sp, color = TextSecondary)
+                Text(
+                    text = "Nama Akun",
+                    fontSize = 12.sp,
+                    color = TextSecondary
+                )
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = {
+                        name = it
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = {
                         Text(
@@ -96,80 +121,95 @@ fun AddAccountDialog(
                             color = TextMuted
                         )
                     },
+                    singleLine = true,
+                    shape = RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = AccentPurple,
                         unfocusedBorderColor = BorderSubtle,
+                        focusedContainerColor = DarkBackground,
+                        unfocusedContainerColor = DarkBackground,
                         focusedTextColor = TextPrimary,
                         unfocusedTextColor = TextPrimary,
-                        cursorColor = AccentPurple,
-                        focusedContainerColor = DarkBackground,
-                        unfocusedContainerColor = DarkBackground
-                    ),
-                    shape = RoundedCornerShape(10.dp),
-                    singleLine = true
+                        cursorColor = AccentPurple
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text("Saldo Awal", fontSize = 12.sp, color = TextSecondary)
+                Text(
+                    text = "Saldo Awal",
+                    fontSize = 12.sp,
+                    color = TextSecondary
+                )
+
                 Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedTextField(
                     value = balance,
-                    onValueChange = { balance = it.filter { c -> c.isDigit() } },
+                    onValueChange = {
+                        balance = it.filter(Char::isDigit)
+                    },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("0", color = TextMuted) },
-                    prefix = { Text("Rp ", color = TextMuted) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    prefix = {
+                        Text("Rp ", color = TextMuted)
+                    },
+                    placeholder = {
+                        Text("0", color = TextMuted)
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    ),
+                    shape = RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = AccentPurple,
                         unfocusedBorderColor = BorderSubtle,
+                        focusedContainerColor = DarkBackground,
+                        unfocusedContainerColor = DarkBackground,
                         focusedTextColor = TextPrimary,
                         unfocusedTextColor = TextPrimary,
-                        cursorColor = AccentPurple,
-                        focusedContainerColor = DarkBackground,
-                        unfocusedContainerColor = DarkBackground
-                    ),
-                    shape = RoundedCornerShape(10.dp)
+                        cursorColor = AccentPurple
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+
                     OutlinedButton(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Batal", color = TextMuted)
+                        Text("Batal")
                     }
+
                     Button(
-                        onClick = {
-                            if (name.isEmpty()) return@Button
-                            scope.launch {
-                                isLoading = true
-                                repository.insertAccount(
-                                    AccountEntity(
-                                        name = name,
-                                        balance = balance.toDoubleOrNull() ?: 0.0,
-                                        type = selectedType,
-                                        colorHex = when (selectedType) {
-                                            "BANK" -> "#6C63FF"
-                                            "E_WALLET" -> "#00C896"
-                                            else -> "#F5A623"
-                                        }
-                                    )
-                                )
-                                isLoading = false
-                                onDismiss()
-                            }
-                        },
                         modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = AccentPurple),
-                        enabled = !isLoading && name.isNotEmpty()
+                        enabled = name.isNotBlank(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AccentPurple
+                        ),
+                        onClick = {
+
+                            onSave(
+                                AccountEntity(
+                                    name = name,
+                                    balance = balance.toDoubleOrNull() ?: 0.0,
+                                    type = selectedType,
+                                    colorHex = when (selectedType) {
+                                        "BANK" -> "#6C63FF"
+                                        "E_WALLET" -> "#00C896"
+                                        else -> "#F5A623"
+                                    }
+                                )
+                            )
+
+                            onDismiss()
+                        }
                     ) {
-                        Text("Simpan", color = Color.White)
+                        Text("Simpan")
                     }
                 }
             }
