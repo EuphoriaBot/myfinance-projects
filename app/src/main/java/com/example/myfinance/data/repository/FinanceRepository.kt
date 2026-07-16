@@ -4,8 +4,9 @@ import com.example.myfinance.data.local.dao.*
 import com.example.myfinance.data.local.entity.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class FinanceRepository(
+class FinanceRepository @Inject constructor(
     private val accountDao: AccountDao,
     private val categoryDao: CategoryDao,
     private val transactionDao: TransactionDao,
