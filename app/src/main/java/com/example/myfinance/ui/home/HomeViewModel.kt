@@ -7,9 +7,11 @@ import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
 import com.example.myfinance.data.repository.FinanceRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import javax.inject.Inject
 
 data class BudgetWithSpending(
     val categoryName: String,
@@ -28,7 +30,8 @@ data class HomeUiState(
     val isLoading: Boolean = true
 )
 
-class HomeViewModel(
+@HiltViewModel
+class HomeViewModel @Inject constructor(
     private val repository: FinanceRepository
 ) : ViewModel() {
 
