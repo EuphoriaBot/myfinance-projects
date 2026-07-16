@@ -1,12 +1,16 @@
 package com.example.myfinance.di
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import com.example.myfinance.data.local.dao.AccountDao
 import com.example.myfinance.data.local.dao.BudgetDao
 import com.example.myfinance.data.local.dao.CategoryDao
 import com.example.myfinance.data.local.dao.SavingGoalDao
 import com.example.myfinance.data.local.dao.TransactionDao
 import com.example.myfinance.data.local.database.AppDatabase
+import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.utils.PreferencesManager
 import dagger.Module
 import dagger.Provides
@@ -15,13 +19,17 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+private val Context.dataStore by preferencesDataStore(
+    name = "myfinance_prefs"
+)
+
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
     @Provides
     @Singleton
-    fun provideAppDatabase(
+    fun provideDatabase(
         @ApplicationContext context: Context
     ): AppDatabase {
         return AppDatabase.getInstance(context)
@@ -54,9 +62,35 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providePreferencesManager(
+    fun provideFinanceRepository(
+        accountDao: AccountDao,
+        categoryDao: CategoryDao,
+        transactionDao: TransactionDao,
+        budgetDao: BudgetDao,
+        savingGoalDao: SavingGoalDao
+    ): FinanceRepository {
+        return FinanceRepository(
+            accountDao,
+            categoryDao,
+            transactionDao,
+            budgetDao,
+            savingGoalDao
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideDataStore(
         @ApplicationContext context: Context
+    ): DataStore<Preferences> {
+        return context.dataStore
+    }
+
+    @Provides
+    @Singleton
+    fun providePreferencesManager(
+        dataStore: DataStore<Preferences>
     ): PreferencesManager {
-        return PreferencesManager(context)
+        return PreferencesManager(dataStore)
     }
 }
