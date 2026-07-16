@@ -17,28 +17,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.myfinance.data.local.entity.AccountEntity
-import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatRupiah
 import com.example.myfinance.ui.components.BackgroundPattern
 
 @Composable
 fun AccountScreen(
-    repository: FinanceRepository,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: AccountViewModel = hiltViewModel()
 ) {
-    val accounts by repository.getAllAccounts()
-        .collectAsStateWithLifecycle(initialValue = emptyList())
-
-    val totalBalance = accounts.sumOf { it.balance }
+    val accounts by viewModel.accounts.collectAsStateWithLifecycle()
+    val totalBalance by viewModel.totalBalance.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
 
     if (showAddDialog) {
         AddAccountDialog(
-            repository = repository,
-            onDismiss = { showAddDialog = false }
+            onSave = { account ->
+                viewModel.insertAccount(account)
+                showAddDialog = false
+            },
+            onDismiss = {
+                showAddDialog = false
+            }
         )
     }
 
