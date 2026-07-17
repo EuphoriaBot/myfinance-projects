@@ -38,13 +38,15 @@ fun TransactionScreen(
     var selectedTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
 
-    EditTransactionScreen(
-        transaction = editingTransaction!!,
-        repository = repository,
-        onDismiss = {
-            editingTransaction = null
-        }
-    )
+    if (editingTransaction != null) {
+        EditTransactionScreen(
+            transaction = editingTransaction!!,
+            onDismiss = {
+                editingTransaction = null
+            }
+        )
+        return
+    }
 
     if (selectedTransaction != null) {
         TransactionDetailSheet(
@@ -62,12 +64,7 @@ fun TransactionScreen(
     }
 
     if (showSearch) {
-        SearchScreen(
-            repository = repository,
-            onBack = { showSearch = false },
-            modifier = Modifier.fillMaxSize()
-        )
-        return
+
     }
 
     Box(

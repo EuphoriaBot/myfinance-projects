@@ -3,7 +3,6 @@ package com.example.myfinance.ui.transaction
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -15,11 +14,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.foundation.lazy.items
 import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
-import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.domain.model.TransactionType
 import com.example.myfinance.ui.components.TransactionItem
 import com.example.myfinance.ui.components.TransactionUiModel
@@ -27,6 +25,7 @@ import com.example.myfinance.ui.theme.*
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SearchScreen(
@@ -36,19 +35,10 @@ fun SearchScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val allTransactions by repository.getAllTransactions()
-        .collectAsStateWithLifecycle(initialValue = emptyList())
-
-    val accounts by repository.getAllAccounts()
-        .collectAsStateWithLifecycle(initialValue = emptyList())
-
-    val categories by repository.getAllCategories()
-        .collectAsStateWithLifecycle(initialValue = emptyList())
-
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("SEMUA") }
 
-    val filteredTransactions = allTransactions.filter { transaction ->
+    val filteredTransactions = transactions.filter { transaction ->
         val categoryName = categories.find { it.id == transaction.categoryId }?.name ?: ""
         val accountName = accounts.find { it.id == transaction.accountId }?.name ?: ""
 
