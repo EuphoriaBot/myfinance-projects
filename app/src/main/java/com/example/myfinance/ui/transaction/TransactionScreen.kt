@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
@@ -28,17 +29,12 @@ import com.example.myfinance.ui.components.BackgroundPattern
 
 @Composable
 fun TransactionScreen(
-    repository: FinanceRepository,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: TransactionViewModel = hiltViewModel()
 ) {
-    val transactions by repository.getAllTransactions()
-        .collectAsStateWithLifecycle(initialValue = emptyList())
-
-    val accounts by repository.getAllAccounts()
-        .collectAsStateWithLifecycle(initialValue = emptyList())
-
-    val categories by repository.getAllCategories()
-        .collectAsStateWithLifecycle(initialValue = emptyList())
+    val transactions by viewModel.transactions.collectAsStateWithLifecycle()
+    val accounts by viewModel.accounts.collectAsStateWithLifecycle()
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
 
     var showSearch by remember { mutableStateOf(false) }
     var selectedTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
