@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.hilt.navigation.compose.hiltViewModel
 
 private fun formatInputNumber(input: String): String {
     if (input.isEmpty()) return ""
@@ -35,25 +36,16 @@ private fun formatInputNumber(input: String): String {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TransactionFormScreen(
-    repository: FinanceRepository,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    viewModel: TransactionViewModel = hiltViewModel()
 ) {
-    val scope = rememberCoroutineScope()
-    val scrollState = rememberScrollState()
-    var amount by remember { mutableStateOf("") }
-    var note by remember { mutableStateOf("") }
-    var selectedType by remember { mutableStateOf("EXPENSE") }
-    var selectedAccount by remember { mutableStateOf<AccountEntity?>(null) }
-    var selectedToAccount by remember { mutableStateOf<AccountEntity?>(null) }
-    var selectedCategory by remember { mutableStateOf<CategoryEntity?>(null) }
     var accounts by remember { mutableStateOf<List<AccountEntity>>(emptyList()) }
     var categories by remember { mutableStateOf<List<CategoryEntity>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(false) }
-    var isRecurring by remember { mutableStateOf(false) }
-    var recurringInterval by remember { mutableStateOf("MONTHLY") }
+    val allAccounts by viewModel.accounts.collectAsStateWithLifecycle()
+    val allCategories by viewModel.categories.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        accounts = repository.getAllAccounts().first()
+        accounts = collectAsStateWithLifecycle()
         if (accounts.isNotEmpty()) {
             selectedAccount = accounts[0]
             selectedToAccount = if (accounts.size > 1) accounts[1] else accounts[0]

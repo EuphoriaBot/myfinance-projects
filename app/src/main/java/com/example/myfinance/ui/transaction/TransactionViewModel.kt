@@ -18,26 +18,29 @@ class TransactionViewModel @Inject constructor(
     private val repository: FinanceRepository
 ) : ViewModel() {
 
-    val transactions: StateFlow<List<TransactionEntity>> = repository.getAllTransactions()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    val transactions: StateFlow<List<TransactionEntity>> =
+        repository.getAllTransactions()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
 
-    val accounts: StateFlow<List<AccountEntity>> = repository.getAllAccounts()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    val accounts: StateFlow<List<AccountEntity>> =
+        repository.getAllAccounts()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
 
-    val categories: StateFlow<List<CategoryEntity>> = repository.getAllCategories()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    val categories: StateFlow<List<CategoryEntity>> =
+        repository.getAllCategories()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
 
     fun insertTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
@@ -57,9 +60,21 @@ class TransactionViewModel @Inject constructor(
         }
     }
 
+    fun insertAccount(account: AccountEntity) {
+        viewModelScope.launch {
+            repository.insertAccount(account)
+        }
+    }
+
     fun updateAccount(account: AccountEntity) {
         viewModelScope.launch {
             repository.updateAccount(account)
+        }
+    }
+
+    fun deleteAccount(account: AccountEntity) {
+        viewModelScope.launch {
+            repository.deleteAccount(account)
         }
     }
 }
