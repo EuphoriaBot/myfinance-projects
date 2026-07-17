@@ -20,13 +20,13 @@ import androidx.compose.ui.unit.sp
 import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
-import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.FlowRow
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 private fun formatInputNumber(input: String): String {
     if (input.isEmpty()) return ""
@@ -37,8 +37,8 @@ private fun formatInputNumber(input: String): String {
 @Composable
 fun EditTransactionScreen(
     transaction: TransactionEntity,
-    repository: FinanceRepository,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    viewModel: TransactionViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
@@ -48,22 +48,18 @@ fun EditTransactionScreen(
     var selectedType by remember { mutableStateOf(transaction.type) }
     var selectedAccount by remember { mutableStateOf<AccountEntity?>(null) }
     var selectedCategory by remember { mutableStateOf<CategoryEntity?>(null) }
-    var accounts by remember { mutableStateOf<List<AccountEntity>>(emptyList()) }
-    var categories by remember { mutableStateOf<List<CategoryEntity>>(emptyList()) }
+    val accounts by viewModel.accounts.collectAsStateWithLifecycle()
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
     var isLoading by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        accounts = repository.getAllAccounts().first()
-        selectedAccount = accounts.find { it.id == transaction.accountId } ?: accounts.firstOrNull()
-        categories = repository.getCategoriesByType(selectedType).first()
-        selectedCategory = categories.find { it.id == transaction.categoryId } ?: categories.firstOrNull()
+    LaunchedEffect(accounts) {
+        selectedAccount =
+            accounts.find { it.id == transaction.accountId }
     }
 
-    LaunchedEffect(selectedType) {
-        categories = repository.getCategoriesByType(selectedType).first()
-        if (selectedCategory?.let { cat -> categories.none { it.id == cat.id } } == true) {
-            selectedCategory = categories.firstOrNull()
-        }
+    LaunchedEffect(categories, selectedType) {
+        selectedCategory =
+            categories.find { it.id == transaction.categoryId }
     }
 
     Box(
@@ -229,17 +225,7 @@ fun EditTransactionScreen(
                     scope.launch {
                         isLoading = true
 
-                        val oldAccount = accounts.find { it.id == transaction.accountId }
-                        if (oldAccount != null) {
-                            val restoredBalance = when (transaction.type) {
-                                "INCOME" -> oldAccount.balance - transaction.amount
-                                "EXPENSE" -> oldAccount.balance + transaction.amount
-                                else -> oldAccount.balance
-                            }
-                            repository.updateAccount(oldAccount.copy(balance = restoredBalance))
-                        }
-
-                        repository.updateTransaction(
+                        viewModel.updateTransaction(
                             transaction.copy(
                                 amount = amountValue,
                                 note = note,
@@ -248,17 +234,6 @@ fun EditTransactionScreen(
                                 accountId = account.id
                             )
                         )
-
-                        val freshAccounts = repository.getAllAccounts().first()
-                        val newAccount = freshAccounts.find { it.id == account.id }
-                        if (newAccount != null) {
-                            val newBalance = when (selectedType) {
-                                "INCOME" -> newAccount.balance + amountValue
-                                "EXPENSE" -> newAccount.balance - amountValue
-                                else -> newAccount.balance
-                            }
-                            repository.updateAccount(newAccount.copy(balance = newBalance))
-                        }
 
                         isLoading = false
                         onDismiss()
