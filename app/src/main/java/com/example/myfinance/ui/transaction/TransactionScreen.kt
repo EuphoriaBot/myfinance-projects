@@ -64,7 +64,13 @@ fun TransactionScreen(
     }
 
     if (showSearch) {
-
+        SearchScreen(
+            transactions = transactions,
+            accounts = accounts,
+            categories = categories,
+            onBack = { showSearch = false },
+            modifier = Modifier.fillMaxSize()
+        )
     }
 
     Box(
