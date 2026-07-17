@@ -20,13 +20,12 @@ import androidx.compose.ui.unit.sp
 import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
-import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 
 private fun formatInputNumber(input: String): String {
     if (input.isEmpty()) return ""
@@ -39,23 +38,44 @@ fun TransactionFormScreen(
     onDismiss: () -> Unit,
     viewModel: TransactionViewModel = hiltViewModel()
 ) {
-    var accounts by remember { mutableStateOf<List<AccountEntity>>(emptyList()) }
-    var categories by remember { mutableStateOf<List<CategoryEntity>>(emptyList()) }
-    val allAccounts by viewModel.accounts.collectAsStateWithLifecycle()
-    val allCategories by viewModel.categories.collectAsStateWithLifecycle()
+    val accounts by viewModel.accounts.collectAsStateWithLifecycle()
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
+    var amount by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf("") }
+    var selectedType by remember { mutableStateOf("EXPENSE") }
+    var selectedAccount by remember {
+        mutableStateOf<AccountEntity?>(null)
+    }
 
-    LaunchedEffect(Unit) {
-        accounts = collectAsStateWithLifecycle()
-        if (accounts.isNotEmpty()) {
-            selectedAccount = accounts[0]
-            selectedToAccount = if (accounts.size > 1) accounts[1] else accounts[0]
+    var selectedToAccount by remember {
+        mutableStateOf<AccountEntity?>(null)
+    }
+
+    var selectedCategory by remember {
+        mutableStateOf<CategoryEntity?>(null)
+    }
+    var isLoading by remember { mutableStateOf(false) }
+    var isRecurring by remember { mutableStateOf(false) }
+    var recurringInterval by remember {
+        mutableStateOf("MONTHLY")
+    }
+
+    LaunchedEffect(accounts) {
+        if (accounts.isNotEmpty() && selectedAccount == null) {
+            selectedAccount = accounts.first()
+            selectedToAccount =
+                if (accounts.size > 1) accounts[1]
+                else accounts.first()
         }
     }
 
-    LaunchedEffect(selectedType) {
+    LaunchedEffect(categories, selectedType) {
         if (selectedType != "TRANSFER") {
-            categories = repository.getCategoriesByType(selectedType).first()
-            selectedCategory = categories.firstOrNull()
+            selectedCategory =
+                categories.firstOrNull { it.type == selectedType }
+                    ?: categories.firstOrNull()
         }
     }
 
@@ -302,7 +322,7 @@ fun TransactionFormScreen(
                         isLoading = true
                         if (selectedType == "TRANSFER") {
                             val toAccount = selectedToAccount ?: return@launch
-                            repository.insertTransaction(
+                            viewModel.insertTransaction(
                                 TransactionEntity(
                                     amount = amountValue,
                                     note = note.ifEmpty { "Transfer ke ${toAccount.name}" },
@@ -315,15 +335,15 @@ fun TransactionFormScreen(
                                     recurringInterval = if (isRecurring) recurringInterval else null
                                 )
                             )
-                            repository.updateAccount(
+                            viewModel.updateAccount(
                                 account.copy(balance = account.balance - amountValue)
                             )
-                            repository.updateAccount(
+                            viewModel.updateAccount(
                                 toAccount.copy(balance = toAccount.balance + amountValue)
                             )
                         } else {
                             val category = selectedCategory ?: return@launch
-                            repository.insertTransaction(
+                            viewModel.insertTransaction(
                                 TransactionEntity(
                                     amount = amountValue,
                                     note = note,
@@ -340,7 +360,7 @@ fun TransactionFormScreen(
                             } else {
                                 account.balance - amountValue
                             }
-                            repository.updateAccount(account.copy(balance = newBalance))
+                            viewModel.updateAccount(account.copy(balance = newBalance))
                         }
                         isLoading = false
                         onDismiss()
