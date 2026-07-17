@@ -9,15 +9,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.example.myfinance.ui.home.HomeScreen
-import com.example.myfinance.ui.onboarding.OnboardingScreen
 import com.example.myfinance.ui.theme.DarkBackground
 import com.example.myfinance.ui.theme.MyFinanceTheme
-import com.example.myfinance.utils.PreferencesManager
 import com.example.myfinance.data.worker.RecurringTransactionWorker
 import androidx.core.view.WindowCompat
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val preferencesManager by lazy { PreferencesManager(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,21 +29,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = DarkBackground
                 ) {
-                    var onboardingCompleted by remember {
-                        mutableStateOf(preferencesManager.isOnboardingCompleted)
-                    }
-
-                    if (onboardingCompleted) {
-                        HomeScreen(repository = repository)
-                    } else {
-                        OnboardingScreen(
-                            repository = repository,
-                            onFinished = {
-                                preferencesManager.isOnboardingCompleted = true
-                                onboardingCompleted = true
-                            }
-                        )
-                    }
+                    HomeScreen()
                 }
             }
         }
