@@ -51,7 +51,6 @@ fun TransactionScreen(
             transaction = selectedTransaction!!,
             accounts = accounts,
             categories = categories,
-            repository = repository,
             onDismiss = {
                 selectedTransaction = null
             },

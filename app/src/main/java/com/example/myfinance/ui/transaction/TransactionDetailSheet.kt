@@ -14,10 +14,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
-import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatRupiah
 import kotlinx.coroutines.launch
@@ -27,9 +27,9 @@ fun TransactionDetailSheet(
     transaction: TransactionEntity,
     accounts: List<AccountEntity>,
     categories: List<CategoryEntity>,
-    repository: FinanceRepository,
     onDismiss: () -> Unit,
-    onEdit: () -> Unit
+    onEdit: () -> Unit,
+    viewModel: TransactionViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
     var showDeleteConfirm by remember { mutableStateOf(false) }
@@ -58,9 +58,9 @@ fun TransactionDetailSheet(
                                     "EXPENSE" -> account.balance + transaction.amount
                                     else -> account.balance
                                 }
-                                repository.updateAccount(account.copy(balance = restoredBalance))
+                                viewModel.updateAccount(account.copy(balance = restoredBalance))
                             }
-                            repository.deleteTransaction(transaction)
+                            viewModel.deleteTransaction(transaction)
                             onDismiss()
                         }
                     },
