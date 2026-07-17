@@ -30,9 +30,11 @@ import androidx.compose.foundation.layout.FlowRow
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SearchScreen(
-    repository: FinanceRepository,
-    modifier: Modifier = Modifier,
-    onBack: () -> Unit = {}
+    transactions: List<TransactionEntity>,
+    accounts: List<AccountEntity>,
+    categories: List<CategoryEntity>,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val allTransactions by repository.getAllTransactions()
         .collectAsStateWithLifecycle(initialValue = emptyList())

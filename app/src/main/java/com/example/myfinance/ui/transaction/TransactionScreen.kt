@@ -69,9 +69,10 @@ fun TransactionScreen(
 
     if (showSearch) {
         SearchScreen(
-            repository = repository,
-            onBack = { showSearch = false },
-            modifier = Modifier.fillMaxSize()
+            transactions = transactions,
+            accounts = accounts,
+            categories = categories,
+            onBack = { showSearch = false }
         )
         return
     }
