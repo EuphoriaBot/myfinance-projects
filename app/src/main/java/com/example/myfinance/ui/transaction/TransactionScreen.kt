@@ -15,17 +15,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
-import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.domain.model.TransactionType
 import com.example.myfinance.ui.components.TransactionItem
 import com.example.myfinance.ui.components.TransactionUiModel
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.ui.components.BackgroundPattern
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun TransactionScreen(
@@ -35,21 +34,17 @@ fun TransactionScreen(
     val transactions by viewModel.transactions.collectAsStateWithLifecycle()
     val accounts by viewModel.accounts.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
-
     var showSearch by remember { mutableStateOf(false) }
     var selectedTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
 
-    if (editingTransaction != null) {
-        EditTransactionScreen(
-            transaction = editingTransaction!!,
-            repository = repository,
-            onDismiss = {
-                editingTransaction = null
-            }
-        )
-        return
-    }
+    EditTransactionScreen(
+        transaction = editingTransaction!!,
+        repository = repository,
+        onDismiss = {
+            editingTransaction = null
+        }
+    )
 
     if (selectedTransaction != null) {
         TransactionDetailSheet(
@@ -69,10 +64,9 @@ fun TransactionScreen(
 
     if (showSearch) {
         SearchScreen(
-            transactions = transactions,
-            accounts = accounts,
-            categories = categories,
-            onBack = { showSearch = false }
+            repository = repository,
+            onBack = { showSearch = false },
+            modifier = Modifier.fillMaxSize()
         )
         return
     }
