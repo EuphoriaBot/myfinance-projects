@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import com.example.myfinance.data.local.database.AppDatabase
-import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.home.HomeScreen
 import com.example.myfinance.ui.onboarding.OnboardingScreen
 import com.example.myfinance.ui.theme.DarkBackground
@@ -19,17 +17,6 @@ import com.example.myfinance.data.worker.RecurringTransactionWorker
 import androidx.core.view.WindowCompat
 
 class MainActivity : ComponentActivity() {
-
-    private val database by lazy { AppDatabase.getInstance(this) }
-    private val repository by lazy {
-        FinanceRepository(
-            accountDao = database.accountDao(),
-            categoryDao = database.categoryDao(),
-            transactionDao = database.transactionDao(),
-            budgetDao = database.budgetDao(),
-            savingGoalDao = database.savingGoalDao()
-        )
-    }
     private val preferencesManager by lazy { PreferencesManager(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
