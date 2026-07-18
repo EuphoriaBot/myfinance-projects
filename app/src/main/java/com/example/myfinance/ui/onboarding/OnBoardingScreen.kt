@@ -12,11 +12,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.myfinance.data.local.entity.AccountEntity
-import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
 import kotlinx.coroutines.launch
 import com.example.myfinance.ui.components.BackgroundPattern
+import androidx.hilt.navigation.compose.hiltViewModel
 
 fun formatInputRupiah(input: String): String {
     if (input.isEmpty()) return ""
@@ -25,10 +24,11 @@ fun formatInputRupiah(input: String): String {
         .joinToString(".")
         .reversed()
 }
+
 @Composable
 fun OnboardingScreen(
-    repository: FinanceRepository,
-    onFinished: () -> Unit
+    onFinished: () -> Unit,
+    viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
 
@@ -154,22 +154,13 @@ fun OnboardingScreen(
                 onClick = {
                     scope.launch {
                         isLoading = true
-                        repository.insertAccount(
-                            AccountEntity(
-                                name = "Cash",
-                                balance = cashBalance.toDoubleOrNull() ?: 0.0,
-                                type = "CASH",
-                                colorHex = "#00C896"
-                            )
+
+                        viewModel.finishOnboarding(
+                            cashBalance = cashBalance.toDoubleOrNull() ?: 0.0,
+                            bankName = bankName,
+                            bankBalance = bankBalance.toDoubleOrNull() ?: 0.0
                         )
-                        repository.insertAccount(
-                            AccountEntity(
-                                name = bankName,
-                                balance = bankBalance.toDoubleOrNull() ?: 0.0,
-                                type = "BANK",
-                                colorHex = "#6C63FF"
-                            )
-                        )
+
                         isLoading = false
                         onFinished()
                     }

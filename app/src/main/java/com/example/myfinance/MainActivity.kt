@@ -14,6 +14,10 @@ import com.example.myfinance.ui.theme.MyFinanceTheme
 import com.example.myfinance.data.worker.RecurringTransactionWorker
 import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.myfinance.ui.main.MainViewModel
+import com.example.myfinance.ui.onboarding.OnboardingScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -24,12 +28,27 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         RecurringTransactionWorker.schedule(this)
         setContent {
+            val viewModel: MainViewModel = hiltViewModel()
+            val onboardingCompleted by viewModel.onboardingCompleted.collectAsStateWithLifecycle()
             MyFinanceTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = DarkBackground
                 ) {
-                    HomeScreen()
+
+                    if (onboardingCompleted) {
+
+                        HomeScreen()
+
+                    } else {
+                        OnboardingScreen(
+                            onFinished = {
+                                viewModel.setOnboardingCompleted()
+                            }
+                        )
+
+                    }
+
                 }
             }
         }
