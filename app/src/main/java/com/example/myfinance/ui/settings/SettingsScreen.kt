@@ -20,7 +20,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.exportTransactionsToCsv
 import com.example.myfinance.utils.shareFile
@@ -32,17 +31,20 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import com.example.myfinance.ui.components.BackgroundPattern
 import androidx.core.content.edit
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun SettingsScreen(
-    repository: FinanceRepository,
     modifier: Modifier = Modifier,
+    viewModel: SettingsViewModel = hiltViewModel(),
     onNavigateToGoals: () -> Unit = {},
     onNavigateToAccount: () -> Unit = {},
     onNavigateToReport: () -> Unit = {},
     onNavigateToCategory: () -> Unit = {},
 ) {
     val context = LocalContext.current
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     var showAddBudgetDialog by remember { mutableStateOf(false) }
     var isExporting by remember { mutableStateOf(false) }
@@ -71,7 +73,7 @@ fun SettingsScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            repository.resetAllData()
+                            viewModel.resetAllData()
 
                             val prefs = context.getSharedPreferences(
                                 "myfinance_prefs",
@@ -179,13 +181,7 @@ fun SettingsScreen(
                         onClick = {
                             scope.launch {
                                 isExporting = true
-                                val transactions = repository.getAllTransactions().first()
-                                val accounts = repository.getAllAccounts().first()
-                                val categories = repository.getAllCategories().first()
-                                val uri = exportTransactionsToCsv(
-                                    context, transactions, accounts, categories
-                                )
-                                if (uri != null) shareFile(context, uri)
+                                viewModel.exportCsv(context)
                                 isExporting = false
                             }
                         }
