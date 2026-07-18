@@ -15,28 +15,29 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.myfinance.data.local.entity.BudgetEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
-import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AddBudgetDialog(
-    repository: FinanceRepository,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
-    var categories by remember { mutableStateOf<List<CategoryEntity>>(emptyList()) }
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
     var selectedCategory by remember { mutableStateOf<CategoryEntity?>(null) }
     var limitAmount by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        categories = repository.getCategoriesByType("EXPENSE").first()
-        selectedCategory = categories.firstOrNull()
+    LaunchedEffect(categories) {
+        if (selectedCategory == null) {
+            selectedCategory = categories.firstOrNull { it.type == "EXPENSE" }
+        }
     }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -62,7 +63,9 @@ fun AddBudgetDialog(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    categories.forEach { category ->
+                    categories
+                        .filter { it.type == "EXPENSE" }
+                        .forEach { category ->
                         FilterChip(
                             selected = selectedCategory?.id == category.id,
                             onClick = { selectedCategory = category },
@@ -118,7 +121,7 @@ fun AddBudgetDialog(
                             val category = selectedCategory ?: return@Button
                             scope.launch {
                                 isLoading = true
-                                repository.insertBudget(
+                                viewModel.insertBudget(
                                     BudgetEntity(
                                         categoryId = category.id,
                                         limitAmount = limit,
