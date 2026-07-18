@@ -32,7 +32,14 @@ object AppModule {
     fun provideDatabase(
         @ApplicationContext context: Context
     ): AppDatabase {
-        return AppDatabase.getInstance(context)
+        return androidx.room.Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "myfinance_database"
+        )
+            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .addCallback(PrepopulateCallback())
+            .build()
     }
 
     @Provides

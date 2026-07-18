@@ -1,8 +1,6 @@
 package com.example.myfinance.data.local.database
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -33,10 +31,7 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
 
-        @Volatile
-        private var INSTANCE: AppDatabase? = null
-
-        private val MIGRATION_1_2 = object : Migration(1, 2) {
+        val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
                     "CREATE INDEX IF NOT EXISTS index_transactions_date ON transactions(date)"
@@ -72,32 +67,14 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        fun getInstance(context: Context): AppDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "myfinance_database"
-                )
-                    .addMigrations(MIGRATION_1_2)
-                    .addCallback(PrepopulateCallback())
-                    .build()
+        val PREPOPULATE_CALLBACK = object : RoomDatabase.Callback() {
 
-                INSTANCE = instance
-                instance
-            }
-        }
-    }
-}
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                super.onCreate(db)
 
-private class PrepopulateCallback : RoomDatabase.Callback() {
-
-    override fun onCreate(db: SupportSQLiteDatabase) {
-        super.onCreate(db)
-
-        CoroutineScope(Dispatchers.IO).launch {
-            db.execSQL(
-                """
+                CoroutineScope(Dispatchers.IO).launch {
+                    db.execSQL(
+                        """
                 INSERT INTO categories (name, icon, type, colorHex) VALUES
                 ('Makan & Minum', 'restaurant', 'EXPENSE', '#FF5C5C'),
                 ('Transportasi', 'directions_car', 'EXPENSE', '#F5A623'),
@@ -113,7 +90,10 @@ private class PrepopulateCallback : RoomDatabase.Callback() {
                 ('Hadiah', 'card_giftcard', 'INCOME', '#F5A623'),
                 ('Lainnya', 'more_horiz', 'INCOME', '#7B7F9E')
                 """.trimIndent()
-            )
+                    )
+                }
+            }
         }
     }
 }
+
