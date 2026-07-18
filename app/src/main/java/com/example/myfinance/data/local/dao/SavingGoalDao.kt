@@ -24,4 +24,7 @@ interface SavingGoalDao {
 
     @Query("SELECT * FROM saving_goals WHERE id = :id")
     suspend fun getById(id: Long): SavingGoalEntity?
+
+    @Query("DELETE FROM saving_goals")
+    suspend fun deleteAll()
 }

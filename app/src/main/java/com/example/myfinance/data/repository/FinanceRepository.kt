@@ -5,8 +5,11 @@ import com.example.myfinance.data.local.entity.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import com.example.myfinance.data.local.database.AppDatabase
+import androidx.room.withTransaction
 
 class FinanceRepository @Inject constructor(
+    private val database: AppDatabase,
     private val accountDao: AccountDao,
     private val categoryDao: CategoryDao,
     private val transactionDao: TransactionDao,
@@ -90,16 +93,18 @@ class FinanceRepository @Inject constructor(
         savingGoalDao.delete(goal)
 
     suspend fun resetAllData() {
-        val accounts = getAllAccounts().first()
-        accounts.forEach { deleteAccount(it) }
 
-        val transactions = getAllTransactions().first()
-        transactions.forEach { deleteTransaction(it) }
+        database.withTransaction {
 
-        val budgets = getAllBudgets().first()
-        budgets.forEach { deleteBudget(it) }
+            transactionDao.deleteAll()
 
-        val goals = getAllSavingGoals().first()
-        goals.forEach { deleteSavingGoal(it) }
+            budgetDao.deleteAll()
+
+            savingGoalDao.deleteAll()
+
+            accountDao.deleteAll()
+
+            categoryDao.deleteAll()
+        }
     }
 }

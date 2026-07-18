@@ -53,4 +53,7 @@ interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE accountId = :accountId ORDER BY date DESC")
     fun getByAccount(accountId: Long): Flow<List<TransactionEntity>>
+
+    @Query("DELETE FROM transactions")
+    suspend fun deleteAll()
 }

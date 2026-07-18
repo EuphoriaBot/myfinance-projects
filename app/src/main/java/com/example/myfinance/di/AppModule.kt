@@ -63,6 +63,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideFinanceRepository(
+        database: AppDatabase,
         accountDao: AccountDao,
         categoryDao: CategoryDao,
         transactionDao: TransactionDao,
@@ -70,6 +71,7 @@ object AppModule {
         savingGoalDao: SavingGoalDao
     ): FinanceRepository {
         return FinanceRepository(
+            database,
             accountDao,
             categoryDao,
             transactionDao,
