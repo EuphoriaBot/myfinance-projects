@@ -14,41 +14,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.myfinance.data.repository.FinanceRepository
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatRupiah
-import java.util.Calendar
 import com.example.myfinance.ui.components.BackgroundPattern
 
 @Composable
 fun ReportScreen(
-    repository: FinanceRepository,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: ReportViewModel = hiltViewModel()
 ) {
-    val calendar = Calendar.getInstance()
-    calendar.set(Calendar.DAY_OF_MONTH, 1)
-    calendar.set(Calendar.HOUR_OF_DAY, 0)
-    calendar.set(Calendar.MINUTE, 0)
-    val startOfMonth = calendar.timeInMillis
-    val endOfMonth = System.currentTimeMillis()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val income = uiState.totalIncome
+    val expense = uiState.totalExpense
+    val transactions = uiState.transactions
+    val categories = uiState.categories
+    val accounts = uiState.accounts
 
-    val totalIncome by repository.getTotalByTypeAndDateRange("INCOME", startOfMonth, endOfMonth)
-        .collectAsStateWithLifecycle(initialValue = 0.0)
-
-    val totalExpense by repository.getTotalByTypeAndDateRange("EXPENSE", startOfMonth, endOfMonth)
-        .collectAsStateWithLifecycle(initialValue = 0.0)
-
-    val transactions by repository.getTransactionsByDateRange(startOfMonth, endOfMonth)
-        .collectAsStateWithLifecycle(initialValue = emptyList())
-
-    val categories by repository.getAllCategories()
-        .collectAsStateWithLifecycle(initialValue = emptyList())
-
-    val accounts by repository.getAllAccounts()
-        .collectAsStateWithLifecycle(initialValue = emptyList())
-
-    val income = totalIncome ?: 0.0
-    val expense = totalExpense ?: 0.0
     val net = income - expense
 
     val top5Categories = transactions
@@ -74,7 +56,10 @@ fun ReportScreen(
         .sortedByDescending { it.second }
         .toList()
 
-    val monthName = android.text.format.DateFormat.format("MMMM yyyy", calendar).toString()
+    val monthName = android.text.format.DateFormat.format(
+        "MMMM yyyy",
+        java.util.Date()
+    ).toString()
 
     Box(
         modifier = modifier
