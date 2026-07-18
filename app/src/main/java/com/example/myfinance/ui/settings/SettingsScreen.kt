@@ -1,6 +1,5 @@
 package com.example.myfinance.ui.settings
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,9 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import com.example.myfinance.ui.components.BackgroundPattern
-import androidx.core.content.edit
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun SettingsScreen(
@@ -41,7 +38,6 @@ fun SettingsScreen(
     onNavigateToCategory: () -> Unit = {},
 ) {
     val context = LocalContext.current
-    val categories by viewModel.categories.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     var showAddBudgetDialog by remember { mutableStateOf(false) }
     var isExporting by remember { mutableStateOf(false) }
@@ -69,22 +65,21 @@ fun SettingsScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            viewModel.resetAllData()
 
-                            val prefs = context.getSharedPreferences(
-                                "myfinance_prefs",
-                                Context.MODE_PRIVATE
-                            )
-                            prefs.edit { clear() }
+                            viewModel.resetAllData()
 
                             showResetConfirm = false
 
                             val intent = context.packageManager
                                 .getLaunchIntentForPackage(context.packageName)
 
-                            intent?.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            intent?.addFlags(
+                                android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                                        android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+                            )
 
                             context.startActivity(intent)
+
                             (context as? android.app.Activity)?.finish()
                         }
                     },

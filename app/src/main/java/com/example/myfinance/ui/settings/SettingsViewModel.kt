@@ -46,10 +46,8 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun resetAllData() {
-        viewModelScope.launch {
-            repository.resetAllData()
-            preferencesManager.clearAll()
-        }
+    suspend fun resetAllData() {
+        repository.resetAllData()
+        preferencesManager.clearAll()
     }
 }
