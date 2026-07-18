@@ -57,7 +57,7 @@ fun HomeScreen(
             return
         }
         showGoalScreen -> {
-            SavingGoalScreen(onBack = { showGoalScreen = false })
+            SavingGoalScreen()
             return
         }
         showCategoryScreen -> {

@@ -19,27 +19,25 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.myfinance.data.local.entity.CategoryEntity
-import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
 import kotlinx.coroutines.launch
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun CategoryScreen(
-    repository: FinanceRepository,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: CategoryViewModel = hiltViewModel()
 ) {
-    val categories by repository.getAllCategories()
-        .collectAsStateWithLifecycle(initialValue = emptyList())
-
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableStateOf("EXPENSE") }
     var categoryToDelete by remember { mutableStateOf<CategoryEntity?>(null) }
 
     if (showAddDialog) {
         AddCategoryDialog(
-            repository = repository,
+            viewModel = viewModel,
             defaultType = selectedTab,
             onDismiss = { showAddDialog = false }
         )
@@ -48,7 +46,7 @@ fun CategoryScreen(
     if (categoryToDelete != null) {
         DeleteCategoryDialog(
             category = categoryToDelete!!,
-            repository = repository,
+            viewModel = viewModel,
             onDismiss = { categoryToDelete = null }
         )
     }
@@ -207,7 +205,7 @@ private fun CategoryItem(
 
 @Composable
 private fun AddCategoryDialog(
-    repository: FinanceRepository,
+    viewModel: CategoryViewModel,
     defaultType: String,
     onDismiss: () -> Unit
 ) {
@@ -298,7 +296,7 @@ private fun AddCategoryDialog(
                             if (name.isEmpty()) return@Button
                             scope.launch {
                                 isLoading = true
-                                repository.insertCategory(
+                                viewModel.insertCategory(
                                     CategoryEntity(
                                         name = name,
                                         icon = "category",
@@ -325,7 +323,7 @@ private fun AddCategoryDialog(
 @Composable
 private fun DeleteCategoryDialog(
     category: CategoryEntity,
-    repository: FinanceRepository,
+    viewModel: CategoryViewModel,
     onDismiss: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -343,7 +341,7 @@ private fun DeleteCategoryDialog(
             Button(
                 onClick = {
                     scope.launch {
-                        repository.deleteCategory(category)
+                        viewModel.deleteCategory(category)
                         onDismiss()
                     }
                 },
