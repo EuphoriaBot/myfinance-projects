@@ -21,9 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myfinance.ui.theme.*
-import com.example.myfinance.utils.exportTransactionsToCsv
-import com.example.myfinance.utils.shareFile
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -52,7 +49,6 @@ fun SettingsScreen(
 
     if (showAddBudgetDialog) {
         AddBudgetDialog(
-            repository = repository,
             onDismiss = { showAddBudgetDialog = false }
         )
     }
