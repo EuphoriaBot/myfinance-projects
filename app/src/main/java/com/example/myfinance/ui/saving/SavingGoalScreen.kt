@@ -21,25 +21,24 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.myfinance.data.local.entity.SavingGoalEntity
-import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatRupiah
 import kotlinx.coroutines.launch
 import com.example.myfinance.ui.components.BackgroundPattern
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun SavingGoalScreen(
-    repository: FinanceRepository,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: SavingGoalViewModel = hiltViewModel()
 ) {
-    val goals by repository.getAllSavingGoals()
-        .collectAsStateWithLifecycle(initialValue = emptyList())
+    val goals by viewModel.goals.collectAsStateWithLifecycle()
 
     var showAddDialog by remember { mutableStateOf(false) }
 
     if (showAddDialog) {
         AddSavingGoalDialog(
-            repository = repository,
+            viewModel = viewModel,
             onDismiss = { showAddDialog = false }
         )
     }
@@ -114,7 +113,7 @@ fun SavingGoalScreen(
                     items(goals) { goal ->
                         SavingGoalItem(
                             goal = goal,
-                            repository = repository
+                            viewModel = viewModel
                         )
                     }
                 }
@@ -126,7 +125,7 @@ fun SavingGoalScreen(
 @Composable
 private fun SavingGoalItem(
     goal: SavingGoalEntity,
-    repository: FinanceRepository
+    viewModel: SavingGoalViewModel
 ) {
     var showAddFundsDialog by remember { mutableStateOf(false) }
 
@@ -136,7 +135,7 @@ private fun SavingGoalItem(
     if (showAddFundsDialog) {
         AddFundsDialog(
             goal = goal,
-            repository = repository,
+            viewModel = viewModel,
             onDismiss = { showAddFundsDialog = false }
         )
     }
@@ -242,7 +241,7 @@ private fun SavingGoalItem(
 
 @Composable
 private fun AddSavingGoalDialog(
-    repository: FinanceRepository,
+    viewModel: SavingGoalViewModel,
     onDismiss: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -326,7 +325,7 @@ private fun AddSavingGoalDialog(
                             if (name.isEmpty()) return@Button
                             scope.launch {
                                 isLoading = true
-                                repository.insertSavingGoal(
+                                viewModel.insertGoal(
                                     SavingGoalEntity(
                                         name = name,
                                         targetAmount = target,
@@ -352,7 +351,7 @@ private fun AddSavingGoalDialog(
 @Composable
 private fun AddFundsDialog(
     goal: SavingGoalEntity,
-    repository: FinanceRepository,
+    viewModel: SavingGoalViewModel,
     onDismiss: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -419,7 +418,7 @@ private fun AddFundsDialog(
                                 isLoading = true
                                 val newAmount = (goal.currentAmount + addAmount)
                                     .coerceAtMost(goal.targetAmount)
-                                repository.updateSavingGoal(
+                                viewModel.updateGoal(
                                     goal.copy(
                                         currentAmount = newAmount,
                                         isCompleted = newAmount >= goal.targetAmount
