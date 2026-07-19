@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.room.Room
 import com.example.myfinance.data.local.dao.AccountDao
 import com.example.myfinance.data.local.dao.BudgetDao
 import com.example.myfinance.data.local.dao.CategoryDao
@@ -32,13 +33,14 @@ object AppModule {
     fun provideDatabase(
         @ApplicationContext context: Context
     ): AppDatabase {
-        return androidx.room.Room.databaseBuilder(
+
+        return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
             "myfinance_database"
         )
             .addMigrations(AppDatabase.MIGRATION_1_2)
-            .addCallback(PrepopulateCallback())
+            .addCallback(AppDatabase.PREPOPULATE_CALLBACK)
             .build()
     }
 
