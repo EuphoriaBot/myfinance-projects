@@ -16,27 +16,20 @@ import androidx.compose.ui.window.Dialog
 import com.example.myfinance.data.local.entity.BudgetEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.ui.theme.*
-import kotlinx.coroutines.launch
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AddBudgetDialog(
+    categories: List<CategoryEntity>,
     onDismiss: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel()
+    onSave: (BudgetEntity) -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-    val categories by viewModel.categories.collectAsStateWithLifecycle()
-    var selectedCategory by remember { mutableStateOf<CategoryEntity?>(null) }
+    var selectedCategory by remember { mutableStateOf(categories.firstOrNull()) }
     var limitAmount by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(categories) {
-        if (selectedCategory == null) {
-            selectedCategory = categories.firstOrNull { it.type == "EXPENSE" }
+        if (selectedCategory == null && categories.isNotEmpty()) {
+            selectedCategory = categories.first()
         }
     }
 
@@ -58,14 +51,13 @@ fun AddBudgetDialog(
 
                 Text("Kategori", fontSize = 12.sp, color = TextSecondary)
                 Spacer(modifier = Modifier.height(8.dp))
+
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    categories
-                        .filter { it.type == "EXPENSE" }
-                        .forEach { category ->
+                    categories.filter { it.type == "EXPENSE" }.forEach { category ->
                         FilterChip(
                             selected = selectedCategory?.id == category.id,
                             onClick = { selectedCategory = category },
@@ -119,22 +111,18 @@ fun AddBudgetDialog(
                         onClick = {
                             val limit = limitAmount.toDoubleOrNull() ?: return@Button
                             val category = selectedCategory ?: return@Button
-                            scope.launch {
-                                isLoading = true
-                                viewModel.insertBudget(
-                                    BudgetEntity(
-                                        categoryId = category.id,
-                                        limitAmount = limit,
-                                        period = "MONTHLY"
-                                    )
+                            onSave(
+                                BudgetEntity(
+                                    categoryId = category.id,
+                                    limitAmount = limit,
+                                    period = "MONTHLY"
                                 )
-                                isLoading = false
-                                onDismiss()
-                            }
+                            )
+                            onDismiss()
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = AccentPurple),
-                        enabled = !isLoading && limitAmount.isNotEmpty()
+                        enabled = limitAmount.isNotEmpty() && selectedCategory != null
                     ) {
                         Text("Simpan", color = Color.White)
                     }
