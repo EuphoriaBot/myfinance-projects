@@ -27,6 +27,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import com.example.myfinance.ui.components.BackgroundPattern
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun SettingsScreen(
@@ -42,10 +43,13 @@ fun SettingsScreen(
     var showAddBudgetDialog by remember { mutableStateOf(false) }
     var isExporting by remember { mutableStateOf(false) }
     var showResetConfirm by remember { mutableStateOf(false) }
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
 
     if (showAddBudgetDialog) {
         AddBudgetDialog(
-            onDismiss = { showAddBudgetDialog = false }
+            categories = categories,
+            onDismiss = { showAddBudgetDialog = false },
+            onSave = { budget -> viewModel.insertBudget(budget) }
         )
     }
 
