@@ -42,9 +42,7 @@ class MainActivity : ComponentActivity() {
 
                     } else {
                         OnboardingScreen(
-                            onFinished = {
-                                viewModel.setOnboardingCompleted()
-                            }
+                            onFinished = {}
                         )
 
                     }

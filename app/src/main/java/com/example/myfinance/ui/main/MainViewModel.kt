@@ -22,10 +22,4 @@ class MainViewModel @Inject constructor(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = false
             )
-
-    fun setOnboardingCompleted() {
-        viewModelScope.launch {
-            preferencesManager.setOnboardingCompleted(true)
-        }
-    }
 }
