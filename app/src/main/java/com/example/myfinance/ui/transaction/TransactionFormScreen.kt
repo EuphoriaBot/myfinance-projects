@@ -72,10 +72,16 @@ fun TransactionFormScreen(
     }
 
     LaunchedEffect(categories, selectedType) {
-        if (selectedType != "TRANSFER") {
+        if (selectedType == "TRANSFER") return@LaunchedEffect
+
+        val currentCategoryStillExists =
+            categories.any { it.id == selectedCategory?.id }
+
+        if (!currentCategoryStillExists ||
+            selectedCategory?.type != selectedType
+        ) {
             selectedCategory =
                 categories.firstOrNull { it.type == selectedType }
-                    ?: categories.firstOrNull()
         }
     }
 
@@ -241,19 +247,22 @@ fun TransactionFormScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    categories.take(6).forEach { category ->
-                        FilterChip(
-                            selected = selectedCategory?.id == category.id,
-                            onClick = { selectedCategory = category },
-                            label = { Text(category.name, fontSize = 11.sp) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = AccentPurple,
-                                selectedLabelColor = Color.White,
-                                containerColor = DarkCard,
-                                labelColor = TextMuted
+                    categories
+                        .filter { it.type == selectedType }
+                        .forEach { category ->
+
+                            FilterChip(
+                                selected = selectedCategory?.id == category.id,
+                                onClick = { selectedCategory = category },
+                                label = { Text(category.name, fontSize = 11.sp) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = AccentPurple,
+                                    selectedLabelColor = Color.White,
+                                    containerColor = DarkCard,
+                                    labelColor = TextMuted
+                                )
                             )
-                        )
-                    }
+                        }
                 }
             }
 
