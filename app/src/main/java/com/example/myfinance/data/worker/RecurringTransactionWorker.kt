@@ -1,29 +1,24 @@
 package com.example.myfinance.data.worker
 
 import android.content.Context
+import androidx.hilt.work.HiltWorker
 import androidx.work.*
-import com.example.myfinance.data.local.database.AppDatabase
 import com.example.myfinance.data.local.entity.TransactionEntity
 import com.example.myfinance.data.repository.FinanceRepository
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.TimeUnit
 
-class RecurringTransactionWorker(
-    context: Context,
-    params: WorkerParameters
-) : CoroutineWorker(context, params) {
+@HiltWorker
+class RecurringTransactionWorker @AssistedInject constructor(
+    @Assisted appContext: Context,
+    @Assisted params: WorkerParameters,
+    private val repository: FinanceRepository
+) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
         return try {
-            val database = AppDatabase.getInstance(applicationContext)
-            val repository = FinanceRepository(
-                accountDao = database.accountDao(),
-                categoryDao = database.categoryDao(),
-                transactionDao = database.transactionDao(),
-                budgetDao = database.budgetDao(),
-                savingGoalDao = database.savingGoalDao()
-            )
-
             val allTransactions = repository.getAllTransactions().first()
             val recurringTransactions = allTransactions.filter { it.isRecurring }
 
