@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.sp
 import com.example.myfinance.ui.theme.*
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.myfinance.utils.formatRupiah
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 
 @Composable
 fun BalanceCard(
@@ -44,14 +46,14 @@ fun BalanceCard(
                 color = Color.White
             )
             Spacer(modifier = Modifier.height(14.dp))
-            Row(
+            LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                accounts.forEach { (name, balance) ->
+                items(accounts) { (name, balance) ->
                     AccountChip(
                         name = name,
                         balance = balance,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.width(120.dp)
                     )
                 }
             }
@@ -69,20 +71,24 @@ private fun AccountChip(
         modifier = modifier
             .clip(RoundedCornerShape(10.dp))
             .background(Color.White.copy(alpha = 0.12f))
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .padding(horizontal = 10.dp, vertical = 8.dp)
     ) {
         Column {
             Text(
                 text = name,
                 fontSize = 10.sp,
-                color = Color.White.copy(alpha = 0.6f)
+                color = Color.White.copy(alpha = 0.6f),
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = formatRupiah(balance),
-                fontSize = 13.sp,
+                fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.White
+                color = Color.White,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
         }
     }
