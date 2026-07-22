@@ -30,9 +30,28 @@ class SettingsViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    val budgets: StateFlow<List<BudgetEntity>> = repository.getAllBudgets()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     fun insertBudget(budget: BudgetEntity) {
         viewModelScope.launch {
             repository.insertBudget(budget)
+        }
+    }
+
+    fun updateBudget(budget: BudgetEntity) {
+        viewModelScope.launch {
+            repository.insertBudget(budget) // Room REPLACE strategy
+        }
+    }
+
+    fun deleteBudget(budget: BudgetEntity) {
+        viewModelScope.launch {
+            repository.deleteBudget(budget)
         }
     }
 
