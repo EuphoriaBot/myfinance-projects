@@ -130,7 +130,13 @@ fun HomeScreen(
                         )
                     }
                     item {
-                        SectionHeader(title = "Budget bulan ini", onSeeAll = {})
+                        Text(
+                            text = "Budget bulan ini",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = TextPrimary,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
                     }
                     item {
                         if (uiState.budgets.isNotEmpty()) {
@@ -159,9 +165,12 @@ fun HomeScreen(
                         }
                     }
                     item {
-                        SectionHeader(
-                            title = "Transaksi terakhir",
-                            onSeeAll = { currentDestination = BottomNavDestination.TRANSACTIONS }
+                        Text(
+                            text = "Transaksi terakhir",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = TextPrimary,
+                            modifier = Modifier.padding(horizontal = 16.dp)
                         )
                     }
                     items(uiState.recentTransactions) { transaction ->
@@ -199,24 +208,4 @@ private fun mapToUiModel(
         },
         dateLabel = android.text.format.DateFormat.format("dd MMM", entity.date).toString()
     )
-}
-
-@Composable
-private fun SectionHeader(title: String, onSeeAll: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary, text = title)
-        Text(
-            text = "Lihat semua",
-            fontSize = 11.sp,
-            color = AccentPurple,
-            modifier = Modifier.let {
-                androidx.compose.ui.Modifier.then(it)
-            }
-        )
-    }
 }
