@@ -3,7 +3,6 @@ package com.example.myfinance.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -71,15 +70,21 @@ private fun BudgetProgressItem(
             )
         }
         Spacer(modifier = Modifier.height(6.dp))
-        LinearProgressIndicator(
-            progress = { progress },
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(5.dp)
-                .clip(RoundedCornerShape(3.dp)),
-            color = barColor,
-            trackColor = Color.White.copy(alpha = 0.07f)
-        )
+                .clip(RoundedCornerShape(3.dp))
+                .background(Color.White.copy(alpha = 0.07f))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(progress)
+                    .height(5.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(barColor)
+            )
+        }
     }
 }
 
