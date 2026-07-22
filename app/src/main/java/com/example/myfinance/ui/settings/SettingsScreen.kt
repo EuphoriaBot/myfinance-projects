@@ -40,17 +40,19 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var showAddBudgetDialog by remember { mutableStateOf(false) }
     var isExporting by remember { mutableStateOf(false) }
     var showResetConfirm by remember { mutableStateOf(false) }
     val categories by viewModel.categories.collectAsStateWithLifecycle()
+    var showBudgetManagement by remember { mutableStateOf(false) }
 
-    if (showAddBudgetDialog) {
-        AddBudgetDialog(
-            categories = categories,
-            onDismiss = { showAddBudgetDialog = false },
-            onSave = { budget -> viewModel.insertBudget(budget) }
+    if (showBudgetManagement) {
+        BudgetManagementScreen(
+            onBack = {
+                showBudgetManagement = false
+            },
+            viewModel = viewModel
         )
+        return
     }
 
     if (showResetConfirm) {
@@ -142,9 +144,11 @@ fun SettingsScreen(
                     )
                     SettingsItem(
                         icon = Icons.Default.AccountBalanceWallet,
-                        title = "Tambah Budget",
-                        subtitle = "Atur limit pengeluaran per kategori",
-                        onClick = { showAddBudgetDialog = true }
+                        title = "Kelola Budget",
+                        subtitle = "Tambah, edit, dan hapus budget",
+                        onClick = {
+                            showBudgetManagement = true
+                        }
                     )
                     SettingsItem(
                         icon = Icons.Default.Savings,
