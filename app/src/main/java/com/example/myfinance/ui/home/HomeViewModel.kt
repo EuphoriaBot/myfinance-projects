@@ -51,13 +51,12 @@ class HomeViewModel @Inject constructor(
                 calendar.set(Calendar.MINUTE, 0)
                 calendar.set(Calendar.SECOND, 0)
                 val startOfMonth = calendar.timeInMillis
-                val endOfMonth = System.currentTimeMillis()
 
                 combine(
                     repository.getAllAccounts(),
                     repository.getTotalBalance(),
                     repository.getRecentTransactions(5),
-                    repository.getTransactionsByDateRange(startOfMonth, endOfMonth)
+                    repository.getTransactionsByDateRange(startOfMonth, Long.MAX_VALUE)
                 ) { accounts, totalBalance, recentTransactions, monthTransactions ->
                     Quadruple(accounts, totalBalance, recentTransactions, monthTransactions)
                 }.combine(repository.getAllCategories()) { quad, categories ->
