@@ -31,13 +31,12 @@ class ReportViewModel @Inject constructor(
         set(Calendar.SECOND, 0)
     }
 
-    val startOfMonth = calendar.timeInMillis
-    val endOfMonth = System.currentTimeMillis()
+    private val startOfMonth = calendar.timeInMillis
 
     val uiState: StateFlow<ReportUiState> = combine(
-        repository.getTotalByTypeAndDateRange("INCOME", startOfMonth, endOfMonth),
-        repository.getTotalByTypeAndDateRange("EXPENSE", startOfMonth, endOfMonth),
-        repository.getTransactionsByDateRange(startOfMonth, endOfMonth),
+        repository.getTotalByTypeAndDateRange("INCOME", startOfMonth, Long.MAX_VALUE),
+        repository.getTotalByTypeAndDateRange("EXPENSE", startOfMonth, Long.MAX_VALUE),
+        repository.getTransactionsByDateRange(startOfMonth, Long.MAX_VALUE),
         repository.getAllCategories(),
         repository.getAllAccounts()
     ) { income, expense, transactions, categories, accounts ->
