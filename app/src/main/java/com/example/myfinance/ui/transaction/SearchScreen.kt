@@ -25,6 +25,7 @@ import com.example.myfinance.ui.theme.*
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.statusBarsPadding
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -82,6 +83,7 @@ fun SearchScreen(
         modifier = modifier
             .fillMaxSize()
             .background(DarkBackground)
+            .statusBarsPadding()
     ) {
         Text(
             text = "Cari Transaksi",
