@@ -16,6 +16,11 @@ import androidx.compose.ui.window.Dialog
 import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.ui.theme.*
 
+private fun formatInputNumber(input: String): String {
+    if (input.isEmpty()) return ""
+    return input.reversed().chunked(3).joinToString(".").reversed()
+}
+
 @Composable
 fun AddAccountDialog(
     onSave: (AccountEntity) -> Unit,

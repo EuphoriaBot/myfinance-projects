@@ -27,6 +27,11 @@ import kotlinx.coroutines.launch
 import com.example.myfinance.ui.components.BackgroundPattern
 import androidx.hilt.navigation.compose.hiltViewModel
 
+private fun formatInputNumber(input: String): String {
+    if (input.isEmpty()) return ""
+    return input.reversed().chunked(3).joinToString(".").reversed()
+}
+
 @Composable
 fun SavingGoalScreen(
     modifier: Modifier = Modifier,
@@ -289,8 +294,10 @@ private fun AddSavingGoalDialog(
                 Text("Target Nominal", fontSize = 12.sp, color = TextSecondary)
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = targetAmount,
-                    onValueChange = { targetAmount = it.filter { c -> c.isDigit() } },
+                    value = if (targetAmount.isEmpty()) "" else formatInputNumber(targetAmount),
+                    onValueChange = { newValue ->
+                        targetAmount = newValue.replace(".", "").filter { it.isDigit() }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("0", color = TextMuted) },
                     prefix = { Text("Rp ", color = TextMuted) },
@@ -381,8 +388,10 @@ private fun AddFundsDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
-                    value = amount,
-                    onValueChange = { amount = it.filter { c -> c.isDigit() } },
+                    value = if (amount.isEmpty()) "" else formatInputNumber(amount),
+                    onValueChange = { newValue ->
+                        amount = newValue.replace(".", "").filter { it.isDigit() }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("0", color = TextMuted) },
                     prefix = { Text("Rp ", color = TextMuted) },
