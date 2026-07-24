@@ -26,11 +26,7 @@ import com.example.myfinance.utils.formatRupiah
 import kotlinx.coroutines.launch
 import com.example.myfinance.ui.components.BackgroundPattern
 import androidx.hilt.navigation.compose.hiltViewModel
-
-private fun formatInputNumber(input: String): String {
-    if (input.isEmpty()) return ""
-    return input.reversed().chunked(3).joinToString(".").reversed()
-}
+import com.example.myfinance.utils.formatInputNumber
 
 @Composable
 fun SavingGoalScreen(

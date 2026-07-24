@@ -15,11 +15,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.ui.theme.*
-
-private fun formatInputNumber(input: String): String {
-    if (input.isEmpty()) return ""
-    return input.reversed().chunked(3).joinToString(".").reversed()
-}
+import com.example.myfinance.utils.formatInputNumber
 
 @Composable
 fun AddAccountDialog(
@@ -150,9 +146,10 @@ fun AddAccountDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
-                    value = balance,
+                    value = if (balance.isEmpty()) "" else formatInputNumber(balance),
                     onValueChange = {
-                        balance = it.filter(Char::isDigit)
+                        balance = it.replace(".", "")
+                            .filter(Char::isDigit)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     prefix = {

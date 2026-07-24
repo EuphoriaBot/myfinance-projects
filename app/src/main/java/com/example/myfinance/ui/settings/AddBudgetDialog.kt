@@ -16,6 +16,7 @@ import androidx.compose.ui.window.Dialog
 import com.example.myfinance.data.local.entity.BudgetEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.ui.theme.*
+import com.example.myfinance.utils.formatInputNumber
 
 private fun formatInputNumber(input: String): String {
     if (input.isEmpty()) return ""
@@ -83,10 +84,9 @@ fun AddBudgetDialog(
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = if (limitAmount.isEmpty()) "" else formatInputNumber(limitAmount),
-                    onValueChange = { newValue ->
-                        limitAmount = newValue
-                            .replace(".", "")
-                            .filter { it.isDigit() }
+                    onValueChange = {
+                        limitAmount = it.replace(".", "")
+                            .filter(Char::isDigit)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("0", color = TextMuted) },
