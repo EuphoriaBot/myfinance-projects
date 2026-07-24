@@ -287,7 +287,7 @@ private fun EditBudgetDialog(
                     onValueChange = {
                         limitAmount = it.replace(".", "")
                             .filter(Char::isDigit)
-                    }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("0", color = TextMuted) },
                     prefix = { Text("Rp ", color = TextMuted) },
