@@ -17,6 +17,11 @@ import com.example.myfinance.data.local.entity.BudgetEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.ui.theme.*
 
+private fun formatInputNumber(input: String): String {
+    if (input.isEmpty()) return ""
+    return input.reversed().chunked(3).joinToString(".").reversed()
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AddBudgetDialog(
@@ -77,8 +82,12 @@ fun AddBudgetDialog(
                 Text("Limit Bulanan", fontSize = 12.sp, color = TextSecondary)
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = limitAmount,
-                    onValueChange = { limitAmount = it.filter { c -> c.isDigit() } },
+                    value = if (limitAmount.isEmpty()) "" else formatInputNumber(limitAmount),
+                    onValueChange = { newValue ->
+                        limitAmount = newValue
+                            .replace(".", "")
+                            .filter { it.isDigit() }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("0", color = TextMuted) },
                     prefix = { Text("Rp ", color = TextMuted) },
