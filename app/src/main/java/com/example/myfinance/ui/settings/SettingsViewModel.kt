@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.example.myfinance.utils.BackupManager
 import kotlinx.coroutines.Dispatchers
+import android.net.Uri
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -71,6 +72,12 @@ class SettingsViewModel @Inject constructor(
             val categories = repository.getAllCategories().first()
             val uri = exportTransactionsToCsv(context, transactions, accounts, categories)
             if (uri != null) shareFile(context, uri)
+        }
+    }
+
+    fun restoreDatabase(uri: Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            backupManager.restoreBackup(uri)
         }
     }
 
