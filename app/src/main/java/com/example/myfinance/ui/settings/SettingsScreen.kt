@@ -31,7 +31,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import android.content.Intent
 
 @Composable
 fun SettingsScreen(
@@ -48,6 +47,8 @@ fun SettingsScreen(
     var showResetConfirm by remember { mutableStateOf(false) }
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     var showBudgetManagement by remember { mutableStateOf(false) }
+    var showRestoreFailedDialog by remember { mutableStateOf(false) }
+    var showRestoreSuccessDialog by remember { mutableStateOf(false) }
     val restoreLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
@@ -59,17 +60,9 @@ fun SettingsScreen(
                 val success = viewModel.restoreDatabase(uri)
 
                 if (success) {
-
-                    val intent = context.packageManager
-                        .getLaunchIntentForPackage(context.packageName)
-
-                    intent?.addFlags(
-                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                                Intent.FLAG_ACTIVITY_NEW_TASK
-                    )
-
-                    context.startActivity(intent)
-                    (context as? android.app.Activity)?.finish()
+                    showRestoreSuccessDialog = true
+                } else {
+                    showRestoreFailedDialog = true
                 }
             }
         }
@@ -133,6 +126,82 @@ fun SettingsScreen(
                     Text("Batal")
                 }
             },
+            containerColor = DarkCard
+        )
+    }
+
+    if (showRestoreSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showRestoreSuccessDialog = false
+                (context as? android.app.Activity)?.finishAffinity()
+            },
+
+            title = {
+                Text(
+                    "Restore Berhasil",
+                    color = TextPrimary
+                )
+            },
+
+            text = {
+                Text(
+                    text = "Database berhasil dipulihkan.\n\nAplikasi perlu ditutup terlebih dahulu agar database yang baru dapat dimuat saat dibuka kembali.",
+                    color = TextSecondary
+                )
+            },
+
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showRestoreSuccessDialog = false
+                        (context as? android.app.Activity)?.finishAffinity()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AccentPurple
+                    )
+                ) {
+                    Text("Tutup Aplikasi")
+                }
+            },
+
+            containerColor = DarkCard
+        )
+    }
+
+    if (showRestoreFailedDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showRestoreFailedDialog = false
+            },
+
+            title = {
+                Text(
+                    text = "Restore Gagal",
+                    color = TextPrimary
+                )
+            },
+
+            text = {
+                Text(
+                    text = "Backup tidak dapat dipulihkan.\n\nPastikan file yang dipilih merupakan file backup MyFinance yang valid.",
+                    color = TextSecondary
+                )
+            },
+
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showRestoreFailedDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ExpenseRed
+                    )
+                ) {
+                    Text("OK")
+                }
+            },
+
             containerColor = DarkCard
         )
     }
