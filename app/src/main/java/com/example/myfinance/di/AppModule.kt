@@ -19,6 +19,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import net.sqlcipher.database.SupportFactory
+import com.example.myfinance.utils.DatabasePassphraseManager
 
 private val Context.dataStore by preferencesDataStore(
     name = "myfinance_prefs"
@@ -31,14 +33,22 @@ object AppModule {
     @Provides
     @Singleton
     fun provideDatabase(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
+        databasePassphraseManager: DatabasePassphraseManager
     ): AppDatabase {
 
+        val passphrase =
+            databasePassphraseManager
+                .getOrCreateDatabasePassphrase(context)
+
+        val factory = SupportFactory(passphrase)
+
         return Room.databaseBuilder(
-            context,
+            context.applicationContext,
             AppDatabase::class.java,
             "myfinance_database"
         )
+            .openHelperFactory(factory)
             .addMigrations(AppDatabase.MIGRATION_1_2)
             .addCallback(AppDatabase.PREPOPULATE_CALLBACK)
             .build()
