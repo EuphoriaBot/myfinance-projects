@@ -16,11 +16,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.myfinance.utils.BackupManager
+import kotlinx.coroutines.Dispatchers
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repository: FinanceRepository,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    private val backupManager: BackupManager
 ) : ViewModel() {
 
     val categories: StateFlow<List<CategoryEntity>> = repository.getAllCategories()
@@ -36,6 +39,12 @@ class SettingsViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    fun backupDatabase() {
+        viewModelScope.launch(Dispatchers.IO) {
+            backupManager.createBackup()
+        }
+    }
 
     fun insertBudget(budget: BudgetEntity) {
         viewModelScope.launch {
