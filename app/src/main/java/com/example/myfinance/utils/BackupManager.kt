@@ -17,6 +17,9 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
+import java.io.BufferedInputStream
+import java.io.FileOutputStream
+import java.util.zip.ZipInputStream
 
 @Singleton
 class BackupManager @Inject constructor(
@@ -102,5 +105,45 @@ class BackupManager @Inject constructor(
         if (!folder.exists()) folder.mkdirs()
 
         return Uri.fromFile(File(folder, fileName))
+    }
+
+    fun restoreBackup(uri: Uri): Boolean {
+        return try {
+            deleteExistingDatabaseFiles()
+
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                ZipInputStream(BufferedInputStream(inputStream)).use { zipInputStream ->
+                    var entry = zipInputStream.nextEntry
+
+                    while (entry != null) {
+                        val outFile = context.getDatabasePath(entry.name)
+                        outFile.parentFile?.mkdirs()
+
+                        FileOutputStream(outFile).use { outputStream ->
+                            zipInputStream.copyTo(outputStream)
+                        }
+
+                        zipInputStream.closeEntry()
+                        entry = zipInputStream.nextEntry
+                    }
+                }
+            } ?: return false
+
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    private fun deleteExistingDatabaseFiles() {
+        listOf(
+            context.getDatabasePath(DATABASE_NAME),
+            context.getDatabasePath("$DATABASE_NAME-wal"),
+            context.getDatabasePath("$DATABASE_NAME-shm")
+        ).forEach { file ->
+            if (file.exists()) {
+                file.delete()
+            }
+        }
     }
 }
