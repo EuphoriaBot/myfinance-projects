@@ -28,6 +28,10 @@ import androidx.compose.material3.OutlinedButton
 import com.example.myfinance.ui.components.BackgroundPattern
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.content.Intent
 
 @Composable
 fun SettingsScreen(
@@ -44,6 +48,24 @@ fun SettingsScreen(
     var showResetConfirm by remember { mutableStateOf(false) }
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     var showBudgetManagement by remember { mutableStateOf(false) }
+    val restoreLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            viewModel.restoreDatabase(uri)
+
+            val intent = context.packageManager
+                .getLaunchIntentForPackage(context.packageName)
+
+            intent?.addFlags(
+                Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                        Intent.FLAG_ACTIVITY_NEW_TASK
+            )
+
+            context.startActivity(intent)
+            (context as? android.app.Activity)?.finish()
+        }
+    }
 
     if (showBudgetManagement) {
         BudgetManagementScreen(
@@ -191,6 +213,14 @@ fun SettingsScreen(
                         subtitle = "Simpan salinan database terenkripsi",
                         onClick = {
                             viewModel.backupDatabase()
+                        }
+                    )
+                    SettingsItem(
+                        icon = Icons.Default.Restore,
+                        title = "Restore Database",
+                        subtitle = "Pulihkan data dari file backup",
+                        onClick = {
+                            restoreLauncher.launch(arrayOf("*/*"))
                         }
                     )
                     SettingsItem(
