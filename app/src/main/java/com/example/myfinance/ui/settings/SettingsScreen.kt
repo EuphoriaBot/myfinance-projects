@@ -51,19 +51,27 @@ fun SettingsScreen(
     val restoreLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
+
         if (uri != null) {
-            viewModel.restoreDatabase(uri)
 
-            val intent = context.packageManager
-                .getLaunchIntentForPackage(context.packageName)
+            scope.launch {
 
-            intent?.addFlags(
-                Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                        Intent.FLAG_ACTIVITY_NEW_TASK
-            )
+                val success = viewModel.restoreDatabase(uri)
 
-            context.startActivity(intent)
-            (context as? android.app.Activity)?.finish()
+                if (success) {
+
+                    val intent = context.packageManager
+                        .getLaunchIntentForPackage(context.packageName)
+
+                    intent?.addFlags(
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                                Intent.FLAG_ACTIVITY_NEW_TASK
+                    )
+
+                    context.startActivity(intent)
+                    (context as? android.app.Activity)?.finish()
+                }
+            }
         }
     }
 

@@ -19,6 +19,7 @@ import javax.inject.Inject
 import com.example.myfinance.utils.BackupManager
 import kotlinx.coroutines.Dispatchers
 import android.net.Uri
+import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -75,8 +76,8 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun restoreDatabase(uri: Uri) {
-        viewModelScope.launch(Dispatchers.IO) {
+    suspend fun restoreDatabase(uri: Uri): Boolean {
+        return withContext(Dispatchers.IO) {
             backupManager.restoreBackup(uri)
         }
     }
