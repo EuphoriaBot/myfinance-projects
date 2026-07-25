@@ -186,6 +186,14 @@ fun SettingsScreen(
                         }
                     )
                     SettingsItem(
+                        icon = Icons.Default.Save,
+                        title = "Backup Database",
+                        subtitle = "Simpan salinan database terenkripsi",
+                        onClick = {
+                            viewModel.backupDatabase()
+                        }
+                    )
+                    SettingsItem(
                         icon = Icons.Default.RestartAlt,
                         title = "Reset Semua Data",
                         subtitle = "Hapus semua data dan mulai dari awal",
