@@ -7,6 +7,8 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.inject.Inject
 import javax.inject.Singleton
+import javax.crypto.Cipher
+import javax.crypto.spec.GCMParameterSpec
 
 @Singleton
 class KeystoreManager @Inject constructor() {
@@ -16,7 +18,7 @@ class KeystoreManager @Inject constructor() {
         private const val ANDROID_KEYSTORE = "AndroidKeyStore"
     }
 
-    fun getOrCreateSecretKey(): SecretKey {
+    private fun getOrCreateKeystoreKey(): SecretKey {
 
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
         keyStore.load(null)
@@ -49,5 +51,30 @@ class KeystoreManager @Inject constructor() {
         keyGenerator.init(spec)
 
         return keyGenerator.generateKey()
+    }
+
+    fun encrypt(data: ByteArray): Pair<ByteArray, ByteArray> {
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKeystoreKey())
+
+        val encrypted = cipher.doFinal(data)
+
+        return encrypted to cipher.iv
+    }
+
+    fun decrypt(
+        encryptedData: ByteArray,
+        iv: ByteArray
+    ): ByteArray {
+
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+
+        cipher.init(
+            Cipher.DECRYPT_MODE,
+            getOrCreateKeystoreKey(),
+            GCMParameterSpec(128, iv)
+        )
+
+        return cipher.doFinal(encryptedData)
     }
 }
