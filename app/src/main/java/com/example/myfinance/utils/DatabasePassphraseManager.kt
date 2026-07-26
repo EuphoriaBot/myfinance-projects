@@ -19,7 +19,6 @@ class DatabasePassphraseManager @Inject constructor(
     }
 
     fun getOrCreateDatabasePassphrase(context: Context): ByteArray {
-
         val prefs = context.getSharedPreferences(
             PREFS_NAME,
             Context.MODE_PRIVATE
