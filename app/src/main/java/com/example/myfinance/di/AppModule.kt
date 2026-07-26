@@ -21,6 +21,8 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import net.sqlcipher.database.SupportFactory
 import com.example.myfinance.utils.DatabasePassphraseManager
+import com.example.myfinance.utils.KeystoreManager
+import com.example.myfinance.utils.PinManager
 
 private val Context.dataStore by preferencesDataStore(
     name = "myfinance_prefs"
@@ -113,5 +115,13 @@ object AppModule {
         dataStore: DataStore<Preferences>
     ): PreferencesManager {
         return PreferencesManager(dataStore)
+    }
+
+    @Provides
+    @Singleton
+    fun providePinManager(
+        keystoreManager: KeystoreManager
+    ): PinManager {
+        return PinManager(keystoreManager)
     }
 }
