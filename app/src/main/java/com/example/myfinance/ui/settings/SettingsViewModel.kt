@@ -20,6 +20,15 @@ import com.example.myfinance.utils.BackupManager
 import kotlinx.coroutines.Dispatchers
 import android.net.Uri
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+sealed class BackupState {
+    object Idle : BackupState()
+    object Loading : BackupState()
+    object Success : BackupState()
+    object Failed : BackupState()
+}
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -27,6 +36,9 @@ class SettingsViewModel @Inject constructor(
     private val preferencesManager: PreferencesManager,
     private val backupManager: BackupManager
 ) : ViewModel() {
+
+    private val _backupState = MutableStateFlow<BackupState>(BackupState.Idle)
+    val backupState: StateFlow<BackupState> = _backupState.asStateFlow()
 
     val categories: StateFlow<List<CategoryEntity>> = repository.getAllCategories()
         .stateIn(
@@ -43,8 +55,18 @@ class SettingsViewModel @Inject constructor(
         )
 
     fun backupDatabase() {
-        viewModelScope.launch(Dispatchers.IO) {
-            backupManager.createBackup()
+        viewModelScope.launch {
+            _backupState.value = BackupState.Loading
+
+            val success = withContext(Dispatchers.IO) {
+                backupManager.createBackup()
+            }
+
+            _backupState.value = if (success) {
+                BackupState.Success
+            } else {
+                BackupState.Failed
+            }
         }
     }
 
@@ -56,7 +78,7 @@ class SettingsViewModel @Inject constructor(
 
     fun updateBudget(budget: BudgetEntity) {
         viewModelScope.launch {
-            repository.insertBudget(budget) // Room REPLACE strategy
+            repository.insertBudget(budget)
         }
     }
 
