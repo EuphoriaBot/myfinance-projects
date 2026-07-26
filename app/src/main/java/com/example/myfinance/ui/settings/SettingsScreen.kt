@@ -49,6 +49,9 @@ fun SettingsScreen(
     var showBudgetManagement by remember { mutableStateOf(false) }
     var showRestoreFailedDialog by remember { mutableStateOf(false) }
     var showRestoreSuccessDialog by remember { mutableStateOf(false) }
+    val backupState by viewModel.backupState.collectAsStateWithLifecycle()
+    var showBackupSuccessDialog by remember { mutableStateOf(false) }
+    var showBackupFailedDialog by remember { mutableStateOf(false) }
     val restoreLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
@@ -65,6 +68,14 @@ fun SettingsScreen(
                     showRestoreFailedDialog = true
                 }
             }
+        }
+    }
+
+    LaunchedEffect(backupState) {
+        when (backupState) {
+            BackupState.Success -> showBackupSuccessDialog = true
+            BackupState.Failed -> showBackupFailedDialog = true
+            else -> {}
         }
     }
 
@@ -202,6 +213,76 @@ fun SettingsScreen(
                 }
             },
 
+            containerColor = DarkCard
+        )
+    }
+
+    if (showBackupSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showBackupSuccessDialog = false
+                viewModel.resetBackupState()
+            },
+            title = {
+                Text(
+                    text = "Backup Berhasil",
+                    color = TextPrimary
+                )
+            },
+            text = {
+                Text(
+                    text = "Database berhasil dibackup ke folder Download/MyFinance.",
+                    color = TextSecondary
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showBackupSuccessDialog = false
+                        viewModel.resetBackupState()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AccentPurple
+                    )
+                ) {
+                    Text("OK")
+                }
+            },
+            containerColor = DarkCard
+        )
+    }
+
+    if (showBackupFailedDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showBackupFailedDialog = false
+                viewModel.resetBackupState()
+            },
+            title = {
+                Text(
+                    text = "Backup Gagal",
+                    color = TextPrimary
+                )
+            },
+            text = {
+                Text(
+                    text = "Database tidak dapat dibackup. Coba lagi.",
+                    color = TextSecondary
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showBackupFailedDialog = false
+                        viewModel.resetBackupState()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ExpenseRed
+                    )
+                ) {
+                    Text("OK")
+                }
+            },
             containerColor = DarkCard
         )
     }

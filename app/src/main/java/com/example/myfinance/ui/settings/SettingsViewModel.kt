@@ -70,6 +70,10 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun resetBackupState() {
+        _backupState.value = BackupState.Idle
+    }
+
     fun insertBudget(budget: BudgetEntity) {
         viewModelScope.launch {
             repository.insertBudget(budget)
