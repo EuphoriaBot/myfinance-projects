@@ -46,6 +46,20 @@ fun AppLockSettingsScreen(
         )
     }
 
+    var showSetPinScreen by remember {
+        mutableStateOf(false)
+    }
+
+    if (showSetPinScreen) {
+        SetPinScreen(
+            onPinSet = {
+                showSetPinScreen = false
+                isAppLockEnabled = true
+            }
+        )
+        return
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
