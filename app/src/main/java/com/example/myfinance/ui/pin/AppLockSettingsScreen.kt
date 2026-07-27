@@ -31,6 +31,8 @@ import com.example.myfinance.ui.theme.AccentPurple
 import com.example.myfinance.ui.theme.DarkCard
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.filled.ChevronRight
 
 @Composable
 fun AppLockSettingsScreen(
@@ -166,11 +168,47 @@ fun AppLockSettingsScreen(
                         checkedTrackColor = AccentPurple
                     )
                 )
+            }
+            
+            if (isPinSet) {
+
+                HorizontalDivider(
+                    color = Color.White.copy(alpha = 0.05f)
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Column {
+
+                        Text(
+                            text = "Ubah PIN",
+                            color = TextPrimary,
+                            fontWeight = FontWeight.Medium
+                        )
+
+                        Text(
+                            text = "Ganti PIN aplikasi",
+                            color = TextMuted,
+                            fontSize = 12.sp
+                        )
+
+                    }
+
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        tint = TextMuted
+                    )
+
+                }
 
             }
-
         }
-
     }
-
 }
