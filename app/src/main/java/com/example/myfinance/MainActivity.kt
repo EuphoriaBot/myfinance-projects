@@ -19,9 +19,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.myfinance.ui.main.MainViewModel
 import com.example.myfinance.ui.onboarding.OnboardingScreen
 import com.example.myfinance.ui.pin.PinViewModel
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -34,6 +34,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val pinViewModel: PinViewModel = hiltViewModel()
             val lockState by pinViewModel.lockState.collectAsState()
+            val context = LocalContext.current
+            LaunchedEffect(Unit) {
+                pinViewModel.checkInitialState(context)
+            }
             val viewModel: MainViewModel = hiltViewModel()
             val onboardingCompleted by viewModel.onboardingCompleted.collectAsStateWithLifecycle()
             MyFinanceTheme {
