@@ -53,8 +53,12 @@ fun AppLockSettingsScreen(
     if (showSetPinScreen) {
         SetPinScreen(
             onPinSet = {
-                showSetPinScreen = false
+                viewModel.setAppLockEnabled(
+                    context,
+                    true
+                )
                 isAppLockEnabled = true
+                showSetPinScreen = false
             }
         )
         return
