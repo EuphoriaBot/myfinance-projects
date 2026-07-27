@@ -18,6 +18,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.myfinance.ui.main.MainViewModel
 import com.example.myfinance.ui.onboarding.OnboardingScreen
+import com.example.myfinance.ui.pin.PinViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -28,6 +30,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         RecurringTransactionWorker.schedule(this)
         setContent {
+            val pinViewModel: PinViewModel = hiltViewModel()
             val viewModel: MainViewModel = hiltViewModel()
             val onboardingCompleted by viewModel.onboardingCompleted.collectAsStateWithLifecycle()
             MyFinanceTheme {
