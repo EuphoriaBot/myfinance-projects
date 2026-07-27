@@ -20,6 +20,8 @@ import com.example.myfinance.ui.main.MainViewModel
 import com.example.myfinance.ui.onboarding.OnboardingScreen
 import com.example.myfinance.ui.pin.PinViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -31,6 +33,7 @@ class MainActivity : ComponentActivity() {
         RecurringTransactionWorker.schedule(this)
         setContent {
             val pinViewModel: PinViewModel = hiltViewModel()
+            val lockState by pinViewModel.lockState.collectAsState()
             val viewModel: MainViewModel = hiltViewModel()
             val onboardingCompleted by viewModel.onboardingCompleted.collectAsStateWithLifecycle()
             MyFinanceTheme {
