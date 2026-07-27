@@ -29,14 +29,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import com.example.myfinance.ui.theme.AccentPurple
 import com.example.myfinance.ui.theme.DarkCard
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun AppLockSettingsScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: PinViewModel = hiltViewModel()
 ) {
 
+    val context = LocalContext.current
+
     var isAppLockEnabled by remember {
-        mutableStateOf(false)
+        mutableStateOf(
+            viewModel.isAppLockEnabled(context)
+        )
     }
 
     Column(
