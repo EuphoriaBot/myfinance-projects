@@ -131,14 +131,23 @@ fun AppLockSettingsScreen(
                 Switch(
                     checked = isAppLockEnabled,
                     onCheckedChange = { enabled ->
-
-                        viewModel.setAppLockEnabled(
-                            context,
-                            enabled
-                        )
-
-                        isAppLockEnabled = enabled
-
+                        if (enabled) {
+                            if (viewModel.isPinSet(context)) {
+                                viewModel.setAppLockEnabled(
+                                    context,
+                                    true
+                                )
+                                isAppLockEnabled = true
+                            } else {
+                                showSetPinScreen = true
+                            }
+                        } else {
+                            viewModel.setAppLockEnabled(
+                                context,
+                                false
+                            )
+                            isAppLockEnabled = false
+                        }
                     },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
