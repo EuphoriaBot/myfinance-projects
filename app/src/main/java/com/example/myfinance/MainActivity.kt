@@ -22,6 +22,8 @@ import com.example.myfinance.ui.pin.PinViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
+import com.example.myfinance.ui.pin.PinScreen
+import com.example.myfinance.ui.pin.PinLockState
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -45,18 +47,25 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = DarkBackground
                 ) {
-
-                    if (onboardingCompleted) {
-
-                        HomeScreen()
-
-                    } else {
+                    if (!onboardingCompleted) {
                         OnboardingScreen(
                             onFinished = {}
                         )
-
+                    } else {
+                        if (lockState is PinLockState.Locked) {
+                            PinScreen(
+                                title = "Masukkan PIN",
+                                onPinComplete = { pin ->
+                                    pinViewModel.verifyPin(
+                                        context,
+                                        pin
+                                    )
+                                }
+                            )
+                        } else {
+                            HomeScreen()
+                        }
                     }
-
                 }
             }
         }
