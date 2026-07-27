@@ -46,6 +46,12 @@ fun AppLockSettingsScreen(
         )
     }
 
+    var isPinSet by remember {
+        mutableStateOf(
+            viewModel.isPinSet(context)
+        )
+    }
+
     var showSetPinScreen by remember {
         mutableStateOf(false)
     }
@@ -53,6 +59,7 @@ fun AppLockSettingsScreen(
     if (showSetPinScreen) {
         SetPinScreen(
             onPinSet = {
+                isPinSet = true
                 viewModel.setAppLockEnabled(
                     context,
                     true
@@ -144,6 +151,7 @@ fun AppLockSettingsScreen(
                                 isAppLockEnabled = true
                             } else {
                                 showSetPinScreen = true
+
                             }
                         } else {
                             viewModel.setAppLockEnabled(
