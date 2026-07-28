@@ -33,6 +33,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 
 @Composable
 fun AppLockSettingsScreen(
@@ -62,6 +65,10 @@ fun AppLockSettingsScreen(
         mutableStateOf(false)
     }
 
+    var showDisableDialog by remember {
+        mutableStateOf(false)
+    }
+
     if (showSetPinScreen) {
         SetPinScreen(
             onPinSet = {
@@ -75,6 +82,40 @@ fun AppLockSettingsScreen(
             }
         )
         return
+    }
+
+    if (showDisableDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showDisableDialog = false
+            },
+            title = {
+                Text("Nonaktifkan App Lock?")
+            },
+            text = {
+                Text(
+                    "Masukkan PIN untuk menonaktifkan App Lock."
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDisableDialog = false
+                    }
+                ) {
+                    Text("Lanjut")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = {
+                        showDisableDialog = false
+                    }
+                ) {
+                    Text("Batal")
+                }
+            }
+        )
     }
 
     if (showChangePinScreen) {
@@ -169,11 +210,7 @@ fun AppLockSettingsScreen(
 
                             }
                         } else {
-                            viewModel.setAppLockEnabled(
-                                context,
-                                false
-                            )
-                            isAppLockEnabled = false
+                            showDisableDialog = true
                         }
                     },
                     colors = SwitchDefaults.colors(
