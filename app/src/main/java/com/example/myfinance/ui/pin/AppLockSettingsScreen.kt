@@ -61,6 +61,10 @@ fun AppLockSettingsScreen(
         mutableStateOf(false)
     }
 
+    var showVerifyDisablePin by remember {
+        mutableStateOf(false)
+    }
+
     var showChangePinScreen by remember {
         mutableStateOf(false)
     }
@@ -84,6 +88,26 @@ fun AppLockSettingsScreen(
         return
     }
 
+    if (showVerifyDisablePin) {
+        PinScreen(
+            title = "Verifikasi PIN",
+            subtitle = "Masukkan PIN untuk menonaktifkan App Lock",
+            onPinComplete = { pin ->
+                if (viewModel.verifyPin(context, pin)) {
+                    viewModel.clearPin(context)
+                    isPinSet = false
+                    viewModel.setAppLockEnabled(
+                        context,
+                        false
+                    )
+                    isAppLockEnabled = false
+                    showVerifyDisablePin = false
+                }
+            }
+        )
+        return
+    }
+
     if (showDisableDialog) {
         AlertDialog(
             onDismissRequest = {
@@ -101,6 +125,7 @@ fun AppLockSettingsScreen(
                 Button(
                     onClick = {
                         showDisableDialog = false
+                        showVerifyDisablePin = true
                     }
                 ) {
                     Text("Lanjut")

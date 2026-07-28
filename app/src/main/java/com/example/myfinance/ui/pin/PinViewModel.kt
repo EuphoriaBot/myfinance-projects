@@ -40,14 +40,21 @@ class PinViewModel @Inject constructor(
         }
     }
 
-    fun verifyPin(context: Context, pin: String) {
-        val correct = pinManager.verifyPin(context, pin)
+    fun verifyPin(
+        context: Context,
+        pin: String
+    ): Boolean {
+        val correct = pinManager.verifyPin(
+            context,
+            pin
+        )
         if (correct) {
             _pinError.value = null
             _lockState.value = PinLockState.Unlocked
         } else {
-            _pinError.value = "PIN salah, coba lagi"
+            _pinError.value = "PIN salah"
         }
+        return correct
     }
 
     fun setPin(context: Context, pin: String) {
