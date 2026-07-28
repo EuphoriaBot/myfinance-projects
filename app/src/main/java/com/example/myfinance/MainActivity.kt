@@ -25,9 +25,11 @@ import androidx.compose.ui.platform.LocalContext
 import com.example.myfinance.ui.pin.PinScreen
 import com.example.myfinance.ui.pin.PinLockState
 import timber.log.Timber
+import androidx.activity.viewModels
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val pinViewModel: PinViewModel by viewModels()
     private var lastPausedTime: Long = 0L
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +37,6 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         RecurringTransactionWorker.schedule(this)
         setContent {
-            val pinViewModel: PinViewModel = hiltViewModel()
             val lockState by pinViewModel.lockState.collectAsState()
             val pinError by pinViewModel.pinError.collectAsState()
             val context = LocalContext.current
@@ -85,6 +86,10 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         val elapsed = System.currentTimeMillis() - lastPausedTime
+        val autoLockMinutes =
+            pinViewModel.getAutoLockMinutes(this)
+        val autoLockMillis =
+            autoLockMinutes * 60 * 1000L
         Timber.d("Elapsed: %d ms", elapsed)
     }
 }
