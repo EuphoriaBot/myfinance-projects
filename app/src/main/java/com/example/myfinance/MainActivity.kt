@@ -57,6 +57,9 @@ class MainActivity : ComponentActivity() {
                             PinScreen(
                                 title = "Masukkan PIN",
                                 error = pinError,
+                                onPinChanged = {
+                                    pinViewModel.clearPinError()
+                                },
                                 onPinComplete = { pin ->
                                     pinViewModel.verifyPin(
                                         context,

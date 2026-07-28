@@ -24,7 +24,8 @@ fun PinScreen(
     subtitle: String = "",
     onPinComplete: (String) -> Unit,
     onForgotPin: (() -> Unit)? = null,
-    error: String? = null
+    error: String? = null,
+    onPinChanged: (() -> Unit)? = null
 ) {
     var pin by remember { mutableStateOf("") }
     val maxPin = 6
@@ -114,7 +115,12 @@ fun PinScreen(
                                     when (key) {
                                         "⌫" -> if (pin.isNotEmpty()) pin = pin.dropLast(1)
                                         "" -> Unit
-                                        else -> if (pin.length < maxPin) pin += key
+                                        else -> {
+                                            if (pin.length < maxPin) {
+                                                pin += key
+                                                onPinChanged?.invoke()
+                                            }
+                                        }
                                     }
                                 }
                             )
