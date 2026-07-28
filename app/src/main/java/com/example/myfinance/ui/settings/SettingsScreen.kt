@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import com.example.myfinance.ui.pin.AppLockSettingsScreen
 
 @Composable
 fun SettingsScreen(
@@ -47,6 +48,9 @@ fun SettingsScreen(
     var showResetConfirm by remember { mutableStateOf(false) }
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     var showBudgetManagement by remember { mutableStateOf(false) }
+    var showAppLockSettings by remember {
+        mutableStateOf(false)
+    }
     var showRestoreFailedDialog by remember { mutableStateOf(false) }
     var showRestoreSuccessDialog by remember { mutableStateOf(false) }
     val backupState by viewModel.backupState.collectAsStateWithLifecycle()
@@ -85,6 +89,15 @@ fun SettingsScreen(
                 showBudgetManagement = false
             },
             viewModel = viewModel
+        )
+        return
+    }
+
+    if (showAppLockSettings) {
+        AppLockSettingsScreen(
+            onBack = {
+                showAppLockSettings = false
+            }
         )
         return
     }
@@ -313,7 +326,6 @@ fun SettingsScreen(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
-
             item {
                 SettingsSection(title = "Keuangan") {
                     SettingsItem(
@@ -350,7 +362,20 @@ fun SettingsScreen(
                     )
                 }
             }
+            item {
+                SettingsSection(title = "Keamanan") {
 
+                    SettingsItem(
+                        icon = Icons.Default.Lock,
+                        title = "App Lock",
+                        subtitle = "Kunci aplikasi menggunakan PIN",
+                        onClick = {
+                            showAppLockSettings = true
+                        }
+                    )
+
+                }
+            }
             item {
                 SettingsSection(title = "Data") {
                     SettingsItem(

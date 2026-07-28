@@ -58,6 +58,10 @@ fun AppLockSettingsScreen(
         mutableStateOf(false)
     }
 
+    var showChangePinScreen by remember {
+        mutableStateOf(false)
+    }
+
     if (showSetPinScreen) {
         SetPinScreen(
             onPinSet = {
@@ -68,6 +72,15 @@ fun AppLockSettingsScreen(
                 )
                 isAppLockEnabled = true
                 showSetPinScreen = false
+            }
+        )
+        return
+    }
+
+    if (showChangePinScreen) {
+        SetPinScreen(
+            onPinSet = {
+                showChangePinScreen = false
             }
         )
         return
@@ -169,7 +182,7 @@ fun AppLockSettingsScreen(
                     )
                 )
             }
-            
+
             if (isPinSet) {
 
                 HorizontalDivider(
@@ -200,14 +213,18 @@ fun AppLockSettingsScreen(
 
                     }
 
-                    Icon(
-                        imageVector = Icons.Default.ChevronRight,
-                        contentDescription = null,
-                        tint = TextMuted
-                    )
-
+                    IconButton(
+                        onClick = {
+                            showChangePinScreen = true
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = TextMuted
+                        )
+                    }
                 }
-
             }
         }
     }
