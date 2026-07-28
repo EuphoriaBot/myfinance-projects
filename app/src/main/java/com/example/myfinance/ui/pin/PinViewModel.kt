@@ -89,6 +89,11 @@ class PinViewModel @Inject constructor(
         _pinError.value = null
     }
 
+    fun lockApp() {
+        _lockState.value = PinLockState.Locked
+        _pinError.value = null
+    }
+
     fun resetAllAndClearPin(context: Context) {
         viewModelScope.launch {
             pinManager.clearPin(context)

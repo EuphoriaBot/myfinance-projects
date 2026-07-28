@@ -24,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import com.example.myfinance.ui.pin.PinScreen
 import com.example.myfinance.ui.pin.PinLockState
+import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -79,5 +80,11 @@ class MainActivity : ComponentActivity() {
     override fun onPause() {
         super.onPause()
         lastPausedTime = System.currentTimeMillis()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val elapsed = System.currentTimeMillis() - lastPausedTime
+        Timber.d("Elapsed: %d ms", elapsed)
     }
 }
