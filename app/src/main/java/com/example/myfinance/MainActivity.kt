@@ -27,7 +27,7 @@ import com.example.myfinance.ui.pin.PinLockState
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
+    private var lastPausedTime: Long = 0L
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -74,5 +74,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        lastPausedTime = System.currentTimeMillis()
     }
 }
