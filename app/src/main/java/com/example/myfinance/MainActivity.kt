@@ -36,6 +36,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val pinViewModel: PinViewModel = hiltViewModel()
             val lockState by pinViewModel.lockState.collectAsState()
+            val pinError by pinViewModel.pinError.collectAsState()
             val context = LocalContext.current
             LaunchedEffect(Unit) {
                 pinViewModel.checkInitialState(context)
@@ -55,6 +56,7 @@ class MainActivity : ComponentActivity() {
                         if (lockState is PinLockState.Locked) {
                             PinScreen(
                                 title = "Masukkan PIN",
+                                error = pinError,
                                 onPinComplete = { pin ->
                                     pinViewModel.verifyPin(
                                         context,
