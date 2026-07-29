@@ -89,7 +89,10 @@ class MainActivity : ComponentActivity() {
         val autoLockMinutes =
             pinViewModel.getAutoLockMinutes(this)
         val autoLockMillis = autoLockMinutes * 60 * 1000L
-        if (elapsed >= autoLockMillis) {
+        if (
+            lastPausedTime != 0L &&
+            elapsed >= autoLockMillis
+        ) {
             pinViewModel.lockApp()
         }
         Timber.d("Elapsed: %d ms", elapsed)
