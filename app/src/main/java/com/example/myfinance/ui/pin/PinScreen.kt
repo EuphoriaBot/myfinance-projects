@@ -25,6 +25,7 @@ fun PinScreen(
     onPinComplete: (String) -> Unit,
     onForgotPin: (() -> Unit)? = null,
     error: String? = null,
+    isLocked: Boolean = false,
     onPinChanged: (() -> Unit)? = null
 ) {
     var pin by remember { mutableStateOf("") }
@@ -111,6 +112,7 @@ fun PinScreen(
                         row.forEach { key ->
                             PinKey(
                                 key = key,
+                                enabled = !isLocked,
                                 onClick = {
                                     when (key) {
                                         "⌫" -> if (pin.isNotEmpty()) pin = pin.dropLast(1)
@@ -144,6 +146,7 @@ fun PinScreen(
 @Composable
 private fun PinKey(
     key: String,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Box(
@@ -155,8 +158,11 @@ private fun PinKey(
                 else DarkCard
             )
             .then(
-                if (key.isNotEmpty()) Modifier.clickable { onClick() }
-                else Modifier
+                if (key.isNotEmpty() && enabled) {
+                    Modifier.clickable { onClick() }
+                } else {
+                    Modifier
+                }
             ),
         contentAlignment = Alignment.Center
     ) {

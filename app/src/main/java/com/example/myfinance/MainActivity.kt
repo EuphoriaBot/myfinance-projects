@@ -39,6 +39,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val lockState by pinViewModel.lockState.collectAsState()
             val pinError by pinViewModel.pinError.collectAsState()
+            val isPinLocked by pinViewModel.isPinLocked.collectAsState()
             val context = LocalContext.current
             LaunchedEffect(Unit) {
                 pinViewModel.checkInitialState(context)
@@ -59,6 +60,7 @@ class MainActivity : ComponentActivity() {
                             PinScreen(
                                 title = "Masukkan PIN",
                                 error = pinError,
+                                isLocked = isPinLocked,
                                 onPinChanged = {
                                     pinViewModel.clearPinError()
                                 },
