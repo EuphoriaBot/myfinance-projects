@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.foundation.clickable
 
 @Composable
 fun AppLockSettingsScreen(
@@ -58,6 +59,14 @@ fun AppLockSettingsScreen(
     }
 
     var showSetPinScreen by remember {
+        mutableStateOf(false)
+    }
+
+    var selectedAutoLock by remember {
+        mutableStateOf("Immediately")
+    }
+
+    var showAutoLockDialog by remember {
         mutableStateOf(false)
     }
 
@@ -106,6 +115,43 @@ fun AppLockSettingsScreen(
             }
         )
         return
+    }
+
+    if (showAutoLockDialog) {
+        val options = listOf(
+            "Immediately",
+            "30 seconds",
+            "1 minute",
+            "5 minutes",
+            "Never"
+        )
+
+        AlertDialog(
+            onDismissRequest = {
+                showAutoLockDialog = false
+            },
+            title = {
+                Text("Auto Lock After")
+            },
+            text = {
+                Column {
+                    options.forEach { option ->
+                        Text(
+                            text = option,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    selectedAutoLock = option
+                                    showAutoLockDialog = false
+                                }
+                                .padding(vertical = 12.dp),
+                            color = TextPrimary
+                        )
+                    }
+                }
+            },
+            confirmButton = {}
+        )
     }
 
     if (showDisableDialog) {
@@ -250,6 +296,41 @@ fun AppLockSettingsScreen(
                 HorizontalDivider(
                     color = Color.White.copy(alpha = 0.05f)
                 )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showAutoLockDialog = true
+                        }
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Column {
+
+                        Text(
+                            text = "Auto Lock After",
+                            color = TextPrimary,
+                            fontWeight = FontWeight.Medium
+                        )
+
+                        Text(
+                            text = selectedAutoLock,
+                            color = TextMuted,
+                            fontSize = 12.sp
+                        )
+
+                    }
+
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        tint = TextMuted
+                    )
+
+                }
 
                 Row(
                     modifier = Modifier
