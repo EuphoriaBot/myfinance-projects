@@ -86,6 +86,10 @@ fun AppLockSettingsScreen(
         mutableStateOf(false)
     }
 
+    var showVerifyOldPin by remember {
+        mutableStateOf(false)
+    }
+
     var showDisableDialog by remember {
         mutableStateOf(false)
     }
@@ -128,7 +132,6 @@ fun AppLockSettingsScreen(
     if (showAutoLockDialog) {
         val options = listOf(
             "Immediately",
-            "30 seconds",
             "1 minute",
             "5 minutes",
             "Never"
@@ -206,6 +209,20 @@ fun AppLockSettingsScreen(
                 }
             }
         )
+    }
+
+    if (showVerifyOldPin) {
+        PinScreen(
+            title = "Verifikasi PIN Lama",
+            subtitle = "Masukkan PIN lama untuk melanjutkan",
+            onPinComplete = { pin ->
+                if (viewModel.verifyPin(context, pin)) {
+                    showVerifyOldPin = false
+                    showChangePinScreen = true
+                }
+            }
+        )
+        return
     }
 
     if (showChangePinScreen) {
@@ -351,6 +368,10 @@ fun AppLockSettingsScreen(
 
                 }
 
+                HorizontalDivider(
+                    color = Color.White.copy(alpha = 0.05f)
+                )
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -377,7 +398,7 @@ fun AppLockSettingsScreen(
 
                     IconButton(
                         onClick = {
-                            showChangePinScreen = true
+                            showVerifyOldPin = true
                         }
                     ) {
                         Icon(
