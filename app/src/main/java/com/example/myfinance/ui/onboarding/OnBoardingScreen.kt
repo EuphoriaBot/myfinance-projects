@@ -27,7 +27,6 @@ fun formatInputRupiah(input: String): String {
 
 @Composable
 fun OnboardingScreen(
-    onFinished: () -> Unit,
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
@@ -162,7 +161,6 @@ fun OnboardingScreen(
                         )
 
                         isLoading = false
-                        onFinished()
                     }
                 },
                 modifier = Modifier

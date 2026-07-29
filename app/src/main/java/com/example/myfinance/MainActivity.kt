@@ -52,9 +52,7 @@ class MainActivity : ComponentActivity() {
                     color = DarkBackground
                 ) {
                     if (!onboardingCompleted) {
-                        OnboardingScreen(
-                            onFinished = {}
-                        )
+                        OnboardingScreen()
                     } else {
                         if (lockState is PinLockState.Locked) {
                             PinScreen(
