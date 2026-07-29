@@ -52,9 +52,11 @@ class PinViewModel @Inject constructor(
             pin
         )
         if (correct) {
+            _failedAttempts.value = 0
             _pinError.value = null
             _lockState.value = PinLockState.Unlocked
         } else {
+            _failedAttempts.value++
             _pinError.value = "PIN salah"
         }
         return correct
