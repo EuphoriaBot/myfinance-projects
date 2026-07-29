@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.delay
+
 
 sealed class PinLockState {
     object Locked : PinLockState()
@@ -67,6 +69,13 @@ class PinViewModel @Inject constructor(
                 _isPinLocked.value = true
                 _lockUntil.value =
                     System.currentTimeMillis() + 30_000L
+                viewModelScope.launch {
+                    delay(30_000L)
+                    _isPinLocked.value = false
+                    _failedAttempts.value = 0
+                    _lockUntil.value = null
+                    _pinError.value = null
+                }
             }
             _pinError.value = "PIN salah"
         }
