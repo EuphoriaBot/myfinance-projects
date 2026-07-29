@@ -36,6 +36,9 @@ class PinViewModel @Inject constructor(
     private val _isPinLocked = MutableStateFlow(false)
     val isPinLocked = _isPinLocked.asStateFlow()
 
+    private val _lockUntil = MutableStateFlow<Long?>(null)
+    val lockUntil = _lockUntil.asStateFlow()
+
     fun checkInitialState(context: Context) {
         val isEnabled = pinManager.isAppLockEnabled(context)
         val isPinSet = pinManager.isPinSet(context)
@@ -62,6 +65,8 @@ class PinViewModel @Inject constructor(
             _failedAttempts.value++
             if (_failedAttempts.value >= 3) {
                 _isPinLocked.value = true
+                _lockUntil.value =
+                    System.currentTimeMillis() + 30_000L
             }
             _pinError.value = "PIN salah"
         }
