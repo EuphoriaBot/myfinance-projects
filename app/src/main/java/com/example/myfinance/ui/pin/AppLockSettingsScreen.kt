@@ -63,7 +63,15 @@ fun AppLockSettingsScreen(
     }
 
     var selectedAutoLock by remember {
-        mutableStateOf("Immediately")
+        mutableStateOf(
+            when (viewModel.getAutoLockMinutes(context)) {
+                0 -> "Immediately"
+                1 -> "1 minute"
+                5 -> "5 minutes"
+                -1 -> "Never"
+                else -> "Immediately"
+            }
+        )
     }
 
     var showAutoLockDialog by remember {
@@ -142,6 +150,17 @@ fun AppLockSettingsScreen(
                                 .fillMaxWidth()
                                 .clickable {
                                     selectedAutoLock = option
+                                    val minutes = when (option) {
+                                        "Immediately" -> 0
+                                        "1 minute" -> 1
+                                        "5 minutes" -> 5
+                                        "Never" -> -1
+                                        else -> 0
+                                    }
+                                    viewModel.setAutoLockMinutes(
+                                        context,
+                                        minutes
+                                    )
                                     showAutoLockDialog = false
                                 }
                                 .padding(vertical = 12.dp),
