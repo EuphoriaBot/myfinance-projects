@@ -57,6 +57,9 @@ fun TransactionFormScreen(
         mutableStateOf<CategoryEntity?>(null)
     }
     var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember {
+        mutableStateOf<String?>(null)
+    }
     var isRecurring by remember { mutableStateOf(false) }
     var recurringInterval by remember {
         mutableStateOf("MONTHLY")
@@ -322,10 +325,31 @@ fun TransactionFormScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
+            errorMessage?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 13.sp
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
             Button(
                 onClick = {
-                    val amountValue = amount.toDoubleOrNull() ?: return@Button
-                    val account = selectedAccount ?: return@Button
+                    errorMessage = viewModel.validateTransaction(
+                        amount = amount,
+                        account = selectedAccount,
+                        category = selectedCategory,
+                        type = selectedType,
+                        toAccount = selectedToAccount
+                    )
+
+                    if (errorMessage != null) {
+                        return@Button
+                    }
+
+                    val amountValue = amount.toDouble()
+                    val account = selectedAccount!!
 
                     scope.launch {
                         isLoading = true

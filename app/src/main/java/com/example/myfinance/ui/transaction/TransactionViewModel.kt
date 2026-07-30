@@ -42,6 +42,48 @@ class TransactionViewModel @Inject constructor(
                 initialValue = emptyList()
             )
 
+    fun validateTransaction(
+        amount: String,
+        account: AccountEntity?,
+        category: CategoryEntity?,
+        type: String,
+        toAccount: AccountEntity?
+    ): String? {
+        val amountValue = amount.toDoubleOrNull()
+
+        if (amount.isBlank())
+            return "Jumlah tidak boleh kosong"
+
+        if (amountValue == null || amountValue <= 0)
+            return "Jumlah harus lebih dari 0"
+
+        if (account == null)
+            return "Pilih akun"
+
+        if (
+            (type == "EXPENSE" || type == "TRANSFER") &&
+            amountValue > account.balance
+        ) {
+            return "Saldo akun tidak mencukupi"
+        }
+
+        if (type == "TRANSFER") {
+
+            if (toAccount == null)
+                return "Pilih akun tujuan"
+
+            if (account.id == toAccount.id)
+                return "Akun asal dan tujuan tidak boleh sama"
+
+        } else {
+
+            if (category == null)
+                return "Pilih kategori"
+
+        }
+        return null
+    }
+
     fun insertTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
             repository.insertTransaction(transaction)
@@ -58,6 +100,10 @@ class TransactionViewModel @Inject constructor(
         viewModelScope.launch {
             repository.deleteTransaction(transaction)
         }
+    }
+
+    suspend fun getAccountById(id: Long): AccountEntity? {
+        return repository.getAccountById(id)
     }
 
     fun updateAccount(account: AccountEntity) {

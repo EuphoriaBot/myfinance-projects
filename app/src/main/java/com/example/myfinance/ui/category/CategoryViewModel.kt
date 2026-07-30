@@ -23,6 +23,15 @@ class CategoryViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    fun categoryExists(
+        name: String,
+        type: String
+    ): Boolean {
+        return categories.value.any {
+            it.type == type && it.name.equals(name.trim(), ignoreCase = true)
+        }
+    }
+
     fun insertCategory(category: CategoryEntity) {
         viewModelScope.launch {
             repository.insertCategory(category)

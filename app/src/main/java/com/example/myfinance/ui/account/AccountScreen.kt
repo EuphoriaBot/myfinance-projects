@@ -47,6 +47,7 @@ fun AccountScreen(
 
     if (showAddDialog) {
         AddAccountDialog(
+            viewModel = viewModel,
             onSave = { account ->
                 viewModel.insertAccount(account)
                 showAddDialog = false
@@ -60,6 +61,7 @@ fun AccountScreen(
     if (accountToEdit != null) {
 
         EditAccountDialog(
+            viewModel = viewModel,
             account = accountToEdit!!,
             onDismiss = {
                 accountToEdit = null
@@ -69,7 +71,6 @@ fun AccountScreen(
                 accountToEdit = null
             }
         )
-
     }
 
     Box(
@@ -303,6 +304,7 @@ private fun AccountItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditAccountDialog(
+    viewModel: AccountViewModel,
     account: AccountEntity,
     onDismiss: () -> Unit,
     onSave: (AccountEntity) -> Unit
@@ -320,6 +322,10 @@ private fun EditAccountDialog(
         mutableStateOf(account.type)
     }
 
+    var errorMessage by remember {
+        mutableStateOf<String?>(null)
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -332,6 +338,13 @@ private fun EditAccountDialog(
                     value = accountName,
                     onValueChange = {
                         accountName = it
+                        errorMessage = null
+                    },
+                    isError = errorMessage != null,
+                    supportingText = {
+                        errorMessage?.let {
+                            Text(it)
+                        }
                     },
                     label = {
                         Text("Nama Akun")
@@ -414,9 +427,30 @@ private fun EditAccountDialog(
 
             Button(
                 onClick = {
+                    val cleanName = accountName.trim()
+                    when {
+                        cleanName.isBlank() -> {
+                            errorMessage = "Nama akun tidak boleh kosong"
+                            return@Button
+                        }
+
+                        cleanName.length > 30 -> {
+                            errorMessage = "Maksimal 30 karakter"
+                            return@Button
+                        }
+
+                        viewModel.accountExists(
+                            cleanName,
+                            excludeId = account.id
+                        ) -> {
+                            errorMessage = "Nama akun sudah digunakan"
+                            return@Button
+                        }
+                    }
+
                     onSave(
                         account.copy(
-                            name = accountName,
+                            name = cleanName,
                             balance = accountBalance.toDoubleOrNull() ?: 0.0,
                             type = accountType
                         )

@@ -30,6 +30,15 @@ class AccountViewModel @Inject constructor(
             initialValue = 0.0
         )
 
+    fun accountExists(
+        name: String,
+        excludeId: Long? = null
+    ): Boolean {
+        return accounts.value.any {
+            it.id != excludeId && it.name.equals(name.trim(), ignoreCase = true)
+        }
+    }
+
     fun insertAccount(account: AccountEntity) {
         viewModelScope.launch {
             repository.insertAccount(account)

@@ -19,12 +19,14 @@ import com.example.myfinance.utils.formatInputNumber
 
 @Composable
 fun AddAccountDialog(
+    viewModel: AccountViewModel,
     onSave: (AccountEntity) -> Unit,
     onDismiss: () -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var balance by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf("CASH") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Dialog(onDismissRequest = onDismiss) {
         Box(
@@ -110,6 +112,16 @@ fun AddAccountDialog(
                     value = name,
                     onValueChange = {
                         name = it
+                        errorMessage = null
+                    },
+                    isError = errorMessage != null,
+                    supportingText = {
+                        errorMessage?.let {
+                            Text(
+                                text = it,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = {
@@ -189,15 +201,32 @@ fun AddAccountDialog(
 
                     Button(
                         modifier = Modifier.weight(1f),
-                        enabled = name.isNotBlank(),
+                        enabled = !name.isBlank(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = AccentPurple
                         ),
                         onClick = {
+                            val cleanName = name.trim()
+                            when {
+                                cleanName.isBlank() -> {
+                                    errorMessage = "Nama akun tidak boleh kosong"
+                                    return@Button
+                                }
+
+                                cleanName.length > 30 -> {
+                                    errorMessage = "Maksimal 30 karakter"
+                                    return@Button
+                                }
+
+                                viewModel.accountExists(cleanName) -> {
+                                    errorMessage = "Nama akun sudah digunakan"
+                                    return@Button
+                                }
+                            }
 
                             onSave(
                                 AccountEntity(
-                                    name = name,
+                                    name = cleanName,
                                     balance = balance.toDoubleOrNull() ?: 0.0,
                                     type = selectedType,
                                     colorHex = when (selectedType) {
@@ -207,7 +236,6 @@ fun AddAccountDialog(
                                     }
                                 )
                             )
-
                             onDismiss()
                         }
                     ) {

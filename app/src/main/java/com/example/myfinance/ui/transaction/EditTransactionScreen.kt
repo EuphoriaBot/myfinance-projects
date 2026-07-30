@@ -51,6 +51,9 @@ fun EditTransactionScreen(
     val accounts by viewModel.accounts.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember {
+        mutableStateOf<String?>(null)
+    }
 
     LaunchedEffect(accounts) {
         selectedAccount =
@@ -216,14 +219,55 @@ fun EditTransactionScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
+            errorMessage?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 13.sp
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
             Button(
                 onClick = {
-                    val amountValue = amount.toDoubleOrNull() ?: return@Button
-                    val account = selectedAccount ?: return@Button
-                    val category = selectedCategory ?: return@Button
+                    errorMessage = viewModel.validateTransaction(
+                        amount = amount,
+                        account = selectedAccount,
+                        category = selectedCategory,
+                        type = selectedType,
+                        toAccount = null
+                    )
+
+                    if (errorMessage != null) {
+                        return@Button
+                    }
+
+                    val amountValue = amount.toDouble()
+                    val account = selectedAccount!!
+                    val category = selectedCategory!!
 
                     scope.launch {
                         isLoading = true
+
+                        val oldAccount = viewModel.getAccountById(transaction.accountId)
+
+                        if (oldAccount != null) {
+                            val restoredBalance = when (transaction.type) {
+                                "INCOME" ->
+                                    oldAccount.balance - transaction.amount
+                                "EXPENSE" ->
+                                    oldAccount.balance + transaction.amount
+                                else ->
+                                    oldAccount.balance
+                            }
+                            viewModel.updateAccount(
+                                oldAccount.copy(
+                                    balance = restoredBalance
+                                )
+                            )
+                        }
+
+                        val newAccount = viewModel.getAccountById(account.id)
 
                         viewModel.updateTransaction(
                             transaction.copy(
@@ -234,6 +278,23 @@ fun EditTransactionScreen(
                                 accountId = account.id
                             )
                         )
+
+                        if (newAccount != null) {
+                            val newBalance = when (selectedType) {
+                                "INCOME" ->
+                                    newAccount.balance + amountValue
+                                "EXPENSE" ->
+                                    newAccount.balance - amountValue
+                                else ->
+                                    newAccount.balance
+
+                            }
+                            viewModel.updateAccount(
+                                newAccount.copy(
+                                    balance = newBalance
+                                )
+                            )
+                        }
 
                         isLoading = false
                         onDismiss()

@@ -213,6 +213,7 @@ private fun AddCategoryDialog(
     var name by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf(defaultType) }
     var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Dialog(onDismissRequest = onDismiss) {
         Box(
@@ -263,9 +264,21 @@ private fun AddCategoryDialog(
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = {
+                        name = it
+                        errorMessage = null
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("Contoh: Olahraga", color = TextMuted) },
+                    isError = errorMessage != null,
+                    supportingText = {
+                        errorMessage?.let {
+                            Text(
+                                text = it,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = AccentPurple,
                         unfocusedBorderColor = BorderSubtle,
@@ -293,15 +306,36 @@ private fun AddCategoryDialog(
                     }
                     Button(
                         onClick = {
-                            if (name.isEmpty()) return@Button
+                            val cleanName = name.trim()
+                            when {
+                                cleanName.isBlank() -> {
+                                    errorMessage = "Nama kategori tidak boleh kosong"
+                                    return@Button
+                                }
+
+                                cleanName.length > 30 -> {
+                                    errorMessage = "Maksimal 30 karakter"
+                                    return@Button
+                                }
+
+                                viewModel.categoryExists(cleanName, selectedType) -> {
+                                    errorMessage = "Kategori sudah ada"
+                                    return@Button
+                                }
+                            }
+
                             scope.launch {
                                 isLoading = true
                                 viewModel.insertCategory(
                                     CategoryEntity(
-                                        name = name,
+                                        name = cleanName,
                                         icon = "category",
                                         type = selectedType,
-                                        colorHex = if (selectedType == "INCOME") "#00C896" else "#FF5C5C"
+                                        colorHex =
+                                            if (selectedType == "INCOME")
+                                                "#00C896"
+                                            else
+                                                "#FF5C5C"
                                     )
                                 )
                                 isLoading = false
@@ -310,7 +344,7 @@ private fun AddCategoryDialog(
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = AccentPurple),
-                        enabled = !isLoading && name.isNotEmpty()
+                        enabled = !isLoading && name.isNotBlank()
                     ) {
                         Text("Simpan", color = Color.White)
                     }
