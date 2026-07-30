@@ -49,7 +49,6 @@ fun exportTransactionsToCsv(
             file
         )
     } catch (e: Exception) {
-        e.printStackTrace()
         null
     }
 }
