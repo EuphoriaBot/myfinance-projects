@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material3.MenuAnchorType
+import com.example.myfinance.utils.formatInputNumber
 
 @Composable
 fun AccountScreen(
@@ -340,12 +341,17 @@ private fun EditAccountDialog(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
-                    value = accountBalance,
+                    value = if (accountBalance.isEmpty()) "" else formatInputNumber(accountBalance),
                     onValueChange = {
-                        accountBalance = it.filter(Char::isDigit)
+                        accountBalance = it
+                            .replace(".", "")
+                            .filter(Char::isDigit)
                     },
                     label = {
                         Text("Saldo")
+                    },
+                    prefix = {
+                        Text("Rp ")
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number
