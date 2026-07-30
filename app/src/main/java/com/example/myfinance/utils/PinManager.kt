@@ -60,11 +60,9 @@ class PinManager @Inject constructor(
         val saltStr = prefs.getString(KEY_PIN_SALT, null) ?: return false
         val hashStr = prefs.getString(KEY_PIN_HASH, null) ?: return false
         val ivStr = prefs.getString(KEY_PIN_IV, null) ?: return false
-
         val salt = Base64.decode(saltStr, Base64.DEFAULT)
         val encryptedHash = Base64.decode(hashStr, Base64.DEFAULT)
         val iv = Base64.decode(ivStr, Base64.DEFAULT)
-
         val decryptedHash = keystoreManager.decrypt(encryptedHash, iv)
         val inputHash = hashPin(pin, salt)
 

@@ -27,14 +27,8 @@ class FinanceRepository @Inject constructor(
     suspend fun updateAccount(account: AccountEntity) =
         accountDao.update(account)
 
-    suspend fun deleteAccount(account: AccountEntity) =
-        accountDao.delete(account)
-
     fun getAllCategories(): Flow<List<CategoryEntity>> =
         categoryDao.getAll()
-
-    fun getCategoriesByType(type: String): Flow<List<CategoryEntity>> =
-        categoryDao.getByType(type)
 
     suspend fun insertCategory(category: CategoryEntity): Long =
         categoryDao.insert(category)

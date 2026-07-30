@@ -25,9 +25,7 @@ fun exportTransactionsToCsv(
         val file = File(context.cacheDir, fileName)
 
         FileWriter(file).use { writer ->
-            // Header
             writer.append("Tanggal,Jenis,Kategori,Akun,Jumlah,Catatan\n")
-
             transactions.forEach { transaction ->
                 val date = dateFormat.format(Date(transaction.date))
                 val type = when (transaction.type) {

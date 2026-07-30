@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myfinance.utils.PinManager
-import com.example.myfinance.utils.PreferencesManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +22,6 @@ sealed class PinLockState {
 @HiltViewModel
 class PinViewModel @Inject constructor(
     private val pinManager: PinManager,
-    private val preferencesManager: PreferencesManager
 ) : ViewModel() {
 
     private val _lockState = MutableStateFlow<PinLockState>(PinLockState.Locked)
@@ -115,13 +113,5 @@ class PinViewModel @Inject constructor(
     fun lockApp() {
         _lockState.value = PinLockState.Locked
         _pinError.value = null
-    }
-
-    fun resetAllAndClearPin(context: Context) {
-        viewModelScope.launch {
-            pinManager.clearPin(context)
-            preferencesManager.clearAll()
-            _lockState.value = PinLockState.Unlocked
-        }
     }
 }

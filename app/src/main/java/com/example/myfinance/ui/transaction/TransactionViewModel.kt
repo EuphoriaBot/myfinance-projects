@@ -60,21 +60,9 @@ class TransactionViewModel @Inject constructor(
         }
     }
 
-    fun insertAccount(account: AccountEntity) {
-        viewModelScope.launch {
-            repository.insertAccount(account)
-        }
-    }
-
     fun updateAccount(account: AccountEntity) {
         viewModelScope.launch {
             repository.updateAccount(account)
-        }
-    }
-
-    fun deleteAccount(account: AccountEntity) {
-        viewModelScope.launch {
-            repository.deleteAccount(account)
         }
     }
 }
