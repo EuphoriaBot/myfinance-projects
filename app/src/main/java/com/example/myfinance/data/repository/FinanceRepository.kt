@@ -2,7 +2,6 @@ package com.example.myfinance.data.repository
 
 import com.example.myfinance.data.local.dao.*
 import com.example.myfinance.data.local.entity.*
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import com.example.myfinance.data.local.database.AppDatabase
@@ -93,17 +92,11 @@ class FinanceRepository @Inject constructor(
         savingGoalDao.delete(goal)
 
     suspend fun resetAllData() {
-
         database.withTransaction {
-
             transactionDao.deleteAll()
-
             budgetDao.deleteAll()
-
             savingGoalDao.deleteAll()
-
             accountDao.deleteAll()
-
             categoryDao.deleteAll()
         }
     }

@@ -67,7 +67,7 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        val PREPOPULATE_CALLBACK = object : RoomDatabase.Callback() {
+        val PREPOPULATE_CALLBACK = object : Callback() {
 
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)

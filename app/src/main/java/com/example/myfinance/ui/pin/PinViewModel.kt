@@ -12,12 +12,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 
 sealed class PinLockState {
     object Locked : PinLockState()
     object Unlocked : PinLockState()
-    object NoPinSet : PinLockState()
 }
 
 @HiltViewModel
@@ -33,13 +33,11 @@ class PinViewModel @Inject constructor(
     val pinError: StateFlow<String?> = _pinError.asStateFlow()
 
     private val _failedAttempts = MutableStateFlow(0)
-    val failedAttempts = _failedAttempts.asStateFlow()
 
     private val _isPinLocked = MutableStateFlow(false)
     val isPinLocked = _isPinLocked.asStateFlow()
 
     private val _lockUntil = MutableStateFlow<Long?>(null)
-    val lockUntil = _lockUntil.asStateFlow()
 
     fun checkInitialState(context: Context) {
         val isEnabled = pinManager.isAppLockEnabled(context)
@@ -70,7 +68,7 @@ class PinViewModel @Inject constructor(
                 _lockUntil.value =
                     System.currentTimeMillis() + 30_000L
                 viewModelScope.launch {
-                    delay(30_000L)
+                    delay(30.seconds)
                     _isPinLocked.value = false
                     _failedAttempts.value = 0
                     _lockUntil.value = null

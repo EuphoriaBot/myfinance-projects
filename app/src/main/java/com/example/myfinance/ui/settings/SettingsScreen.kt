@@ -46,7 +46,6 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     var isExporting by remember { mutableStateOf(false) }
     var showResetConfirm by remember { mutableStateOf(false) }
-    val categories by viewModel.categories.collectAsStateWithLifecycle()
     var showBudgetManagement by remember { mutableStateOf(false) }
     var showAppLockSettings by remember {
         mutableStateOf(false)

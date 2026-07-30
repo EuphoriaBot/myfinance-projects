@@ -21,7 +21,7 @@ data class ReportUiState(
 
 @HiltViewModel
 class ReportViewModel @Inject constructor(
-    private val repository: FinanceRepository
+    repository: FinanceRepository
 ) : ViewModel() {
 
     private val calendar = Calendar.getInstance().apply {

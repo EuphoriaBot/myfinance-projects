@@ -23,7 +23,8 @@ import java.util.zip.ZipInputStream
 
 @Singleton
 class BackupManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext
+    private val context: Context
 ) {
     companion object {
         private const val DATABASE_NAME = "myfinance_database"

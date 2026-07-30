@@ -77,7 +77,7 @@ class HomeViewModel @Inject constructor(
                         .sumOf { it.amount }
 
                     HomeUiState(
-                        totalBalance = totalBalance ?: 0.0,
+                        totalBalance = totalBalance,
                         accounts = accounts,
                         categories = categories,
                         totalIncome = totalIncome,

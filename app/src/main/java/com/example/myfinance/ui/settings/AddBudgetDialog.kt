@@ -18,11 +18,6 @@ import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatInputNumber
 
-private fun formatInputNumber(input: String): String {
-    if (input.isEmpty()) return ""
-    return input.reversed().chunked(3).joinToString(".").reversed()
-}
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AddBudgetDialog(
