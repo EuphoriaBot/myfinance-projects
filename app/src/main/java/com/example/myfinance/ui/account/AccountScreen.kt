@@ -25,6 +25,9 @@ import com.example.myfinance.utils.formatRupiah
 import com.example.myfinance.ui.components.BackgroundPattern
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.material3.MenuAnchorType
 
 @Composable
 fun AccountScreen(
@@ -51,6 +54,21 @@ fun AccountScreen(
                 showAddDialog = false
             }
         )
+    }
+
+    if (accountToEdit != null) {
+
+        EditAccountDialog(
+            account = accountToEdit!!,
+            onDismiss = {
+                accountToEdit = null
+            },
+            onSave = { updatedAccount ->
+                viewModel.updateAccount(updatedAccount)
+                accountToEdit = null
+            }
+        )
+
     }
 
     Box(
@@ -279,4 +297,136 @@ private fun AccountItem(
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EditAccountDialog(
+    account: AccountEntity,
+    onDismiss: () -> Unit,
+    onSave: (AccountEntity) -> Unit
+) {
+
+    var accountName by remember {
+        mutableStateOf(account.name)
+    }
+
+    var accountBalance by remember {
+        mutableStateOf(account.balance.toLong().toString())
+    }
+
+    var accountType by remember {
+        mutableStateOf(account.type)
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("Edit Akun")
+        },
+
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = accountName,
+                    onValueChange = {
+                        accountName = it
+                    },
+                    label = {
+                        Text("Nama Akun")
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = accountBalance,
+                    onValueChange = {
+                        accountBalance = it.filter(Char::isDigit)
+                    },
+                    label = {
+                        Text("Saldo")
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                var expanded by remember {
+                    mutableStateOf(false)
+                }
+
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = {
+                        expanded = !expanded
+                    }
+                ) {
+
+                    OutlinedTextField(
+                        value = accountType,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = {
+                            Text("Tipe")
+                        },
+                        modifier = Modifier.menuAnchor(
+                            MenuAnchorType.PrimaryNotEditable,
+                            enabled = true
+                        )
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = {
+                            expanded = false
+                        }
+                    ) {
+                        listOf(
+                            "CASH",
+                            "BANK",
+                            "E_WALLET"
+                        ).forEach { type ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(type)
+                                },
+                                onClick = {
+                                    accountType = type
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        },
+
+        confirmButton = {
+
+            Button(
+                onClick = {
+                    onSave(
+                        account.copy(
+                            name = accountName,
+                            balance = accountBalance.toDoubleOrNull() ?: 0.0,
+                            type = accountType
+                        )
+                    )
+                }
+            ) {
+                Text("Simpan")
+            }
+        },
+
+        dismissButton = {
+            OutlinedButton(
+                onClick = onDismiss
+            ) {
+                Text("Batal")
+            }
+        }
+    )
 }
