@@ -42,9 +42,20 @@ class AccountViewModel @Inject constructor(
         }
     }
 
-    fun deleteAccount(account: AccountEntity) {
+    fun softDeleteAccount(account: AccountEntity) {
         viewModelScope.launch {
-            repository.deleteAccount(account)
+            repository.softDeleteAccount(account)
+        }
+    }
+
+    fun getAccountById(
+        id: Long,
+        onResult: (AccountEntity?) -> Unit
+    ) {
+        viewModelScope.launch {
+            onResult(
+                repository.getAccountById(id)
+            )
         }
     }
 }

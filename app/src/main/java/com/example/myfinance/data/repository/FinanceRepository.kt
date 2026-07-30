@@ -100,4 +100,13 @@ class FinanceRepository @Inject constructor(
             categoryDao.deleteAll()
         }
     }
+
+    suspend fun getAccountById(id: Long): AccountEntity? =
+        accountDao.getById(id)
+
+    suspend fun softDeleteAccount(account: AccountEntity) {
+        accountDao.update(
+            account.copy(isActive = false)
+        )
+    }
 }

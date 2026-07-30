@@ -23,6 +23,8 @@ import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatRupiah
 import com.example.myfinance.ui.components.BackgroundPattern
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Delete
 
 @Composable
 fun AccountScreen(
@@ -32,6 +34,12 @@ fun AccountScreen(
     val accounts by viewModel.accounts.collectAsStateWithLifecycle()
     val totalBalance by viewModel.totalBalance.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
+    var accountToEdit by remember {
+        mutableStateOf<AccountEntity?>(null)
+    }
+    var accountToDelete by remember {
+        mutableStateOf<AccountEntity?>(null)
+    }
 
     if (showAddDialog) {
         AddAccountDialog(
@@ -80,6 +88,44 @@ fun AccountScreen(
                         modifier = Modifier.size(20.dp)
                     )
                 }
+            }
+
+            if (accountToDelete != null) {
+
+                AlertDialog(
+                    onDismissRequest = {
+                        accountToDelete = null
+                    },
+                    title = {
+                        Text("Hapus akun?")
+                    },
+                    text = {
+                        Text(
+                            "Akun ${accountToDelete!!.name} akan disembunyikan."
+                        )
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                viewModel.softDeleteAccount(
+                                    accountToDelete!!
+                                )
+                                accountToDelete = null
+                            }
+                        ) {
+                            Text("Hapus")
+                        }
+                    },
+                    dismissButton = {
+                        OutlinedButton(
+                            onClick = {
+                                accountToDelete = null
+                            }
+                        ) {
+                            Text("Batal")
+                        }
+                    }
+                )
             }
 
             Box(
@@ -139,7 +185,15 @@ fun AccountScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(accounts) { account ->
-                        AccountItem(account = account)
+                        AccountItem(
+                            account = account,
+                            onEdit = {
+                                accountToEdit = account
+                            },
+                            onDelete = {
+                                accountToDelete = account
+                            }
+                        )
                     }
                 }
             }
@@ -148,7 +202,11 @@ fun AccountScreen(
 }
 
 @Composable
-private fun AccountItem(account: AccountEntity) {
+private fun AccountItem(
+    account: AccountEntity,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -194,11 +252,31 @@ private fun AccountItem(account: AccountEntity) {
                 )
             }
         }
-        Text(
-            text = formatRupiah(account.balance),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            color = TextPrimary
-        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = formatRupiah(account.balance),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(onClick = onEdit) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit",
+                    tint = AccentPurple
+                )
+            }
+            IconButton(onClick = onDelete) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = ExpenseRed
+                )
+            }
+        }
     }
 }
