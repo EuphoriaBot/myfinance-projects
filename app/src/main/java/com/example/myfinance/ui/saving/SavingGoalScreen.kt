@@ -27,6 +27,8 @@ import kotlinx.coroutines.launch
 import com.example.myfinance.ui.components.BackgroundPattern
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myfinance.utils.formatInputNumber
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Delete
 
 @Composable
 fun SavingGoalScreen(
@@ -34,13 +36,80 @@ fun SavingGoalScreen(
     viewModel: SavingGoalViewModel = hiltViewModel()
 ) {
     val goals by viewModel.goals.collectAsStateWithLifecycle()
-
     var showAddDialog by remember { mutableStateOf(false) }
+    var goalToEdit by remember {
+        mutableStateOf<SavingGoalEntity?>(null)
+    }
+    var goalToDelete by remember {
+        mutableStateOf<SavingGoalEntity?>(null)
+    }
 
     if (showAddDialog) {
         AddSavingGoalDialog(
             viewModel = viewModel,
             onDismiss = { showAddDialog = false }
+        )
+    }
+
+    if (goalToEdit != null) {
+        EditSavingGoalDialog(
+            goal = goalToEdit!!,
+            onDismiss = {
+                goalToEdit = null
+            },
+            onSave = { updatedGoal ->
+                viewModel.updateGoal(updatedGoal)
+                goalToEdit = null
+            }
+        )
+    }
+
+    if (goalToDelete != null) {
+        AlertDialog(
+            onDismissRequest = {
+                goalToDelete = null
+            },
+            title = {
+                Text(
+                    "Hapus Target?",
+                    color = TextPrimary
+                )
+            },
+            text = {
+                Text(
+                    "Target \"${goalToDelete!!.name}\" akan dihapus.",
+                    color = TextSecondary
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.deleteGoal(goalToDelete!!)
+                        goalToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ExpenseRed
+                    )
+                ) {
+                    Text(
+                        "Hapus",
+                        color = Color.White
+                    )
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = {
+                        goalToDelete = null
+                    }
+                ) {
+                    Text(
+                        "Batal",
+                        color = TextMuted
+                    )
+                }
+            },
+            containerColor = DarkCard
         )
     }
 
@@ -114,7 +183,13 @@ fun SavingGoalScreen(
                     items(goals) { goal ->
                         SavingGoalItem(
                             goal = goal,
-                            viewModel = viewModel
+                            viewModel = viewModel,
+                            onEdit = {
+                                goalToEdit = goal
+                            },
+                            onDelete = {
+                                goalToDelete = goal
+                            }
                         )
                     }
                 }
@@ -126,7 +201,9 @@ fun SavingGoalScreen(
 @Composable
 private fun SavingGoalItem(
     goal: SavingGoalEntity,
-    viewModel: SavingGoalViewModel
+    viewModel: SavingGoalViewModel,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
 ) {
     var showAddFundsDialog by remember { mutableStateOf(false) }
 
@@ -220,19 +297,43 @@ private fun SavingGoalItem(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            if (!isCompleted) {
-                OutlinedButton(
-                    onClick = { showAddFundsDialog = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
-                        brush = androidx.compose.ui.graphics.SolidColor(AccentPurple)
-                    ),
-                    shape = RoundedCornerShape(10.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (!isCompleted) {
+                    OutlinedButton(
+                        onClick = { showAddFundsDialog = true },
+                        modifier = Modifier.weight(1f),
+                        border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
+                            brush = androidx.compose.ui.graphics.SolidColor(AccentPurple)
+                        ),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text(
+                            text = "Tambah Dana",
+                            color = AccentPurple
+                        )
+                    }
+                }
+
+                IconButton(
+                    onClick = onEdit
                 ) {
-                    Text(
-                        text = "Tambah Dana",
-                        fontSize = 13.sp,
-                        color = AccentPurple
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = AccentPurple
+                    )
+                }
+
+                IconButton(
+                    onClick = onDelete
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = ExpenseRed
                     )
                 }
             }
@@ -344,6 +445,129 @@ private fun AddSavingGoalDialog(
                         enabled = !isLoading && name.isNotEmpty() && targetAmount.isNotEmpty()
                     ) {
                         Text("Simpan", color = Color.White)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EditSavingGoalDialog(
+    goal: SavingGoalEntity,
+    onDismiss: () -> Unit,
+    onSave: (SavingGoalEntity) -> Unit
+) {
+    var name by remember {
+        mutableStateOf(goal.name)
+    }
+
+    var targetAmount by remember {
+        mutableStateOf(goal.targetAmount.toLong().toString())
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(DarkCard, RoundedCornerShape(16.dp))
+                .padding(20.dp)
+        ) {
+            Column {
+                Text(
+                    text = "Edit Target Nabung",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    "Nama Goal",
+                    fontSize = 12.sp,
+                    color = TextSecondary
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = AccentPurple,
+                        unfocusedBorderColor = BorderSubtle,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        cursorColor = AccentPurple,
+                        focusedContainerColor = DarkBackground,
+                        unfocusedContainerColor = DarkBackground
+                    ),
+                    shape = RoundedCornerShape(10.dp)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    "Target Nominal",
+                    fontSize = 12.sp,
+                    color = TextSecondary
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = if (targetAmount.isEmpty()) "" else formatInputNumber(targetAmount),
+                    onValueChange = {
+                        targetAmount = it.replace(".", "")
+                            .filter(Char::isDigit)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    prefix = { Text("Rp ", color = TextMuted) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = AccentPurple,
+                        unfocusedBorderColor = BorderSubtle,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        cursorColor = AccentPurple,
+                        focusedContainerColor = DarkBackground,
+                        unfocusedContainerColor = DarkBackground
+                    ),
+                    shape = RoundedCornerShape(10.dp)
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Batal")
+                    }
+
+                    Button(
+                        onClick = {
+                            val target = targetAmount.toDoubleOrNull() ?: return@Button
+                            onSave(
+                                goal.copy(
+                                    name = name,
+                                    targetAmount = target
+                                )
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AccentPurple
+                        )
+                    ) {
+                        Text("Simpan")
                     }
                 }
             }
