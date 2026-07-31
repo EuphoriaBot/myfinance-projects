@@ -28,10 +28,17 @@ class DatabasePassphraseManager @Inject constructor(
         val iv = prefs.getString(PREF_IV, null)
 
         if (encrypted != null && iv != null) {
-            return keystoreManager.decrypt(
-                Base64.decode(encrypted, Base64.DEFAULT),
-                Base64.decode(iv, Base64.DEFAULT)
-            )
+            try {
+                return keystoreManager.decrypt(
+                    Base64.decode(encrypted, Base64.DEFAULT),
+                    Base64.decode(iv, Base64.DEFAULT)
+                )
+            } catch (_: Exception) {
+                prefs.edit {
+                    remove(PREF_ENCRYPTED_PASSPHRASE)
+                    remove(PREF_IV)
+                }
+            }
         }
 
         val randomPassphrase = Random.nextBytes(32)
