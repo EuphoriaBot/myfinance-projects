@@ -47,6 +47,7 @@ fun EditTransactionScreen(
     var note by remember { mutableStateOf(transaction.note) }
     var selectedType by remember { mutableStateOf(transaction.type) }
     var selectedAccount by remember { mutableStateOf<AccountEntity?>(null) }
+    var selectedToAccount by remember { mutableStateOf<AccountEntity?>(null) }
     var selectedCategory by remember { mutableStateOf<CategoryEntity?>(null) }
     val accounts by viewModel.accounts.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
@@ -56,11 +57,22 @@ fun EditTransactionScreen(
     }
 
     LaunchedEffect(accounts) {
-        selectedAccount =
-            accounts.find { it.id == transaction.accountId }
+        selectedAccount = accounts.find { it.id == transaction.accountId }
+        selectedToAccount = accounts.find { it.id == transaction.toAccountId }
+    }
+
+    LaunchedEffect(selectedAccount) {
+        if (selectedToAccount?.id == selectedAccount?.id) {
+            selectedToAccount = accounts.firstOrNull { it.id != selectedAccount?.id }
+        }
     }
 
     LaunchedEffect(categories, selectedType) {
+        if (selectedType == "TRANSFER") {
+            selectedCategory = null
+            return@LaunchedEffect
+        }
+
         val currentCategoryStillExists =
             categories.any { it.id == selectedCategory?.id }
 
@@ -112,7 +124,8 @@ fun EditTransactionScreen(
             ) {
                 listOf(
                     "EXPENSE" to "Pengeluaran",
-                    "INCOME" to "Pemasukan"
+                    "INCOME" to "Pemasukan",
+                    "TRANSFER" to "Transfer"
                 ).forEach { (type, label) ->
                     Button(
                         onClick = { selectedType = type },
@@ -127,7 +140,6 @@ fun EditTransactionScreen(
                     ) {
                         Text(text = label, fontSize = 12.sp)
                     }
-                    Spacer(modifier = Modifier.height(20.dp))
                 }
             }
 
@@ -179,7 +191,14 @@ fun EditTransactionScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Akun", fontSize = 13.sp, color = TextSecondary)
+            Text(
+                text = if (selectedType == "TRANSFER")
+                    "Dari Akun"
+                else
+                    "Akun",
+                fontSize = 13.sp,
+                color = TextSecondary
+            )
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 accounts.forEach { account ->
@@ -197,29 +216,64 @@ fun EditTransactionScreen(
                 }
             }
 
+            if (selectedType == "TRANSFER") {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    "Ke Akun",
+                    fontSize = 13.sp,
+                    color = TextSecondary
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    accounts
+                        .filter { it.id != selectedAccount?.id }
+                        .forEach { account ->
+                            FilterChip(
+                                selected = selectedToAccount?.id == account.id,
+                                onClick = {
+                                    selectedToAccount = account
+                                },
+                                label = {
+                                    Text(account.name)
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = IncomeGreen,
+                                    selectedLabelColor = Color.White,
+                                    containerColor = DarkCard,
+                                    labelColor = TextMuted
+                                )
+                            )
+                        }
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Kategori", fontSize = 13.sp, color = TextSecondary)
-            Spacer(modifier = Modifier.height(8.dp))
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                categories
-                    .filter { it.type == selectedType }
-                    .forEach { category ->
-                    FilterChip(
-                        selected = selectedCategory?.id == category.id,
-                        onClick = { selectedCategory = category },
-                        label = { Text(category.name, fontSize = 11.sp) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = AccentPurple,
-                            selectedLabelColor = Color.White,
-                            containerColor = DarkCard,
-                            labelColor = TextMuted
-                        )
-                    )
+            if (selectedType != "TRANSFER") {
+                Text("Kategori", fontSize = 13.sp, color = TextSecondary)
+                Spacer(modifier = Modifier.height(8.dp))
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    categories
+                        .filter { it.type == selectedType }
+                        .forEach { category ->
+                            FilterChip(
+                                selected = selectedCategory?.id == category.id,
+                                onClick = { selectedCategory = category },
+                                label = { Text(category.name, fontSize = 11.sp) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = AccentPurple,
+                                    selectedLabelColor = Color.White,
+                                    containerColor = DarkCard,
+                                    labelColor = TextMuted
+                                )
+                            )
+                        }
                 }
             }
 
@@ -239,9 +293,9 @@ fun EditTransactionScreen(
                     errorMessage = viewModel.validateTransaction(
                         amount = amount,
                         account = selectedAccount,
-                        category = selectedCategory,
+                        category = if (selectedType == "TRANSFER") null else selectedCategory,
                         type = selectedType,
-                        toAccount = null
+                        toAccount = selectedToAccount
                     )
 
                     if (errorMessage != null) {
@@ -250,62 +304,95 @@ fun EditTransactionScreen(
 
                     val amountValue = amount.toDouble()
                     val account = selectedAccount!!
-                    val category = selectedCategory!!
 
                     scope.launch {
                         isLoading = true
-
-                        val oldAccount = viewModel.getAccountById(transaction.accountId)
-
-                        if (oldAccount != null) {
-                            val restoredBalance = when (transaction.type) {
-                                "INCOME" ->
-                                    oldAccount.balance - transaction.amount
-                                "EXPENSE" ->
-                                    oldAccount.balance + transaction.amount
-                                else ->
-                                    oldAccount.balance
+                        when (transaction.type) {
+                            "INCOME" -> {
+                                viewModel.getAccountById(transaction.accountId)?.let {
+                                    viewModel.updateAccount(
+                                        it.copy(balance = it.balance - transaction.amount)
+                                    )
+                                }
                             }
-                            viewModel.updateAccount(
-                                oldAccount.copy(
-                                    balance = restoredBalance
-                                )
-                            )
+
+                            "EXPENSE" -> {
+                                viewModel.getAccountById(transaction.accountId)?.let {
+                                    viewModel.updateAccount(
+                                        it.copy(balance = it.balance + transaction.amount)
+                                    )
+                                }
+                            }
+
+                            "TRANSFER" -> {
+                                viewModel.getAccountById(transaction.accountId)?.let {
+                                    viewModel.updateAccount(
+                                        it.copy(balance = it.balance + transaction.amount)
+                                    )
+                                }
+
+                                transaction.toAccountId?.let { toId ->
+                                    viewModel.getAccountById(toId)?.let {
+                                        viewModel.updateAccount(
+                                            it.copy(balance = it.balance - transaction.amount)
+                                        )
+                                    }
+                                }
+                            }
                         }
 
-                        val newAccount = viewModel.getAccountById(account.id)
-
-                        viewModel.updateTransaction(
-                            transaction.copy(
-                                amount = amountValue,
-                                note = note,
-                                type = selectedType,
-                                categoryId = category.id,
-                                accountId = account.id
-                            )
-                        )
-
-                        if (newAccount != null) {
-                            val newBalance = when (selectedType) {
-                                "INCOME" ->
-                                    newAccount.balance + amountValue
-                                "EXPENSE" ->
-                                    newAccount.balance - amountValue
-                                else ->
-                                    newAccount.balance
-
-                            }
-                            viewModel.updateAccount(
-                                newAccount.copy(
-                                    balance = newBalance
+                        if (selectedType == "TRANSFER") {
+                            val toAccount = selectedToAccount!!
+                            viewModel.updateTransaction(
+                                transaction.copy(
+                                    amount = amountValue,
+                                    note = note,
+                                    type = "TRANSFER",
+                                    categoryId = 0,
+                                    accountId = account.id,
+                                    toAccountId = toAccount.id
                                 )
                             )
-                        }
 
+                            viewModel.updateAccount(
+                                account.copy(
+                                    balance = account.balance - amountValue
+                                )
+                            )
+
+                            viewModel.updateAccount(
+                                toAccount.copy(
+                                    balance = toAccount.balance + amountValue
+                                )
+                            )
+
+                        } else {
+                            val category = selectedCategory!!
+                            viewModel.updateTransaction(
+                                transaction.copy(
+                                    amount = amountValue,
+                                    note = note,
+                                    type = selectedType,
+                                    categoryId = category.id,
+                                    accountId = account.id,
+                                    toAccountId = null
+                                )
+                            )
+
+                            val newBalance =
+                                if (selectedType == "INCOME")
+                                    account.balance + amountValue
+                                else
+                                    account.balance - amountValue
+                            viewModel.updateAccount(
+                                account.copy(balance = newBalance)
+                            )
+                        }
                         isLoading = false
                         onDismiss()
                     }
                 },
+
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
