@@ -98,6 +98,25 @@ class FinanceRepository @Inject constructor(
     suspend fun getAccountById(id: Long): AccountEntity? =
         accountDao.getById(id)
 
+    suspend fun transferMoney(
+        fromAccount: AccountEntity,
+        toAccount: AccountEntity,
+        amount: Double
+    ) {
+        database.withTransaction {
+            accountDao.update(
+                fromAccount.copy(
+                    balance = fromAccount.balance - amount
+                )
+            )
+            accountDao.update(
+                toAccount.copy(
+                    balance = toAccount.balance + amount
+                )
+            )
+        }
+    }
+
     suspend fun softDeleteAccount(account: AccountEntity) {
         accountDao.update(
             account.copy(isActive = false)
