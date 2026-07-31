@@ -111,4 +111,18 @@ class TransactionViewModel @Inject constructor(
             repository.updateAccount(account)
         }
     }
+
+    fun transferMoney(
+        fromAccount: AccountEntity,
+        toAccount: AccountEntity,
+        amount: Double
+    ) {
+        viewModelScope.launch {
+            repository.transferMoney(
+                fromAccount = fromAccount,
+                toAccount = toAccount,
+                amount = amount
+            )
+        }
+    }
 }
