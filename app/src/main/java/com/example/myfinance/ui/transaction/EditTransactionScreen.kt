@@ -61,8 +61,12 @@ fun EditTransactionScreen(
     }
 
     LaunchedEffect(categories, selectedType) {
-        selectedCategory =
-            categories.find { it.id == transaction.categoryId }
+        val currentCategoryStillExists =
+            categories.any { it.id == selectedCategory?.id }
+
+        if (!currentCategoryStillExists || selectedCategory?.type != selectedType) {
+            selectedCategory = categories.firstOrNull { it.type == selectedType }
+        }
     }
 
     Box(
@@ -202,7 +206,9 @@ fun EditTransactionScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                categories.forEach { category ->
+                categories
+                    .filter { it.type == selectedType }
+                    .forEach { category ->
                     FilterChip(
                         selected = selectedCategory?.id == category.id,
                         onClick = { selectedCategory = category },
