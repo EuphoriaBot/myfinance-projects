@@ -39,12 +39,21 @@ fun TransactionScreen(
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
 
     if (editingTransaction != null) {
-        EditTransactionScreen(
-            transaction = editingTransaction!!,
-            onDismiss = {
-                editingTransaction = null
-            }
-        )
+        if (editingTransaction!!.type == "TRANSFER") {
+            EditTransferScreen(
+                transaction = editingTransaction!!,
+                onDismiss = {
+                    editingTransaction = null
+                }
+            )
+        } else {
+            EditTransactionScreen(
+                transaction = editingTransaction!!,
+                onDismiss = {
+                    editingTransaction = null
+                }
+            )
+        }
         return
     }
 
