@@ -74,8 +74,8 @@ fun EditTransactionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(24.dp)
                 .navigationBarsPadding()
+                .padding(24.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -217,7 +217,7 @@ fun EditTransactionScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(100.dp))
 
             errorMessage?.let {
                 Text(
