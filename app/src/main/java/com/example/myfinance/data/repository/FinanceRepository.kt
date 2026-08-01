@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import com.example.myfinance.data.local.database.AppDatabase
 import androidx.room.withTransaction
+import kotlinx.coroutines.flow.first
 
 class FinanceRepository @Inject constructor(
     private val database: AppDatabase,
@@ -77,6 +78,21 @@ class FinanceRepository @Inject constructor(
             startDate,
             endDate
         )
+
+    suspend fun getSpentAmountByCategory(
+        categoryId: Long,
+        startDate: Long,
+        endDate: Long
+    ): Double {
+        return transactionDao
+            .getTransactionsByCategoryAndDateRange(
+                categoryId,
+                startDate,
+                endDate
+            )
+            .first()
+            .sumOf { it.amount }
+    }
 
     fun getAllBudgets(): Flow<List<BudgetEntity>> =
         budgetDao.getAll()

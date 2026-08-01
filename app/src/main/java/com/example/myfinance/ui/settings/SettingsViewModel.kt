@@ -22,6 +22,9 @@ import android.net.Uri
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.example.myfinance.ui.components.BudgetUiModel
+import com.example.myfinance.utils.getCurrentMonthRange
+import kotlinx.coroutines.flow.combine
 
 sealed class BackupState {
     object Idle : BackupState()
@@ -49,6 +52,32 @@ class SettingsViewModel @Inject constructor(
 
     val budgets: StateFlow<List<BudgetEntity>> = repository.getAllBudgets()
         .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    val budgetProgress: StateFlow<List<BudgetUiModel>> =
+        combine(
+            repository.getAllBudgets(),
+            repository.getAllCategories()
+        ) { budgets, categories ->
+            val (startDate, endDate) = getCurrentMonthRange()
+            budgets.map { budget ->
+                val spent = repository.getSpentAmountByCategory(
+                    categoryId = budget.categoryId,
+                    startDate = startDate,
+                    endDate = endDate
+                )
+                BudgetUiModel(
+                    categoryName = categories.find {
+                        it.id == budget.categoryId
+                    }?.name ?: "Kategori",
+                    spent = spent,
+                    limit = budget.limitAmount
+                )
+            }
+        }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
