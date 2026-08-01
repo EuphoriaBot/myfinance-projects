@@ -82,7 +82,7 @@ class SettingsViewModel @Inject constructor(
 
     fun updateBudget(budget: BudgetEntity) {
         viewModelScope.launch {
-            repository.insertBudget(budget)
+            repository.updateBudget(budget)
         }
     }
 

@@ -73,6 +73,9 @@ class FinanceRepository @Inject constructor(
     suspend fun insertBudget(budget: BudgetEntity): Long =
         budgetDao.insert(budget)
 
+    suspend fun updateBudget(budget: BudgetEntity) =
+        budgetDao.update(budget)
+
     suspend fun deleteBudget(budget: BudgetEntity) =
         budgetDao.delete(budget)
 
