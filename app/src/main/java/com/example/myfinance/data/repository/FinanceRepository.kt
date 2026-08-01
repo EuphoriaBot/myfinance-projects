@@ -33,6 +33,9 @@ class FinanceRepository @Inject constructor(
     suspend fun insertCategory(category: CategoryEntity): Long =
         categoryDao.insert(category)
 
+    suspend fun updateCategory(category: CategoryEntity) =
+        categoryDao.update(category)
+
     suspend fun deleteCategory(category: CategoryEntity) =
         categoryDao.delete(category)
 
