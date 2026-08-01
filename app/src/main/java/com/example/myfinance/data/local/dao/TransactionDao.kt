@@ -56,4 +56,17 @@ interface TransactionDao {
 
     @Query("DELETE FROM transactions")
     suspend fun deleteAll()
+
+    @Query("""
+        SELECT *
+        FROM transactions
+        WHERE categoryId = :categoryId
+        AND type = 'EXPENSE'
+        AND date BETWEEN :startDate AND :endDate
+        """)
+    fun getTransactionsByCategoryAndDateRange(
+        categoryId: Long,
+        startDate: Long,
+        endDate: Long
+    ): Flow<List<TransactionEntity>>
 }

@@ -67,6 +67,17 @@ class FinanceRepository @Inject constructor(
     suspend fun deleteTransaction(transaction: TransactionEntity) =
         transactionDao.delete(transaction)
 
+    fun getTransactionsByCategoryAndDateRange(
+        categoryId: Long,
+        startDate: Long,
+        endDate: Long
+    ): Flow<List<TransactionEntity>> =
+        transactionDao.getTransactionsByCategoryAndDateRange(
+            categoryId,
+            startDate,
+            endDate
+        )
+
     fun getAllBudgets(): Flow<List<BudgetEntity>> =
         budgetDao.getAll()
 
