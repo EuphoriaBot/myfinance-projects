@@ -34,6 +34,7 @@ fun CategoryScreen(
     var showAddDialog by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableStateOf("EXPENSE") }
     var categoryToDelete by remember { mutableStateOf<CategoryEntity?>(null) }
+    var categoryToEdit by remember { mutableStateOf<CategoryEntity?>(null) }
 
     if (showAddDialog) {
         AddCategoryDialog(
@@ -43,8 +44,19 @@ fun CategoryScreen(
         )
     }
 
+    if (categoryToEdit != null) {
+        EditCategoryDialog(
+            category = categoryToEdit!!,
+            viewModel = viewModel,
+            onDismiss = {
+                categoryToEdit = null
+            }
+        )
+    }
+
     if (categoryToDelete != null) {
         DeleteCategoryDialog(
+
             category = categoryToDelete!!,
             viewModel = viewModel,
             onDismiss = { categoryToDelete = null }
@@ -141,7 +153,12 @@ fun CategoryScreen(
                 items(filteredCategories) { category ->
                     CategoryItem(
                         category = category,
-                        onDelete = { categoryToDelete = category }
+                        onEdit = {
+                            categoryToEdit = category
+                        },
+                        onDelete = {
+                            categoryToDelete = category
+                        }
                     )
                 }
             }
@@ -152,6 +169,7 @@ fun CategoryScreen(
 @Composable
 private fun CategoryItem(
     category: CategoryEntity,
+    onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     Row(
@@ -192,13 +210,24 @@ private fun CategoryItem(
                 color = TextPrimary
             )
         }
-        IconButton(onClick = onDelete) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Hapus",
-                tint = ExpenseRed.copy(alpha = 0.7f),
-                modifier = Modifier.size(18.dp)
-            )
+        Row {
+            IconButton(onClick = onEdit) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit",
+                    tint = AccentPurple,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            IconButton(onClick = onDelete) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Hapus",
+                    tint = ExpenseRed.copy(alpha = 0.7f),
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
     }
 }
@@ -347,6 +376,123 @@ private fun AddCategoryDialog(
                         enabled = !isLoading && name.isNotBlank()
                     ) {
                         Text("Simpan", color = Color.White)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EditCategoryDialog(
+    category: CategoryEntity,
+    viewModel: CategoryViewModel,
+    onDismiss: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    var name by remember { mutableStateOf(category.name) }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    Dialog(onDismissRequest = onDismiss) {
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    DarkCard,
+                    RoundedCornerShape(16.dp)
+                )
+                .padding(20.dp)
+        ) {
+            Column {
+                Text(
+                    text = "Edit Kategori",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = {
+                        name = it
+                        errorMessage = null
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = errorMessage != null,
+                    supportingText = {
+                        errorMessage?.let {
+                            Text(it, color = MaterialTheme.colorScheme.error)
+                        }
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = AccentPurple,
+                        unfocusedBorderColor = BorderSubtle,
+                        focusedContainerColor = DarkBackground,
+                        unfocusedContainerColor = DarkBackground,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        cursorColor = AccentPurple
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onDismiss
+                    ) {
+                        Text("Batal")
+                    }
+
+                    Button(
+                        modifier = Modifier.weight(1f),
+                        enabled = !isLoading,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AccentPurple
+                        ),
+                        onClick = {
+                            val cleanName = name.trim()
+                            when {
+                                cleanName.isBlank() -> {
+                                    errorMessage = "Nama kategori tidak boleh kosong"
+                                    return@Button
+                                }
+
+                                cleanName.length > 30 -> {
+                                    errorMessage = "Maksimal 30 karakter"
+                                    return@Button
+                                }
+
+                                cleanName.equals(category.name, true).not() && viewModel.categoryExists(
+                                    cleanName,
+                                    category.type
+                                ) -> {
+                                    errorMessage = "Kategori sudah ada"
+                                    return@Button
+                                }
+                            }
+
+                            scope.launch {
+                                isLoading = true
+                                viewModel.updateCategory(
+                                    category.copy(
+                                        name = cleanName
+                                    )
+                                )
+                                isLoading = false
+                                onDismiss()
+                            }
+                        }
+                    ) {
+                        Text("Simpan")
                     }
                 }
             }
