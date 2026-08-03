@@ -53,13 +53,44 @@ fun TransactionDetailSheet(
                         scope.launch {
                             val account = accounts.find { it.id == transaction.accountId }
                             if (account != null) {
-                                val restoredBalance = when (transaction.type) {
-                                    "INCOME" -> account.balance - transaction.amount
-                                    "EXPENSE" -> account.balance + transaction.amount
-                                    else -> account.balance
+                                when (transaction.type) {
+                                    "INCOME" -> {
+                                        viewModel.updateAccount(
+                                            account.copy(
+                                                balance = account.balance - transaction.amount
+                                            )
+                                        )
+                                    }
+
+                                    "EXPENSE" -> {
+                                        viewModel.updateAccount(
+                                            account.copy(
+                                                balance = account.balance + transaction.amount
+                                            )
+                                        )
+                                    }
+
+                                    "TRANSFER" -> {
+                                        viewModel.updateAccount(
+                                            account.copy(
+                                                balance = account.balance + transaction.amount
+                                            )
+                                        )
+
+                                        val toAccount =
+                                            accounts.find { it.id == transaction.toAccountId }
+
+                                        if (toAccount != null) {
+                                            viewModel.updateAccount(
+                                                toAccount.copy(
+                                                    balance = toAccount.balance - transaction.amount
+                                                )
+                                            )
+                                        }
+                                    }
                                 }
-                                viewModel.updateAccount(account.copy(balance = restoredBalance))
                             }
+
                             viewModel.deleteTransaction(transaction)
                             onDismiss()
                         }
