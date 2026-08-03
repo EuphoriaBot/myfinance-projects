@@ -150,6 +150,45 @@ class FinanceRepository @Inject constructor(
         }
     }
 
+    suspend fun updateTransfer(
+        oldTransaction: TransactionEntity,
+        newTransaction: TransactionEntity
+    ) {
+        database.withTransaction {
+            val oldFrom = accountDao.getById(oldTransaction.accountId)!!
+            val oldTo = accountDao.getById(oldTransaction.toAccountId!!)!!
+
+            accountDao.update(
+                oldFrom.copy(
+                    balance = oldFrom.balance + oldTransaction.amount
+                )
+            )
+
+            accountDao.update(
+                oldTo.copy(
+                    balance = oldTo.balance - oldTransaction.amount
+                )
+            )
+
+            val newFrom = accountDao.getById(newTransaction.accountId)!!
+            val newTo = accountDao.getById(newTransaction.toAccountId!!)!!
+
+            accountDao.update(
+                newFrom.copy(
+                    balance = newFrom.balance - newTransaction.amount
+                )
+            )
+
+            accountDao.update(
+                newTo.copy(
+                    balance = newTo.balance + newTransaction.amount
+                )
+            )
+
+            transactionDao.update(newTransaction)
+        }
+    }
+
     suspend fun softDeleteAccount(account: AccountEntity) {
         accountDao.update(
             account.copy(isActive = false)
