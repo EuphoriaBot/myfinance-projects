@@ -342,27 +342,18 @@ fun EditTransactionScreen(
                         }
 
                         if (selectedType == "TRANSFER") {
+
                             val toAccount = selectedToAccount!!
-                            viewModel.updateTransaction(
-                                transaction.copy(
+
+                            viewModel.updateTransfer(
+                                oldTransaction = transaction,
+                                newTransaction = transaction.copy(
                                     amount = amountValue,
                                     note = note,
                                     type = "TRANSFER",
                                     categoryId = 0,
                                     accountId = account.id,
                                     toAccountId = toAccount.id
-                                )
-                            )
-
-                            viewModel.updateAccount(
-                                account.copy(
-                                    balance = account.balance - amountValue
-                                )
-                            )
-
-                            viewModel.updateAccount(
-                                toAccount.copy(
-                                    balance = toAccount.balance + amountValue
                                 )
                             )
 
