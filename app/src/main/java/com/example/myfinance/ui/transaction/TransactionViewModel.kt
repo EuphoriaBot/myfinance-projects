@@ -84,6 +84,50 @@ class TransactionViewModel @Inject constructor(
         return null
     }
 
+    fun validateEditTransfer(
+        amount: String,
+        oldTransaction: TransactionEntity,
+        fromAccount: AccountEntity?,
+        toAccount: AccountEntity?
+    ): String? {
+
+        val amountValue = amount.toDoubleOrNull()
+
+        if (amount.isBlank())
+            return "Jumlah tidak boleh kosong"
+
+        if (amountValue == null || amountValue <= 0)
+            return "Jumlah harus lebih dari 0"
+
+        if (fromAccount == null)
+            return "Pilih akun asal"
+
+        if (toAccount == null)
+            return "Pilih akun tujuan"
+
+        if (fromAccount.id == toAccount.id)
+            return "Akun asal dan tujuan tidak boleh sama"
+
+        var availableBalance = fromAccount.balance
+
+        when (fromAccount.id) {
+
+            oldTransaction.accountId -> {
+                availableBalance += oldTransaction.amount
+            }
+
+            oldTransaction.toAccountId -> {
+                availableBalance -= oldTransaction.amount
+            }
+        }
+
+        if (amountValue > availableBalance) {
+            return "Saldo akun tidak mencukupi"
+        }
+
+        return null
+    }
+
     fun insertTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
             repository.insertTransaction(transaction)

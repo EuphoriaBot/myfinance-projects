@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.myfinance.utils.formatInputNumber
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -117,7 +118,7 @@ fun EditTransferScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = amount,
+                value = if (amount.isEmpty()) "" else formatInputNumber(amount),
                 onValueChange = {
                     amount = it.filter { char -> char.isDigit() }
                 },
@@ -264,20 +265,32 @@ fun EditTransferScreen(
 
             Button(
                 onClick = {
+                    val amountValue = amount.toDouble()
+                    var availableBalance = selectedFromAccount!!.balance
 
-                    errorMessage = viewModel.validateTransaction(
+                    if (selectedFromAccount!!.id == transaction.toAccountId) {
+                        availableBalance -= transaction.amount
+                    }
+
+                    if (selectedFromAccount!!.id == transaction.accountId) {
+                        availableBalance += transaction.amount
+                    }
+
+                    if (amountValue > availableBalance) {
+                        errorMessage = "Saldo akun tidak mencukupi"
+                        return@Button
+                    }
+
+                    errorMessage = viewModel.validateEditTransfer(
                         amount = amount,
-                        account = selectedFromAccount,
-                        category = null,
-                        type = "TRANSFER",
+                        oldTransaction = transaction,
+                        fromAccount = selectedFromAccount,
                         toAccount = selectedToAccount
                     )
 
                     if (errorMessage != null) {
                         return@Button
                     }
-
-                    val amountValue = amount.toDouble()
 
                     val newTransaction = transaction.copy(
                         amount = amountValue,

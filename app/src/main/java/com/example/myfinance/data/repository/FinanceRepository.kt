@@ -170,6 +170,8 @@ class FinanceRepository @Inject constructor(
                 )
             )
 
+            transactionDao.update(newTransaction)
+
             val newFrom = accountDao.getById(newTransaction.accountId)!!
             val newTo = accountDao.getById(newTransaction.toAccountId!!)!!
 
@@ -184,8 +186,6 @@ class FinanceRepository @Inject constructor(
                     balance = newTo.balance + newTransaction.amount
                 )
             )
-
-            transactionDao.update(newTransaction)
         }
     }
 
