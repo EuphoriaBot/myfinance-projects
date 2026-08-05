@@ -62,6 +62,37 @@ class FinanceRepository @Inject constructor(
     suspend fun insertTransaction(transaction: TransactionEntity): Long =
         transactionDao.insert(transaction)
 
+    suspend fun addTransaction(
+        transaction: TransactionEntity
+    ) {
+        database.withTransaction {
+
+            transactionDao.insert(transaction)
+
+            val account =
+                accountDao.getById(transaction.accountId)!!
+
+            val newBalance =
+                when (transaction.type) {
+
+                    "INCOME" ->
+                        account.balance + transaction.amount
+
+                    "EXPENSE" ->
+                        account.balance - transaction.amount
+
+                    else ->
+                        account.balance
+                }
+
+            accountDao.update(
+                account.copy(
+                    balance = newBalance
+                )
+            )
+        }
+    }
+
     suspend fun updateTransaction(
         oldTransaction: TransactionEntity,
         newTransaction: TransactionEntity

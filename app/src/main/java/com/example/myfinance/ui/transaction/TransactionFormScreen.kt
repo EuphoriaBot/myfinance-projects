@@ -408,7 +408,7 @@ fun TransactionFormScreen(
                         )
                     } else {
                         val category = selectedCategory ?: return@launch
-                        viewModel.insertTransaction(
+                        viewModel.addTransaction(
                             TransactionEntity(
                                 amount = amountValue,
                                 note = note,
@@ -420,12 +420,6 @@ fun TransactionFormScreen(
                                 recurringInterval = if (isRecurring) recurringInterval else null
                             )
                         )
-                        val newBalance = if (selectedType == "INCOME") {
-                            account.balance + amountValue
-                        } else {
-                            account.balance - amountValue
-                        }
-                        viewModel.updateAccount(account.copy(balance = newBalance))
                     }
                     isLoading = false
                     onDismiss()
