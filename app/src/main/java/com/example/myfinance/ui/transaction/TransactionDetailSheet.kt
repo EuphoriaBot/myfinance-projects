@@ -51,48 +51,9 @@ fun TransactionDetailSheet(
                 Button(
                     onClick = {
                         scope.launch {
-                            val account = accounts.find { it.id == transaction.accountId }
-                            if (account != null) {
-                                when (transaction.type) {
-                                    "INCOME" -> {
-                                        viewModel.updateAccount(
-                                            account.copy(
-                                                balance = account.balance - transaction.amount
-                                            )
-                                        )
-                                    }
-
-                                    "EXPENSE" -> {
-                                        viewModel.updateAccount(
-                                            account.copy(
-                                                balance = account.balance + transaction.amount
-                                            )
-                                        )
-                                    }
-
-                                    "TRANSFER" -> {
-                                        viewModel.updateAccount(
-                                            account.copy(
-                                                balance = account.balance + transaction.amount
-                                            )
-                                        )
-
-                                        val toAccount =
-                                            accounts.find { it.id == transaction.toAccountId }
-
-                                        if (toAccount != null) {
-                                            viewModel.updateAccount(
-                                                toAccount.copy(
-                                                    balance = toAccount.balance - transaction.amount
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
                             viewModel.deleteTransaction(transaction)
                             onDismiss()
+
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = ExpenseRed)
