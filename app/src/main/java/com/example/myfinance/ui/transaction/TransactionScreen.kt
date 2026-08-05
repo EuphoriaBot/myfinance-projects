@@ -29,6 +29,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun TransactionScreen(
     modifier: Modifier = Modifier,
+    onEditTransaction: (TransactionEntity) -> Unit,
     viewModel: TransactionViewModel = hiltViewModel()
 ) {
     val transactions by viewModel.transactions.collectAsStateWithLifecycle()
@@ -36,26 +37,6 @@ fun TransactionScreen(
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     var showSearch by remember { mutableStateOf(false) }
     var selectedTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
-    var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
-
-    if (editingTransaction != null) {
-        if (editingTransaction!!.type == "TRANSFER") {
-            EditTransferScreen(
-                transaction = editingTransaction!!,
-                onDismiss = {
-                    editingTransaction = null
-                }
-            )
-        } else {
-            EditTransactionScreen(
-                transaction = editingTransaction!!,
-                onDismiss = {
-                    editingTransaction = null
-                }
-            )
-        }
-        return
-    }
 
     if (selectedTransaction != null) {
         TransactionDetailSheet(
@@ -66,7 +47,9 @@ fun TransactionScreen(
                 selectedTransaction = null
             },
             onEdit = {
-                editingTransaction = selectedTransaction
+                selectedTransaction?.let {
+                    onEditTransaction(it)
+                }
                 selectedTransaction = null
             }
         )

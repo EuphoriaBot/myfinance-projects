@@ -62,8 +62,62 @@ class FinanceRepository @Inject constructor(
     suspend fun insertTransaction(transaction: TransactionEntity): Long =
         transactionDao.insert(transaction)
 
-    suspend fun updateTransaction(transaction: TransactionEntity) =
-        transactionDao.update(transaction)
+    suspend fun updateTransaction(
+        oldTransaction: TransactionEntity,
+        newTransaction: TransactionEntity
+    ) {
+        database.withTransaction {
+            when (oldTransaction.type) {
+
+                "INCOME" -> {
+                    val account = accountDao.getById(oldTransaction.accountId)!!
+
+                    accountDao.update(
+                        account.copy(
+                            balance = account.balance - oldTransaction.amount
+                        )
+                    )
+                }
+
+                "EXPENSE" -> {
+                    val account = accountDao.getById(oldTransaction.accountId)!!
+
+                    accountDao.update(
+                        account.copy(
+                            balance = account.balance + oldTransaction.amount
+                        )
+                    )
+                }
+            }
+
+            transactionDao.update(newTransaction)
+
+            when (newTransaction.type) {
+
+                "INCOME" -> {
+
+                    val account = accountDao.getById(newTransaction.accountId)!!
+
+                    accountDao.update(
+                        account.copy(
+                            balance = account.balance + newTransaction.amount
+                        )
+                    )
+                }
+
+                "EXPENSE" -> {
+
+                    val account = accountDao.getById(newTransaction.accountId)!!
+
+                    accountDao.update(
+                        account.copy(
+                            balance = account.balance - newTransaction.amount
+                        )
+                    )
+                }
+            }
+        }
+    }
 
     suspend fun deleteTransaction(transaction: TransactionEntity) =
         transactionDao.delete(transaction)
@@ -194,4 +248,6 @@ class FinanceRepository @Inject constructor(
             account.copy(isActive = false)
         )
     }
+
+
 }

@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.FlowRow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 
 private fun formatInputNumber(input: String): String {
     if (input.isEmpty()) return ""
@@ -81,17 +83,121 @@ fun EditTransactionScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(DarkBackground)
-    ) {
+    Scaffold(
+        containerColor = DarkBackground,
+        bottomBar = {
+            Surface(
+                color = DarkBackground,
+                shadowElevation = 8.dp
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                ) {
+
+                    errorMessage?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
+
+                    Button(
+                        onClick = {
+                            errorMessage = viewModel.validateTransaction(
+                                amount = amount,
+                                account = selectedAccount,
+                                category = if (selectedType == "TRANSFER") null else selectedCategory,
+                                type = selectedType,
+                                toAccount = selectedToAccount
+                            )
+
+                            if (errorMessage != null) {
+                                return@Button
+                            }
+
+                            val amountValue = amount.toDouble()
+                            val account = selectedAccount!!
+
+                            scope.launch {
+                                isLoading = true
+
+                                if (selectedType == "TRANSFER") {
+
+                                    val toAccount = selectedToAccount!!
+
+                                    viewModel.updateTransfer(
+                                        oldTransaction = transaction,
+                                        newTransaction = transaction.copy(
+                                            amount = amountValue,
+                                            note = note,
+                                            type = "TRANSFER",
+                                            categoryId = 0,
+                                            accountId = account.id,
+                                            toAccountId = toAccount.id
+                                        )
+                                    )
+
+                                } else {
+                                    val category = selectedCategory!!
+                                    viewModel.updateTransaction(
+                                        oldTransaction = transaction,
+                                        newTransaction = transaction.copy(
+                                            amount = amountValue,
+                                            note = note,
+                                            type = selectedType,
+                                            categoryId = category.id,
+                                            accountId = account.id,
+                                            toAccountId = null
+                                        )
+                                    )
+                                }
+                                isLoading = false
+                                onDismiss()
+                            }
+                        },
+
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
+                            .height(52.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = AccentPurple),
+                        shape = RoundedCornerShape(14.dp),
+                        enabled = !isLoading && amount.isNotEmpty()
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = "Simpan Perubahan",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .navigationBarsPadding()
-                .padding(24.dp)
+                .padding(innerPadding)
+                .padding(
+                    start = 24.dp,
+                    end = 24.dp,
+                    top = 24.dp,
+                )
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -200,7 +306,11 @@ fun EditTransactionScreen(
                 color = TextSecondary
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 accounts.forEach { account ->
                     FilterChip(
                         selected = selectedAccount?.id == account.id,
@@ -224,12 +334,15 @@ fun EditTransactionScreen(
                     color = TextSecondary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     accounts
                         .filter { it.id != selectedAccount?.id }
                         .forEach { account ->
+
                             FilterChip(
                                 selected = selectedToAccount?.id == account.id,
                                 onClick = {
@@ -245,6 +358,7 @@ fun EditTransactionScreen(
                                     labelColor = TextMuted
                                 )
                             )
+
                         }
                 }
             }
@@ -277,135 +391,7 @@ fun EditTransactionScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(100.dp))
-
-            errorMessage?.let {
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    fontSize = 13.sp
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-
-            Button(
-                onClick = {
-                    errorMessage = viewModel.validateTransaction(
-                        amount = amount,
-                        account = selectedAccount,
-                        category = if (selectedType == "TRANSFER") null else selectedCategory,
-                        type = selectedType,
-                        toAccount = selectedToAccount
-                    )
-
-                    if (errorMessage != null) {
-                        return@Button
-                    }
-
-                    val amountValue = amount.toDouble()
-                    val account = selectedAccount!!
-
-                    scope.launch {
-                        isLoading = true
-                        when (transaction.type) {
-                            "INCOME" -> {
-                                viewModel.getAccountById(transaction.accountId)?.let {
-                                    viewModel.updateAccount(
-                                        it.copy(balance = it.balance - transaction.amount)
-                                    )
-                                }
-                            }
-
-                            "EXPENSE" -> {
-                                viewModel.getAccountById(transaction.accountId)?.let {
-                                    viewModel.updateAccount(
-                                        it.copy(balance = it.balance + transaction.amount)
-                                    )
-                                }
-                            }
-
-                            "TRANSFER" -> {
-                                viewModel.getAccountById(transaction.accountId)?.let {
-                                    viewModel.updateAccount(
-                                        it.copy(balance = it.balance + transaction.amount)
-                                    )
-                                }
-
-                                transaction.toAccountId?.let { toId ->
-                                    viewModel.getAccountById(toId)?.let {
-                                        viewModel.updateAccount(
-                                            it.copy(balance = it.balance - transaction.amount)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        if (selectedType == "TRANSFER") {
-
-                            val toAccount = selectedToAccount!!
-
-                            viewModel.updateTransfer(
-                                oldTransaction = transaction,
-                                newTransaction = transaction.copy(
-                                    amount = amountValue,
-                                    note = note,
-                                    type = "TRANSFER",
-                                    categoryId = 0,
-                                    accountId = account.id,
-                                    toAccountId = toAccount.id
-                                )
-                            )
-
-                        } else {
-                            val category = selectedCategory!!
-                            viewModel.updateTransaction(
-                                transaction.copy(
-                                    amount = amountValue,
-                                    note = note,
-                                    type = selectedType,
-                                    categoryId = category.id,
-                                    accountId = account.id,
-                                    toAccountId = null
-                                )
-                            )
-
-                            val newBalance =
-                                if (selectedType == "INCOME")
-                                    account.balance + amountValue
-                                else
-                                    account.balance - amountValue
-                            viewModel.updateAccount(
-                                account.copy(balance = newBalance)
-                            )
-                        }
-                        isLoading = false
-                        onDismiss()
-                    }
-                },
-
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = AccentPurple),
-                shape = RoundedCornerShape(14.dp),
-                enabled = !isLoading && amount.isNotEmpty()
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        color = Color.White,
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text(
-                        text = "Simpan Perubahan",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

@@ -97,7 +97,13 @@ fun TransactionFormScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(24.dp)
+                .navigationBarsPadding()
+                .padding(
+                    start = 24.dp,
+                    end = 24.dp,
+                    top = 24.dp,
+                    bottom = 100.dp
+                )
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -203,12 +209,21 @@ fun TransactionFormScreen(
                 color = TextSecondary
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 accounts.forEach { account ->
+
                     FilterChip(
                         selected = selectedAccount?.id == account.id,
-                        onClick = { selectedAccount = account },
-                        label = { Text(account.name, fontSize = 12.sp) },
+                        onClick = {
+                            selectedAccount = account
+                        },
+                        label = {
+                            Text(account.name, fontSize = 12.sp)
+                        },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = AccentPurple,
                             selectedLabelColor = Color.White,
@@ -216,6 +231,7 @@ fun TransactionFormScreen(
                             labelColor = TextMuted
                         )
                     )
+
                 }
             }
 
@@ -223,20 +239,32 @@ fun TransactionFormScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Ke Akun", fontSize = 13.sp, color = TextSecondary)
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    accounts.filter { it.id != selectedAccount?.id }.forEach { account ->
-                        FilterChip(
-                            selected = selectedToAccount?.id == account.id,
-                            onClick = { selectedToAccount = account },
-                            label = { Text(account.name, fontSize = 12.sp) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = IncomeGreen,
-                                selectedLabelColor = Color.White,
-                                containerColor = DarkCard,
-                                labelColor = TextMuted
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    accounts
+                        .filter { it.id != selectedAccount?.id }
+                        .forEach { account ->
+
+                            FilterChip(
+                                selected = selectedToAccount?.id == account.id,
+                                onClick = {
+                                    selectedToAccount = account
+                                },
+                                label = {
+                                    Text(account.name, fontSize = 12.sp)
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = IncomeGreen,
+                                    selectedLabelColor = Color.White,
+                                    containerColor = DarkCard,
+                                    labelColor = TextMuted
+                                )
                             )
-                        )
-                    }
+
+                        }
                 }
             }
 
@@ -244,7 +272,6 @@ fun TransactionFormScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Kategori", fontSize = 13.sp, color = TextSecondary)
                 Spacer(modifier = Modifier.height(8.dp))
-                @OptIn(ExperimentalLayoutApi::class)
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -302,7 +329,11 @@ fun TransactionFormScreen(
                 Spacer(modifier = Modifier.height(12.dp))
                 Text("Interval", fontSize = 13.sp, color = TextSecondary)
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     listOf(
                         "DAILY" to "Harian",
                         "WEEKLY" to "Mingguan",
@@ -323,7 +354,7 @@ fun TransactionFormScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             errorMessage?.let {
                 Text(
@@ -333,93 +364,96 @@ fun TransactionFormScreen(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
+        }
 
-            Button(
-                onClick = {
-                    errorMessage = viewModel.validateTransaction(
-                        amount = amount,
-                        account = selectedAccount,
-                        category = selectedCategory,
-                        type = selectedType,
-                        toAccount = selectedToAccount
-                    )
+        Button(
+            onClick = {
+                errorMessage = viewModel.validateTransaction(
+                    amount = amount,
+                    account = selectedAccount,
+                    category = selectedCategory,
+                    type = selectedType,
+                    toAccount = selectedToAccount
+                )
 
-                    if (errorMessage != null) {
-                        return@Button
-                    }
-
-                    val amountValue = amount.toDouble()
-                    val account = selectedAccount!!
-
-                    scope.launch {
-                        isLoading = true
-                        if (selectedType == "TRANSFER") {
-                            val toAccount = selectedToAccount ?: return@launch
-                            viewModel.insertTransaction(
-                                TransactionEntity(
-                                    amount = amountValue,
-                                    note = note.ifEmpty { "Transfer ke ${toAccount.name}" },
-                                    type = "TRANSFER",
-                                    categoryId = 0,
-                                    accountId = account.id,
-                                    toAccountId = toAccount.id,
-                                    date = System.currentTimeMillis(),
-                                    isRecurring = isRecurring,
-                                    recurringInterval = if (isRecurring) recurringInterval else null
-                                )
-                            )
-                            viewModel.updateAccount(
-                                account.copy(balance = account.balance - amountValue)
-                            )
-                            viewModel.updateAccount(
-                                toAccount.copy(balance = toAccount.balance + amountValue)
-                            )
-                        } else {
-                            val category = selectedCategory ?: return@launch
-                            viewModel.insertTransaction(
-                                TransactionEntity(
-                                    amount = amountValue,
-                                    note = note,
-                                    type = selectedType,
-                                    categoryId = category.id,
-                                    accountId = account.id,
-                                    date = System.currentTimeMillis(),
-                                    isRecurring = isRecurring,
-                                    recurringInterval = if (isRecurring) recurringInterval else null
-                                )
-                            )
-                            val newBalance = if (selectedType == "INCOME") {
-                                account.balance + amountValue
-                            } else {
-                                account.balance - amountValue
-                            }
-                            viewModel.updateAccount(account.copy(balance = newBalance))
-                        }
-                        isLoading = false
-                        onDismiss()
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = AccentPurple),
-                shape = RoundedCornerShape(14.dp),
-                enabled = !isLoading && amount.isNotEmpty()
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        color = Color.White,
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text(
-                        text = "Simpan",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White
-                    )
+                if (errorMessage != null) {
+                    return@Button
                 }
+
+                val amountValue = amount.toDouble()
+                val account = selectedAccount!!
+
+                scope.launch {
+                    isLoading = true
+                    if (selectedType == "TRANSFER") {
+                        val toAccount = selectedToAccount ?: return@launch
+                        viewModel.insertTransaction(
+                            TransactionEntity(
+                                amount = amountValue,
+                                note = note.ifEmpty { "Transfer ke ${toAccount.name}" },
+                                type = "TRANSFER",
+                                categoryId = 0,
+                                accountId = account.id,
+                                toAccountId = toAccount.id,
+                                date = System.currentTimeMillis(),
+                                isRecurring = isRecurring,
+                                recurringInterval = if (isRecurring) recurringInterval else null
+                            )
+                        )
+                        viewModel.updateAccount(
+                            account.copy(balance = account.balance - amountValue)
+                        )
+                        viewModel.updateAccount(
+                            toAccount.copy(balance = toAccount.balance + amountValue)
+                        )
+                    } else {
+                        val category = selectedCategory ?: return@launch
+                        viewModel.insertTransaction(
+                            TransactionEntity(
+                                amount = amountValue,
+                                note = note,
+                                type = selectedType,
+                                categoryId = category.id,
+                                accountId = account.id,
+                                date = System.currentTimeMillis(),
+                                isRecurring = isRecurring,
+                                recurringInterval = if (isRecurring) recurringInterval else null
+                            )
+                        )
+                        val newBalance = if (selectedType == "INCOME") {
+                            account.balance + amountValue
+                        } else {
+                            account.balance - amountValue
+                        }
+                        viewModel.updateAccount(account.copy(balance = newBalance))
+                    }
+                    isLoading = false
+                    onDismiss()
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(24.dp)
+                .height(52.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = AccentPurple),
+            shape = RoundedCornerShape(14.dp),
+            enabled = !isLoading && amount.isNotEmpty()
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    text = "Simpan",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White
+                )
             }
         }
     }

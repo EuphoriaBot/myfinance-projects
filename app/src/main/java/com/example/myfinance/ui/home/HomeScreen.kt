@@ -23,6 +23,7 @@ import com.example.myfinance.ui.report.ReportScreen
 import com.example.myfinance.ui.saving.SavingGoalScreen
 import com.example.myfinance.ui.settings.SettingsScreen
 import com.example.myfinance.ui.theme.*
+import com.example.myfinance.ui.transaction.EditTransactionScreen
 import com.example.myfinance.ui.transaction.TransactionFormScreen
 import com.example.myfinance.ui.transaction.TransactionScreen
 
@@ -37,6 +38,7 @@ fun HomeScreen(
     var showTransactionForm by remember { mutableStateOf(false) }
     var showGoalScreen by remember { mutableStateOf(false) }
     var showCategoryScreen by remember { mutableStateOf(false) }
+    var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
 
     BackHandler(
         enabled = showTransactionForm || showGoalScreen ||
@@ -53,15 +55,21 @@ fun HomeScreen(
 
     when {
         showTransactionForm -> {
-            TransactionFormScreen(onDismiss = { showTransactionForm = false })
+            TransactionFormScreen(
+                onDismiss = {
+                    showTransactionForm = false
+                }
+            )
             return
         }
-        showGoalScreen -> {
-            SavingGoalScreen()
-            return
-        }
-        showCategoryScreen -> {
-            CategoryScreen(onBack = { showCategoryScreen = false })
+
+        editingTransaction != null -> {
+            EditTransactionScreen(
+                transaction = editingTransaction!!,
+                onDismiss = {
+                    editingTransaction = null
+                }
+            )
             return
         }
     }
@@ -79,7 +87,12 @@ fun HomeScreen(
     ) { innerPadding ->
         when (currentDestination) {
             BottomNavDestination.TRANSACTIONS -> {
-                TransactionScreen(modifier = Modifier.padding(innerPadding))
+                TransactionScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    onEditTransaction = {
+                        editingTransaction = it
+                    }
+                )
             }
             BottomNavDestination.ACCOUNT -> {
                 AccountScreen(modifier = Modifier.padding(innerPadding))
