@@ -387,7 +387,7 @@ fun TransactionFormScreen(
                     isLoading = true
                     if (selectedType == "TRANSFER") {
                         val toAccount = selectedToAccount ?: return@launch
-                        viewModel.insertTransaction(
+                        viewModel.addTransfer(
                             TransactionEntity(
                                 amount = amountValue,
                                 note = note.ifEmpty { "Transfer ke ${toAccount.name}" },
@@ -399,12 +399,6 @@ fun TransactionFormScreen(
                                 isRecurring = isRecurring,
                                 recurringInterval = if (isRecurring) recurringInterval else null
                             )
-                        )
-                        viewModel.updateAccount(
-                            account.copy(balance = account.balance - amountValue)
-                        )
-                        viewModel.updateAccount(
-                            toAccount.copy(balance = toAccount.balance + amountValue)
                         )
                     } else {
                         val category = selectedCategory ?: return@launch

@@ -140,6 +140,12 @@ class TransactionViewModel @Inject constructor(
         }
     }
 
+    fun addTransfer(transaction: TransactionEntity) {
+        viewModelScope.launch {
+            repository.addTransfer(transaction)
+        }
+    }
+
     fun updateTransaction(
         oldTransaction: TransactionEntity,
         newTransaction: TransactionEntity

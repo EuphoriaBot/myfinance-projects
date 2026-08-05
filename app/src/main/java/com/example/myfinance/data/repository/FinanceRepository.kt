@@ -93,6 +93,31 @@ class FinanceRepository @Inject constructor(
         }
     }
 
+    suspend fun addTransfer(transaction: TransactionEntity) {
+        database.withTransaction {
+
+            transactionDao.insert(transaction)
+
+            val fromAccount = accountDao.getById(transaction.accountId)
+                ?: error("Akun asal tidak ditemukan")
+
+            val toAccount = accountDao.getById(transaction.toAccountId!!)
+                ?: error("Akun tujuan tidak ditemukan")
+
+            accountDao.update(
+                fromAccount.copy(
+                    balance = fromAccount.balance - transaction.amount
+                )
+            )
+
+            accountDao.update(
+                toAccount.copy(
+                    balance = toAccount.balance + transaction.amount
+                )
+            )
+        }
+    }
+
     suspend fun updateTransaction(
         oldTransaction: TransactionEntity,
         newTransaction: TransactionEntity
