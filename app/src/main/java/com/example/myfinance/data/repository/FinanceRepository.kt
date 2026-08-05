@@ -119,8 +119,48 @@ class FinanceRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteTransaction(transaction: TransactionEntity) =
-        transactionDao.delete(transaction)
+    suspend fun deleteTransaction(
+        transaction: TransactionEntity
+    ) {
+        database.withTransaction {
+            when (transaction.type) {
+                "INCOME" -> {
+                    val account = accountDao.getById(transaction.accountId)!!
+                    accountDao.update(
+                        account.copy(
+                            balance = account.balance - transaction.amount
+                        )
+                    )
+                }
+
+                "EXPENSE" -> {
+                    val account = accountDao.getById(transaction.accountId)!!
+                    accountDao.update(
+                        account.copy(
+                            balance = account.balance + transaction.amount
+                        )
+                    )
+                }
+
+                "TRANSFER" -> {
+                    val fromAccount = accountDao.getById(transaction.accountId)!!
+                    val toAccount = accountDao.getById(transaction.toAccountId!!)!!
+                    accountDao.update(
+                        fromAccount.copy(
+                            balance = fromAccount.balance + transaction.amount
+                        )
+                    )
+
+                    accountDao.update(
+                        toAccount.copy(
+                            balance = toAccount.balance - transaction.amount
+                        )
+                    )
+                }
+            }
+            transactionDao.delete(transaction)
+        }
+    }
 
     fun getTransactionsByCategoryAndDateRange(
         categoryId: Long,
