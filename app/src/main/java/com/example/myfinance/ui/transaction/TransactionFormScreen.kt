@@ -27,6 +27,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import com.example.myfinance.domain.model.TransactionType
+import com.example.myfinance.domain.model.RecurringInterval
 
 
 private fun formatInputNumber(input: String): String {
@@ -64,7 +65,7 @@ fun TransactionFormScreen(
     }
     var isRecurring by remember { mutableStateOf(false) }
     var recurringInterval by remember {
-        mutableStateOf("MONTHLY")
+        mutableStateOf(RecurringInterval.MONTHLY.name)
     }
 
     LaunchedEffect(accounts) {
@@ -337,9 +338,9 @@ fun TransactionFormScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     listOf(
-                        "DAILY" to "Harian",
-                        "WEEKLY" to "Mingguan",
-                        "MONTHLY" to "Bulanan"
+                        RecurringInterval.DAILY.name to "Harian",
+                        RecurringInterval.WEEKLY.name to "Mingguan",
+                        RecurringInterval.MONTHLY.name to "Bulanan"
                     ).forEach { (interval, label) ->
                         FilterChip(
                             selected = recurringInterval == interval,
