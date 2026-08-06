@@ -77,10 +77,10 @@ class FinanceRepository @Inject constructor(
             val newBalance =
                 when (transaction.type) {
 
-                    "INCOME" ->
+                    TransactionType.INCOME.name ->
                         account.balance + transaction.amount
 
-                    "EXPENSE" ->
+                    TransactionType.EXPENSE.name ->
                         account.balance - transaction.amount
 
                     else ->
@@ -127,7 +127,7 @@ class FinanceRepository @Inject constructor(
         database.withTransaction {
             when (oldTransaction.type) {
 
-                "INCOME" -> {
+                TransactionType.INCOME.name -> {
                     val account = accountDao.getById(oldTransaction.accountId)!!
 
                     accountDao.update(
@@ -137,7 +137,7 @@ class FinanceRepository @Inject constructor(
                     )
                 }
 
-                "EXPENSE" -> {
+                TransactionType.EXPENSE.name -> {
                     val account = accountDao.getById(oldTransaction.accountId)!!
 
                     accountDao.update(
@@ -152,7 +152,7 @@ class FinanceRepository @Inject constructor(
 
             when (newTransaction.type) {
 
-                "INCOME" -> {
+                TransactionType.INCOME.name -> {
 
                     val account = accountDao.getById(newTransaction.accountId)!!
 
@@ -163,7 +163,7 @@ class FinanceRepository @Inject constructor(
                     )
                 }
 
-                "EXPENSE" -> {
+                TransactionType.EXPENSE.name -> {
 
                     val account = accountDao.getById(newTransaction.accountId)!!
 

@@ -23,6 +23,7 @@ import com.example.myfinance.ui.theme.*
 import kotlinx.coroutines.launch
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myfinance.domain.model.TransactionType
 
 @Composable
 fun CategoryScreen(
@@ -32,7 +33,9 @@ fun CategoryScreen(
 ) {
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
-    var selectedTab by remember { mutableStateOf("EXPENSE") }
+    var selectedTab by remember {
+        mutableStateOf(TransactionType.EXPENSE.name)
+    }
     var categoryToDelete by remember { mutableStateOf<CategoryEntity?>(null) }
     var categoryToEdit by remember { mutableStateOf<CategoryEntity?>(null) }
 
@@ -190,16 +193,15 @@ private fun CategoryItem(
                     .size(36.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(
-                        if (category.type == "INCOME") IncomeGreen.copy(alpha = 0.15f)
+                        if (category.type == TransactionType.INCOME.name) IncomeGreen.copy(alpha = 0.15f)
                         else ExpenseRed.copy(alpha = 0.15f)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (category.type == "INCOME") Icons.Default.Add
-                    else Icons.Default.Remove,
+                    imageVector = if (category.type == TransactionType.INCOME.name) Icons.Default.Add else Icons.Default.Remove,
                     contentDescription = null,
-                    tint = if (category.type == "INCOME") IncomeGreen else ExpenseRed,
+                    tint = if (category.type == TransactionType.INCOME.name) IncomeGreen else ExpenseRed,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -361,7 +363,7 @@ private fun AddCategoryDialog(
                                         icon = "category",
                                         type = selectedType,
                                         colorHex =
-                                            if (selectedType == "INCOME")
+                                            if (selectedType == TransactionType.INCOME.name)
                                                 "#00C896"
                                             else
                                                 "#FF5C5C"

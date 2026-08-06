@@ -28,6 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import com.example.myfinance.domain.model.TransactionType
 import com.example.myfinance.domain.model.RecurringInterval
+import com.example.myfinance.ui.components.SectionTitle
 
 
 private fun formatInputNumber(input: String): String {
@@ -160,7 +161,7 @@ fun TransactionFormScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text("Jumlah", fontSize = 13.sp, color = TextSecondary)
+            SectionTitle("Jumlah")
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
                 value = if (amount.isEmpty()) "" else formatInputNumber(amount),
@@ -185,7 +186,7 @@ fun TransactionFormScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Catatan", fontSize = 13.sp, color = TextSecondary)
+            SectionTitle("Catatan")
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
                 value = note,
@@ -206,11 +207,7 @@ fun TransactionFormScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = if (selectedType == TransactionType.TRANSFER.name) "Dari Akun" else "Akun",
-                fontSize = 13.sp,
-                color = TextSecondary
-            )
+            SectionTitle( if (selectedType == TransactionType.TRANSFER.name) "Dari Akun" else "Akun" )
             Spacer(modifier = Modifier.height(8.dp))
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -240,7 +237,7 @@ fun TransactionFormScreen(
 
             if (selectedType == TransactionType.TRANSFER.name) {
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Ke Akun", fontSize = 13.sp, color = TextSecondary)
+                SectionTitle("Ke Akun")
                 Spacer(modifier = Modifier.height(8.dp))
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -273,7 +270,7 @@ fun TransactionFormScreen(
 
             if (selectedType != TransactionType.TRANSFER.name) {
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Kategori", fontSize = 13.sp, color = TextSecondary)
+                SectionTitle("Kategori")
                 Spacer(modifier = Modifier.height(8.dp))
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -330,7 +327,7 @@ fun TransactionFormScreen(
 
             if (isRecurring) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Text("Interval", fontSize = 13.sp, color = TextSecondary)
+                SectionTitle("Interval")
                 Spacer(modifier = Modifier.height(8.dp))
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),

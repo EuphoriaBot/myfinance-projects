@@ -49,9 +49,15 @@ fun SearchScreen(
                 accountName.contains(searchQuery, ignoreCase = true)
 
         val matchesFilter = when (selectedFilter) {
-            "INCOME" -> transaction.type == "INCOME"
-            "EXPENSE" -> transaction.type == "EXPENSE"
-            "TRANSFER" -> transaction.type == "TRANSFER"
+            TransactionType.INCOME.name ->
+                transaction.type == TransactionType.INCOME.name
+
+            TransactionType.EXPENSE.name ->
+                transaction.type == TransactionType.EXPENSE.name
+
+            TransactionType.TRANSFER.name ->
+                transaction.type == TransactionType.TRANSFER.name
+
             else -> true
         }
 
@@ -206,8 +212,8 @@ private fun mapToUiModel(
         accountName = accountName,
         amount = entity.amount,
         type = when (entity.type) {
-            "INCOME" -> TransactionType.INCOME
-            "EXPENSE" -> TransactionType.EXPENSE
+            TransactionType.INCOME.name -> TransactionType.INCOME
+            TransactionType.EXPENSE.name -> TransactionType.EXPENSE
             else -> TransactionType.TRANSFER
         },
         dateLabel = android.text.format.DateFormat.format(

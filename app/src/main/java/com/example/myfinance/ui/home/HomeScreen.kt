@@ -214,9 +214,9 @@ private fun mapToUiModel(
         categoryName = categoryName,
         accountName = accountName,
         amount = entity.amount,
-        type = when (entity.type) {
-            "INCOME" -> TransactionType.INCOME
-            "EXPENSE" -> TransactionType.EXPENSE
+        when (entity.type) {
+            TransactionType.INCOME.name -> TransactionType.INCOME
+            TransactionType.EXPENSE.name -> TransactionType.EXPENSE
             else -> TransactionType.TRANSFER
         },
         dateLabel = android.text.format.DateFormat.format("dd MMM", entity.date).toString()

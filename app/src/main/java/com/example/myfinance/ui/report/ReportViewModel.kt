@@ -6,6 +6,7 @@ import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
 import com.example.myfinance.data.repository.FinanceRepository
+import com.example.myfinance.domain.model.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import java.util.Calendar
@@ -34,8 +35,8 @@ class ReportViewModel @Inject constructor(
     private val startOfMonth = calendar.timeInMillis
 
     val uiState: StateFlow<ReportUiState> = combine(
-        repository.getTotalByTypeAndDateRange("INCOME", startOfMonth, Long.MAX_VALUE),
-        repository.getTotalByTypeAndDateRange("EXPENSE", startOfMonth, Long.MAX_VALUE),
+        repository.getTotalByTypeAndDateRange(TransactionType.INCOME.name, startOfMonth, Long.MAX_VALUE),
+        repository.getTotalByTypeAndDateRange(TransactionType.EXPENSE.name, startOfMonth, Long.MAX_VALUE),
         repository.getTransactionsByDateRange(startOfMonth, Long.MAX_VALUE),
         repository.getAllCategories(),
         repository.getAllAccounts()

@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myfinance.domain.model.TransactionType
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatRupiah
 import com.example.myfinance.ui.components.BackgroundPattern
@@ -35,7 +36,9 @@ fun ReportScreen(
 
     val top5Categories = transactions
         .asSequence()
-        .filter { it.type == "EXPENSE" }
+        .filter {
+            it.type == TransactionType.EXPENSE.name
+        }
         .groupBy { it.categoryId }
         .map { (categoryId, txList) ->
             val name = categories.find { it.id == categoryId }?.name ?: "Lainnya"
@@ -47,7 +50,9 @@ fun ReportScreen(
 
     val expensePerAccount = transactions
         .asSequence()
-        .filter { it.type == "EXPENSE" }
+        .filter {
+            it.type == TransactionType.EXPENSE.name
+        }
         .groupBy { it.accountId }
         .map { (accountId, txList) ->
             val name = accounts.find { it.id == accountId }?.name ?: "Akun"
@@ -198,15 +203,23 @@ fun ReportScreen(
                         StatRow("Total transaksi", "${transactions.size} transaksi")
                         StatRow(
                             "Transaksi pemasukan",
-                            "${transactions.count { it.type == "INCOME" }} transaksi"
+                            "${transactions.count {
+                                it.type == TransactionType.INCOME.name
+                            }} transaksi"
                         )
                         StatRow(
                             "Transaksi pengeluaran",
-                            "${transactions.count { it.type == "EXPENSE" }} transaksi"
+                            "${transactions.count {
+                                it.type == TransactionType.EXPENSE.name
+                            }} transaksi"
                         )
                         if (transactions.isNotEmpty()) {
-                            val avgExpense = if (transactions.count { it.type == "EXPENSE" } > 0) {
-                                expense / transactions.count { it.type == "EXPENSE" }
+                            val avgExpense = if (transactions.count {
+                                    it.type == TransactionType.EXPENSE.name
+                                } > 0) {
+                                expense / transactions.count {
+                                    it.type == TransactionType.EXPENSE.name
+                                }
                             } else 0.0
                             StatRow("Rata-rata pengeluaran", formatRupiah(avgExpense))
                         }

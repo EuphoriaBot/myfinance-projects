@@ -5,6 +5,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.*
 import com.example.myfinance.data.local.entity.TransactionEntity
 import com.example.myfinance.data.repository.FinanceRepository
+import com.example.myfinance.domain.model.TransactionType
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
@@ -54,7 +55,7 @@ class RecurringTransactionWorker @AssistedInject constructor(
                     val accounts = repository.getAllAccounts().first()
                     val account = accounts.find { it.id == transaction.accountId }
                     if (account != null) {
-                        val newBalance = if (transaction.type == "INCOME") {
+                        val newBalance = if (transaction.type == TransactionType.INCOME.name) {
                             account.balance + transaction.amount
                         } else {
                             account.balance - transaction.amount

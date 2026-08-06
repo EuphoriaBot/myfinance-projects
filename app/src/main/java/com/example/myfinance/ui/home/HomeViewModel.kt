@@ -6,6 +6,7 @@ import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
 import com.example.myfinance.data.repository.FinanceRepository
+import com.example.myfinance.domain.model.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -69,11 +70,11 @@ class HomeViewModel @Inject constructor(
                     val categories = quint.e
 
                     val totalIncome = monthTransactions
-                        .filter { it.type == "INCOME" }
+                        .filter { it.type == TransactionType.INCOME.name }
                         .sumOf { it.amount }
 
                     val totalExpense = monthTransactions
-                        .filter { it.type == "EXPENSE" }
+                        .filter { it.type == TransactionType.EXPENSE.name }
                         .sumOf { it.amount }
 
                     HomeUiState(
@@ -87,7 +88,7 @@ class HomeViewModel @Inject constructor(
                             val categoryName = categories
                                 .find { it.id == budget.categoryId }?.name ?: "Lainnya"
                             val spent = monthTransactions
-                                .filter { it.categoryId == budget.categoryId && it.type == "EXPENSE" }
+                                .filter { it.categoryId == budget.categoryId && it.type == TransactionType.EXPENSE.name }
                                 .sumOf { it.amount }
                             BudgetWithSpending(
                                 categoryName = categoryName,

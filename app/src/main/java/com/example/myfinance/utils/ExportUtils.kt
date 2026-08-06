@@ -7,6 +7,7 @@ import androidx.core.content.FileProvider
 import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
+import com.example.myfinance.domain.model.TransactionType
 import java.io.File
 import java.io.FileWriter
 import java.text.SimpleDateFormat
@@ -29,9 +30,9 @@ fun exportTransactionsToCsv(
             transactions.forEach { transaction ->
                 val date = dateFormat.format(Date(transaction.date))
                 val type = when (transaction.type) {
-                    "INCOME" -> "Pemasukan"
-                    "EXPENSE" -> "Pengeluaran"
-                    "TRANSFER" -> "Transfer"
+                    TransactionType.INCOME.name -> "Pemasukan"
+                    TransactionType.EXPENSE.name -> "Pengeluaran"
+                    TransactionType.TRANSFER.name -> "Transfer"
                     else -> transaction.type
                 }
                 val category = categories.find { it.id == transaction.categoryId }?.name ?: "-"

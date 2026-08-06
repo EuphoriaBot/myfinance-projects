@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.myfinance.data.local.entity.BudgetEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
+import com.example.myfinance.domain.model.TransactionType
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatInputNumber
 
@@ -58,7 +59,9 @@ fun AddBudgetDialog(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    categories.filter { it.type == "EXPENSE" }.forEach { category ->
+                    categories.filter {
+                        it.type == TransactionType.EXPENSE.name
+                    }.forEach { category ->
                         FilterChip(
                             selected = selectedCategory?.id == category.id,
                             onClick = { selectedCategory = category },
