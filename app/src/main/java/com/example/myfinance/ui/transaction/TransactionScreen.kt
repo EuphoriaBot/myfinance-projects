@@ -26,6 +26,7 @@ import com.example.myfinance.ui.theme.*
 import com.example.myfinance.ui.components.BackgroundPattern
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myfinance.utils.toTransactionType
+import com.example.myfinance.ui.transaction.TransactionUiState
 
 @Composable
 fun TransactionScreen(
@@ -33,17 +34,15 @@ fun TransactionScreen(
     onEditTransaction: (TransactionEntity) -> Unit,
     viewModel: TransactionViewModel = hiltViewModel()
 ) {
-    val transactions by viewModel.transactions.collectAsStateWithLifecycle()
-    val accounts by viewModel.accounts.collectAsStateWithLifecycle()
-    val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showSearch by remember { mutableStateOf(false) }
     var selectedTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
 
     if (selectedTransaction != null) {
         TransactionDetailSheet(
             transaction = selectedTransaction!!,
-            accounts = accounts,
-            categories = categories,
+            accounts = uiState.accounts,
+            categories = uiState.categories,
             onDismiss = {
                 selectedTransaction = null
             },
@@ -58,12 +57,13 @@ fun TransactionScreen(
 
     if (showSearch) {
         SearchScreen(
-            transactions = transactions,
-            accounts = accounts,
-            categories = categories,
+            transactions = uiState.transactions,
+            accounts = uiState.accounts,
+            categories = uiState.categories,
             onBack = { showSearch = false },
             modifier = Modifier.fillMaxSize()
         )
+        return
     }
 
     Box(
@@ -98,7 +98,7 @@ fun TransactionScreen(
                 }
             }
 
-            if (transactions.isEmpty()) {
+            if (uiState.transactions.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -120,7 +120,7 @@ fun TransactionScreen(
                     }
                 }
             } else {
-                val grouped = transactions.groupBy { transaction ->
+                val grouped = uiState.transactions.groupBy { transaction ->
                     android.text.format.DateFormat.format(
                         "dd MMMM yyyy", transaction.date
                     ).toString()
@@ -145,8 +145,8 @@ fun TransactionScreen(
                             TransactionItem(
                                 transaction = mapToUiModel(
                                     entity = transaction,
-                                    accounts = accounts,
-                                    categories = categories
+                                    accounts = uiState.accounts,
+                                    categories = uiState.categories
                                 ),
                                 onClick = { selectedTransaction = transaction }
                             )

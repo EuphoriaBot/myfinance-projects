@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.flow.combine
+
 
 @HiltViewModel
 class TransactionViewModel @Inject constructor(
@@ -42,6 +44,22 @@ class TransactionViewModel @Inject constructor(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList()
             )
+
+    val uiState: StateFlow<TransactionUiState> =
+        combine(
+            transactions,
+            accounts,
+            categories
+        ) { transactions, accounts, categories -> TransactionUiState(
+                transactions = transactions,
+                accounts = accounts,
+                categories = categories
+            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = TransactionUiState()
+        )
 
     fun validateTransaction(
         amount: String,
