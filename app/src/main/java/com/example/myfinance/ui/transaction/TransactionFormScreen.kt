@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import com.example.myfinance.domain.model.TransactionType
+
 
 private fun formatInputNumber(input: String): String {
     if (input.isEmpty()) return ""
@@ -44,7 +46,7 @@ fun TransactionFormScreen(
     val scrollState = rememberScrollState()
     var amount by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
-    var selectedType by remember { mutableStateOf("EXPENSE") }
+    var selectedType by remember { mutableStateOf(TransactionType.EXPENSE.name) }
     var selectedAccount by remember {
         mutableStateOf<AccountEntity?>(null)
     }
@@ -75,7 +77,7 @@ fun TransactionFormScreen(
     }
 
     LaunchedEffect(categories, selectedType) {
-        if (selectedType == "TRANSFER") return@LaunchedEffect
+        if (selectedType == TransactionType.TRANSFER.name) return@LaunchedEffect
 
         val currentCategoryStillExists =
             categories.any { it.id == selectedCategory?.id }
@@ -204,7 +206,7 @@ fun TransactionFormScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = if (selectedType == "TRANSFER") "Dari Akun" else "Akun",
+                text = if (selectedType == TransactionType.TRANSFER.name) "Dari Akun" else "Akun",
                 fontSize = 13.sp,
                 color = TextSecondary
             )
@@ -235,7 +237,7 @@ fun TransactionFormScreen(
                 }
             }
 
-            if (selectedType == "TRANSFER") {
+            if (selectedType == TransactionType.TRANSFER.name) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Ke Akun", fontSize = 13.sp, color = TextSecondary)
                 Spacer(modifier = Modifier.height(8.dp))
@@ -268,7 +270,7 @@ fun TransactionFormScreen(
                 }
             }
 
-            if (selectedType != "TRANSFER") {
+            if (selectedType != TransactionType.TRANSFER.name) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Kategori", fontSize = 13.sp, color = TextSecondary)
                 Spacer(modifier = Modifier.height(8.dp))
@@ -385,13 +387,13 @@ fun TransactionFormScreen(
 
                 scope.launch {
                     isLoading = true
-                    if (selectedType == "TRANSFER") {
+                    if (selectedType == TransactionType.TRANSFER.name) {
                         val toAccount = selectedToAccount ?: return@launch
                         viewModel.addTransfer(
                             TransactionEntity(
                                 amount = amountValue,
                                 note = note.ifEmpty { "Transfer ke ${toAccount.name}" },
-                                type = "TRANSFER",
+                                type = TransactionType.TRANSFER.name,
                                 categoryId = 0,
                                 accountId = account.id,
                                 toAccountId = toAccount.id,

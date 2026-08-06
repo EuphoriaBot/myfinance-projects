@@ -29,6 +29,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import com.example.myfinance.domain.model.TransactionType
 
 private fun formatInputNumber(input: String): String {
     if (input.isEmpty()) return ""
@@ -70,7 +71,7 @@ fun EditTransactionScreen(
     }
 
     LaunchedEffect(categories, selectedType) {
-        if (selectedType == "TRANSFER") {
+        if (selectedType == TransactionType.TRANSFER.name) {
             selectedCategory = null
             return@LaunchedEffect
         }
@@ -111,7 +112,11 @@ fun EditTransactionScreen(
                             errorMessage = viewModel.validateTransaction(
                                 amount = amount,
                                 account = selectedAccount,
-                                category = if (selectedType == "TRANSFER") null else selectedCategory,
+                                category =
+                                    if (selectedType == TransactionType.TRANSFER.name)
+                                        null
+                                    else
+                                        selectedCategory,
                                 type = selectedType,
                                 toAccount = selectedToAccount
                             )
@@ -126,7 +131,7 @@ fun EditTransactionScreen(
                             scope.launch {
                                 isLoading = true
 
-                                if (selectedType == "TRANSFER") {
+                                if (selectedType == TransactionType.TRANSFER.name) {
 
                                     val toAccount = selectedToAccount!!
 
@@ -135,7 +140,7 @@ fun EditTransactionScreen(
                                         newTransaction = transaction.copy(
                                             amount = amountValue,
                                             note = note,
-                                            type = "TRANSFER",
+                                            type = TransactionType.TRANSFER.name,
                                             categoryId = 0,
                                             accountId = account.id,
                                             toAccountId = toAccount.id
@@ -229,9 +234,9 @@ fun EditTransactionScreen(
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 listOf(
-                    "EXPENSE" to "Pengeluaran",
-                    "INCOME" to "Pemasukan",
-                    "TRANSFER" to "Transfer"
+                    TransactionType.EXPENSE.name to "Pengeluaran",
+                    TransactionType.INCOME.name to "Pemasukan",
+                    TransactionType.TRANSFER.name to "Transfer"
                 ).forEach { (type, label) ->
                     Button(
                         onClick = { selectedType = type },
@@ -298,7 +303,7 @@ fun EditTransactionScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = if (selectedType == "TRANSFER")
+                text = if (selectedType == TransactionType.TRANSFER.name)
                     "Dari Akun"
                 else
                     "Akun",
@@ -326,7 +331,7 @@ fun EditTransactionScreen(
                 }
             }
 
-            if (selectedType == "TRANSFER") {
+            if (selectedType == TransactionType.TRANSFER.name) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     "Ke Akun",
@@ -365,7 +370,7 @@ fun EditTransactionScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (selectedType != "TRANSFER") {
+            if (selectedType != TransactionType.TRANSFER.name) {
                 Text("Kategori", fontSize = 13.sp, color = TextSecondary)
                 Spacer(modifier = Modifier.height(8.dp))
                 FlowRow(

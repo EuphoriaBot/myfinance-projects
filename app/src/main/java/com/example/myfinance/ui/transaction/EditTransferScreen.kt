@@ -20,14 +20,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myfinance.data.local.entity.AccountEntity
-import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.ui.theme.*
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.myfinance.utils.formatInputNumber
-import kotlinx.coroutines.launch
+import com.example.myfinance.domain.model.TransactionType
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -298,10 +297,8 @@ fun EditTransferScreen(
                         accountId = selectedFromAccount!!.id,
                         toAccountId = selectedToAccount!!.id,
                         categoryId = 0,
-                        type = "TRANSFER"
+                        type = TransactionType.TRANSFER.name
                     )
-
-                    isLoading = true
 
                     viewModel.updateTransfer(
                         oldTransaction = transaction,
