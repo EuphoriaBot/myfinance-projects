@@ -23,6 +23,7 @@ import net.sqlcipher.database.SupportFactory
 import com.example.myfinance.utils.DatabasePassphraseManager
 import com.example.myfinance.utils.KeystoreManager
 import com.example.myfinance.utils.PinManager
+import com.example.myfinance.data.repository.TransactionRepository
 
 private val Context.dataStore by preferencesDataStore(
     name = "myfinance_prefs"
@@ -99,6 +100,14 @@ object AppModule {
             budgetDao,
             savingGoalDao
         )
+    }
+
+    @Provides
+    @Singleton
+    fun provideTransactionRepository(
+        financeRepository: FinanceRepository
+    ): TransactionRepository {
+        return TransactionRepository(financeRepository)
     }
 
     @Provides

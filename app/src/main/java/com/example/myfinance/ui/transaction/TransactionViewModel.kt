@@ -6,6 +6,7 @@ import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
 import com.example.myfinance.data.repository.FinanceRepository
+import com.example.myfinance.data.repository.TransactionRepository
 import com.example.myfinance.domain.model.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,7 +19,7 @@ import kotlinx.coroutines.flow.combine
 
 @HiltViewModel
 class TransactionViewModel @Inject constructor(
-    private val repository: FinanceRepository
+    private val repository: TransactionRepository
 ) : ViewModel() {
 
     val transactions: StateFlow<List<TransactionEntity>> =
