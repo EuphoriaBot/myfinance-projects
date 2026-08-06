@@ -7,6 +7,8 @@ import javax.inject.Inject
 import com.example.myfinance.data.local.database.AppDatabase
 import androidx.room.withTransaction
 import kotlinx.coroutines.flow.first
+import com.example.myfinance.domain.model.TransactionType
+
 
 class FinanceRepository @Inject constructor(
     private val database: AppDatabase,
@@ -180,7 +182,7 @@ class FinanceRepository @Inject constructor(
     ) {
         database.withTransaction {
             when (transaction.type) {
-                "INCOME" -> {
+                TransactionType.INCOME.name -> {
                     val account = accountDao.getById(transaction.accountId)!!
                     accountDao.update(
                         account.copy(
@@ -189,7 +191,7 @@ class FinanceRepository @Inject constructor(
                     )
                 }
 
-                "EXPENSE" -> {
+                TransactionType.EXPENSE.name -> {
                     val account = accountDao.getById(transaction.accountId)!!
                     accountDao.update(
                         account.copy(
@@ -198,7 +200,7 @@ class FinanceRepository @Inject constructor(
                     )
                 }
 
-                "TRANSFER" -> {
+                TransactionType.TRANSFER.name -> {
                     val fromAccount = accountDao.getById(transaction.accountId)!!
                     val toAccount = accountDao.getById(transaction.toAccountId!!)!!
                     accountDao.update(
