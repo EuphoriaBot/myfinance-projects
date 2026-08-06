@@ -53,7 +53,6 @@ fun TransactionDetailSheet(
                         scope.launch {
                             viewModel.deleteTransaction(transaction)
                             onDismiss()
-
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = ExpenseRed)

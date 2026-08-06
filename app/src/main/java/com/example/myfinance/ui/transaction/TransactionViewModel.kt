@@ -128,12 +128,6 @@ class TransactionViewModel @Inject constructor(
         return null
     }
 
-    fun insertTransaction(transaction: TransactionEntity) {
-        viewModelScope.launch {
-            repository.insertTransaction(transaction)
-        }
-    }
-
     fun addTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
             repository.addTransaction(transaction)
@@ -166,26 +160,6 @@ class TransactionViewModel @Inject constructor(
 
     suspend fun getAccountById(id: Long): AccountEntity? {
         return repository.getAccountById(id)
-    }
-
-    fun updateAccount(account: AccountEntity) {
-        viewModelScope.launch {
-            repository.updateAccount(account)
-        }
-    }
-
-    fun transferMoney(
-        fromAccount: AccountEntity,
-        toAccount: AccountEntity,
-        amount: Double
-    ) {
-        viewModelScope.launch {
-            repository.transferMoney(
-                fromAccount = fromAccount,
-                toAccount = toAccount,
-                amount = amount
-            )
-        }
     }
 
     fun updateTransfer(
