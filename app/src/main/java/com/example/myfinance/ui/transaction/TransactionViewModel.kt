@@ -6,6 +6,7 @@ import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
 import com.example.myfinance.data.repository.FinanceRepository
+import com.example.myfinance.domain.model.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -61,13 +62,13 @@ class TransactionViewModel @Inject constructor(
             return "Pilih akun"
 
         if (
-            (type == "EXPENSE" || type == "TRANSFER") &&
+            (type == TransactionType.EXPENSE.name || type == TransactionType.TRANSFER.name) &&
             amountValue > account.balance
         ) {
             return "Saldo akun tidak mencukupi"
         }
 
-        if (type == "TRANSFER") {
+        if (type == TransactionType.TRANSFER.name) {
 
             if (toAccount == null)
                 return "Pilih akun tujuan"

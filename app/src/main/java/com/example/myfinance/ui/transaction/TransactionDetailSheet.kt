@@ -21,6 +21,7 @@ import com.example.myfinance.data.local.entity.TransactionEntity
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.utils.formatRupiah
 import kotlinx.coroutines.launch
+import com.example.myfinance.domain.model.TransactionType
 
 @Composable
 fun TransactionDetailSheet(
@@ -87,11 +88,11 @@ fun TransactionDetailSheet(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                DetailRow(
-                    "Jenis", when (transaction.type) {
-                        "INCOME" -> "Pemasukan"
-                        "EXPENSE" -> "Pengeluaran"
-                        else -> "Transfer"
+                DetailRow("Jenis", when (transaction.type) {
+                        TransactionType.INCOME.name -> "Pemasukan"
+                        TransactionType.EXPENSE.name -> "Pengeluaran"
+                        TransactionType.TRANSFER.name -> "Transfer"
+                        else -> "-"
                     }
                 )
                 DetailRow("Jumlah", formatRupiah(transaction.amount))

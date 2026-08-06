@@ -25,6 +25,7 @@ import com.example.myfinance.ui.components.TransactionUiModel
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.ui.components.BackgroundPattern
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myfinance.utils.toTransactionType
 
 @Composable
 fun TransactionScreen(
@@ -171,11 +172,7 @@ private fun mapToUiModel(
         categoryName = categoryName,
         accountName = accountName,
         amount = entity.amount,
-        type = when (entity.type) {
-            "INCOME" -> TransactionType.INCOME
-            "EXPENSE" -> TransactionType.EXPENSE
-            else -> TransactionType.TRANSFER
-        },
+        type = entity.type.toTransactionType(),
         dateLabel = android.text.format.DateFormat.format(
             "HH:mm", entity.date
         ).toString()
