@@ -24,6 +24,7 @@ import com.example.myfinance.utils.DatabasePassphraseManager
 import com.example.myfinance.utils.KeystoreManager
 import com.example.myfinance.utils.PinManager
 import com.example.myfinance.data.repository.TransactionRepository
+import com.example.myfinance.data.repository.AccountRepository
 
 private val Context.dataStore by preferencesDataStore(
     name = "myfinance_prefs"
@@ -108,6 +109,14 @@ object AppModule {
         financeRepository: FinanceRepository
     ): TransactionRepository {
         return TransactionRepository(financeRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAccountRepository(
+        financeRepository: FinanceRepository
+    ): AccountRepository {
+        return AccountRepository(financeRepository)
     }
 
     @Provides
