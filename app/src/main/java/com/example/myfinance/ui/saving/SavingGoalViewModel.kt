@@ -3,7 +3,7 @@ package com.example.myfinance.ui.saving
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myfinance.data.local.entity.SavingGoalEntity
-import com.example.myfinance.data.repository.FinanceRepository
+import com.example.myfinance.data.repository.SavingGoalRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SavingGoalViewModel @Inject constructor(
-    private val repository: FinanceRepository
+    private val repository: SavingGoalRepository
 ) : ViewModel() {
 
     val goals: StateFlow<List<SavingGoalEntity>> = repository.getAllSavingGoals()
