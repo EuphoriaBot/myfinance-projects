@@ -25,6 +25,7 @@ import com.example.myfinance.utils.KeystoreManager
 import com.example.myfinance.utils.PinManager
 import com.example.myfinance.data.repository.TransactionRepository
 import com.example.myfinance.data.repository.AccountRepository
+import com.example.myfinance.data.repository.CategoryRepository
 
 private val Context.dataStore by preferencesDataStore(
     name = "myfinance_prefs"
@@ -117,6 +118,14 @@ object AppModule {
         financeRepository: FinanceRepository
     ): AccountRepository {
         return AccountRepository(financeRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCategoryRepository(
+        financeRepository: FinanceRepository
+    ): CategoryRepository {
+        return CategoryRepository(financeRepository)
     }
 
     @Provides

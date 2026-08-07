@@ -3,7 +3,7 @@ package com.example.myfinance.ui.category
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myfinance.data.local.entity.CategoryEntity
-import com.example.myfinance.data.repository.FinanceRepository
+import com.example.myfinance.data.repository.CategoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CategoryViewModel @Inject constructor(
-    private val repository: FinanceRepository
+    private val repository: CategoryRepository
 ) : ViewModel() {
 
     val categories: StateFlow<List<CategoryEntity>> = repository.getAllCategories()
