@@ -6,6 +6,7 @@ import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
 import com.example.myfinance.data.repository.FinanceRepository
+import com.example.myfinance.data.repository.BudgetRepository
 import com.example.myfinance.domain.model.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -33,7 +34,8 @@ data class HomeUiState(
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: FinanceRepository
+    private val repository: FinanceRepository,
+    private val budgetRepository: BudgetRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -62,7 +64,7 @@ class HomeViewModel @Inject constructor(
                     Quadruple(accounts, totalBalance, recentTransactions, monthTransactions)
                 }.combine(repository.getAllCategories()) { quad, categories ->
                     Quintuple(quad.a, quad.b, quad.c, quad.d, categories)
-                }.combine(repository.getAllBudgets()) { quint, budgets ->
+                }.combine(budgetRepository.getAllBudgets()) { quint, budgets ->
                     val accounts = quint.a
                     val totalBalance = quint.b
                     val recentTransactions = quint.c

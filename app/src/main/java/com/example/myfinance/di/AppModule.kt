@@ -26,6 +26,7 @@ import com.example.myfinance.utils.PinManager
 import com.example.myfinance.data.repository.TransactionRepository
 import com.example.myfinance.data.repository.AccountRepository
 import com.example.myfinance.data.repository.CategoryRepository
+import com.example.myfinance.data.repository.BudgetRepository
 
 private val Context.dataStore by preferencesDataStore(
     name = "myfinance_prefs"
@@ -78,6 +79,14 @@ object AppModule {
     fun provideBudgetDao(
         database: AppDatabase
     ): BudgetDao = database.budgetDao()
+
+    @Provides
+    @Singleton
+    fun provideBudgetRepository(
+        financeRepository: FinanceRepository
+    ): BudgetRepository {
+        return BudgetRepository(financeRepository)
+    }
 
     @Provides
     fun provideSavingGoalDao(

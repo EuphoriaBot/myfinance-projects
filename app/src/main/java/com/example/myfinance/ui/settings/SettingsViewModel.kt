@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import com.example.myfinance.ui.components.BudgetUiModel
 import com.example.myfinance.utils.getCurrentMonthRange
 import kotlinx.coroutines.flow.combine
+import com.example.myfinance.data.repository.BudgetRepository
 
 sealed class BackupState {
     object Idle : BackupState()
@@ -36,6 +37,7 @@ sealed class BackupState {
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repository: FinanceRepository,
+    private val budgetRepository: BudgetRepository,
     private val preferencesManager: PreferencesManager,
     private val backupManager: BackupManager
 ) : ViewModel() {
@@ -50,7 +52,7 @@ class SettingsViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    val budgets: StateFlow<List<BudgetEntity>> = repository.getAllBudgets()
+        val budgets: StateFlow<List<BudgetEntity>> = budgetRepository.getAllBudgets()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -59,12 +61,12 @@ class SettingsViewModel @Inject constructor(
 
     val budgetProgress: StateFlow<List<BudgetUiModel>> =
         combine(
-            repository.getAllBudgets(),
+            budgetRepository.getAllBudgets(),
             repository.getAllCategories()
         ) { budgets, categories ->
             val (startDate, endDate) = getCurrentMonthRange()
             budgets.map { budget ->
-                val spent = repository.getSpentAmountByCategory(
+                val spent = budgetRepository.getSpentAmountByCategory(
                     categoryId = budget.categoryId,
                     startDate = startDate,
                     endDate = endDate
@@ -105,19 +107,19 @@ class SettingsViewModel @Inject constructor(
 
     fun insertBudget(budget: BudgetEntity) {
         viewModelScope.launch {
-            repository.insertBudget(budget)
+            budgetRepository.insertBudget(budget)
         }
     }
 
     fun updateBudget(budget: BudgetEntity) {
         viewModelScope.launch {
-            repository.updateBudget(budget)
+            budgetRepository.updateBudget(budget)
         }
     }
 
     fun deleteBudget(budget: BudgetEntity) {
         viewModelScope.launch {
-            repository.deleteBudget(budget)
+            budgetRepository.deleteBudget(budget)
         }
     }
 
