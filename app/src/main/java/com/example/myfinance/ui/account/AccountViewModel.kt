@@ -3,7 +3,7 @@ package com.example.myfinance.ui.account
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myfinance.data.local.entity.AccountEntity
-import com.example.myfinance.data.repository.FinanceRepository
+import com.example.myfinance.data.repository.AccountRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AccountViewModel @Inject constructor(
-    private val repository: FinanceRepository
+    private val repository: AccountRepository
 ) : ViewModel() {
 
     val accounts: StateFlow<List<AccountEntity>> = repository.getAllAccounts()
