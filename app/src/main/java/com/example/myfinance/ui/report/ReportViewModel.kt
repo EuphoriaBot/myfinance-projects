@@ -6,6 +6,7 @@ import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
 import com.example.myfinance.data.repository.FinanceRepository
+import com.example.myfinance.data.repository.ReportRepository
 import com.example.myfinance.domain.model.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -22,7 +23,7 @@ data class ReportUiState(
 
 @HiltViewModel
 class ReportViewModel @Inject constructor(
-    repository: FinanceRepository
+    private val repository: ReportRepository
 ) : ViewModel() {
 
     private val calendar = Calendar.getInstance().apply {
