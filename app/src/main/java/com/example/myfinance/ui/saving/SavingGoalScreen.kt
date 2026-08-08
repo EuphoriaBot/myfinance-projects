@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Delete
 @Composable
 fun SavingGoalScreen(
     modifier: Modifier = Modifier,
+    onBack: () -> Unit,
     viewModel: SavingGoalViewModel = hiltViewModel()
 ) {
     val goals by viewModel.goals.collectAsStateWithLifecycle()

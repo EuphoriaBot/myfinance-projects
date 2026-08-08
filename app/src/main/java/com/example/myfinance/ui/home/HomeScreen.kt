@@ -72,6 +72,26 @@ fun HomeScreen(
             )
             return
         }
+
+        showGoalScreen -> {
+            SavingGoalScreen(
+                modifier = modifier,
+                onBack = {
+                    showGoalScreen = false
+                }
+            )
+            return
+        }
+
+        showCategoryScreen -> {
+            CategoryScreen(
+                modifier = modifier,
+                onBack = {
+                    showCategoryScreen = false
+                }
+            )
+            return
+        }
     }
 
     Scaffold(
