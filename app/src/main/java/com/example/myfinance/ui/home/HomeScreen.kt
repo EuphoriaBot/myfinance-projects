@@ -115,7 +115,12 @@ fun HomeScreen(
                 )
             }
             BottomNavDestination.ACCOUNT -> {
-                AccountScreen(modifier = Modifier.padding(innerPadding))
+                AccountScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    onBack = {
+                        currentDestination = BottomNavDestination.SETTINGS
+                    }
+                )
             }
             BottomNavDestination.REPORT -> {
                 ReportScreen(modifier = Modifier.padding(innerPadding))

@@ -29,6 +29,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myfinance.utils.formatInputNumber
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 
 @Composable
 fun SavingGoalScreen(
@@ -127,16 +129,27 @@ fun SavingGoalScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                    .padding(8.dp, 8.dp, 16.dp, 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                IconButton(
+                    onClick = onBack
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Kembali",
+                        tint = TextMuted
+                    )
+                }
+
                 Text(
                     text = "Target Nabung",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextPrimary
+                    color = TextPrimary,
+                    modifier = Modifier.weight(1f)
                 )
+
                 FloatingActionButton(
                     onClick = { showAddDialog = true },
                     containerColor = AccentPurple,

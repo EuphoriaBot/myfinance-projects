@@ -29,10 +29,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material3.MenuAnchorType
 import com.example.myfinance.utils.formatInputNumber
+import androidx.compose.material.icons.filled.ArrowBack
 
 @Composable
 fun AccountScreen(
     modifier: Modifier = Modifier,
+    onBack: () -> Unit,
     viewModel: AccountViewModel = hiltViewModel()
 ) {
     val accounts by viewModel.accounts.collectAsStateWithLifecycle()
@@ -87,15 +89,26 @@ fun AccountScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                IconButton(
+                    onClick = onBack
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Kembali",
+                        tint = TextPrimary
+                    )
+                }
+
                 Text(
                     text = "Akun",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextPrimary
+                    color = TextPrimary,
+                    modifier = Modifier.weight(1f)
                 )
+
                 FloatingActionButton(
                     onClick = { showAddDialog = true },
                     containerColor = AccentPurple,
