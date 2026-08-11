@@ -29,6 +29,7 @@ class RecurringTransactionWorker @AssistedInject constructor(
         transaction: TransactionEntity,
         now: Long
     ): Boolean {
+
         val lastDate = Instant.ofEpochMilli(transaction.date)
             .atZone(ZoneId.systemDefault())
 
@@ -46,23 +47,45 @@ class RecurringTransactionWorker @AssistedInject constructor(
             }
 
             "MONTHLY" -> {
+
                 val monthsDifference =
                     (currentDate.year - lastDate.year) * 12 +
                             (currentDate.monthValue - lastDate.monthValue)
 
-                monthsDifference >= 1 &&
-                        currentDate.dayOfMonth >= lastDate.dayOfMonth
+                if (monthsDifference < 1) {
+                    false
+                } else {
+
+                    val lastDayOfCurrentMonth =
+                        currentDate.toLocalDate().lengthOfMonth()
+
+                    val targetDay =
+                        minOf(
+                            lastDate.dayOfMonth,
+                            lastDayOfCurrentMonth
+                        )
+
+                    currentDate.dayOfMonth >= targetDay
+                }
             }
 
             "YEARLY" -> {
                 val yearsDifference =
                     currentDate.year - lastDate.year
 
-                yearsDifference >= 1 &&
-                        currentDate.monthValue >= lastDate.monthValue &&
-                        currentDate.dayOfMonth >= lastDate.dayOfMonth
+                if (yearsDifference < 1) {
+                    false
+                } else {
+                    val lastDayOfCurrentMonth =
+                        currentDate.toLocalDate().lengthOfMonth()
+                    val targetDay =
+                        minOf(
+                            lastDate.dayOfMonth,
+                            lastDayOfCurrentMonth
+                        )
+                    currentDate.monthValue > lastDate.monthValue || (currentDate.monthValue == lastDate.monthValue && currentDate.dayOfMonth >= targetDay)
+                }
             }
-
             else -> false
         }
     }
