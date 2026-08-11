@@ -27,5 +27,6 @@ data class TransactionEntity(
     val date: Long = System.currentTimeMillis(),
     val isRecurring: Boolean = false,
     val recurringInterval: String? = null,
+    val recurringSourceId: Long? = null,
     val createdAt: Long = System.currentTimeMillis()
 )

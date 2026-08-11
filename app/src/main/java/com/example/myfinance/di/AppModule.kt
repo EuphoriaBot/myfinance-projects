@@ -55,7 +55,10 @@ object AppModule {
             "myfinance_database"
         )
             .openHelperFactory(factory)
-            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .addMigrations(
+                AppDatabase.MIGRATION_1_2,
+                AppDatabase.MIGRATION_2_3
+            )
             .addCallback(AppDatabase.PREPOPULATE_CALLBACK)
             .build()
     }

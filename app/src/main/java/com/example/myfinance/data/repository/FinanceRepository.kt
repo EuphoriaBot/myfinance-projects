@@ -423,5 +423,14 @@ class FinanceRepository @Inject constructor(
         )
     }
 
-
+    suspend fun hasRecurringTransactionInPeriod(
+        sourceId: Long,
+        startDate: Long,
+        endDate: Long
+    ): Boolean =
+        transactionDao.hasRecurringTransactionInPeriod(
+            sourceId,
+            startDate,
+            endDate
+        )
 }

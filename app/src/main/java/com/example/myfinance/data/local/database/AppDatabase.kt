@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
         BudgetEntity::class,
         SavingGoalEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -63,6 +63,25 @@ abstract class AppDatabase : RoomDatabase() {
 
                 db.execSQL(
                     "CREATE INDEX IF NOT EXISTS index_saving_goals_isCompleted ON saving_goals(isCompleted)"
+                )
+            }
+        }
+
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+            ALTER TABLE transactions
+            ADD COLUMN recurringSourceId INTEGER
+            """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+            CREATE INDEX IF NOT EXISTS
+            index_transactions_recurringSourceId
+            ON transactions(recurringSourceId)
+            """.trimIndent()
                 )
             }
         }

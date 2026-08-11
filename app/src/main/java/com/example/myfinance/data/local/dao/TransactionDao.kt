@@ -69,4 +69,39 @@ interface TransactionDao {
         startDate: Long,
         endDate: Long
     ): Flow<List<TransactionEntity>>
+
+    @Query("""
+    SELECT EXISTS(
+        SELECT 1
+        FROM transactions
+        WHERE accountId = :accountId
+        AND type = :type
+        AND amount = :amount
+        AND isRecurring = 0
+        AND date >= :startDate
+        AND date <= :endDate
+    )
+""")
+    suspend fun hasGeneratedRecurringTransaction(
+        accountId: Long,
+        type: String,
+        amount: Double,
+        startDate: Long,
+        endDate: Long
+    ): Boolean
+
+    @Query("""
+    SELECT EXISTS(
+        SELECT 1
+        FROM transactions
+        WHERE recurringSourceId = :sourceId
+        AND date >= :startDate
+        AND date <= :endDate
+    )
+""")
+    suspend fun hasRecurringTransactionInPeriod(
+        sourceId: Long,
+        startDate: Long,
+        endDate: Long
+    ): Boolean
 }
