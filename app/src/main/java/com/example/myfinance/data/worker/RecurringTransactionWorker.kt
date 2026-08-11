@@ -87,6 +87,60 @@ class RecurringTransactionWorker @AssistedInject constructor(
                     return@forEach
                 }
 
+                val periodStart: Long
+                val periodEnd: Long
+
+                when (transaction.recurringInterval) {
+                    "DAILY" -> {
+                        periodStart = now - oneDayMs
+                        periodEnd = now
+                    }
+
+                    "WEEKLY" -> {
+                        periodStart = now - oneWeekMs
+                        periodEnd = now
+                    }
+
+                    "MONTHLY" -> {
+                        val currentDate = Instant
+                            .ofEpochMilli(now)
+                            .atZone(ZoneId.systemDefault())
+
+                        periodStart = currentDate
+                            .withDayOfMonth(1)
+                            .toInstant()
+                            .toEpochMilli()
+
+                        periodEnd = now
+                    }
+
+                    "YEARLY" -> {
+                        val currentDate = Instant
+                            .ofEpochMilli(now)
+                            .atZone(ZoneId.systemDefault())
+
+                        periodStart = currentDate
+                            .withDayOfYear(1)
+                            .toInstant()
+                            .toEpochMilli()
+
+                        periodEnd = now
+                    }
+
+                    else -> return@forEach
+                }
+
+                val alreadyGenerated =
+                    repository.hasRecurringTransactionInPeriod(
+                        sourceId = transaction.id,
+                        startDate = periodStart,
+                        endDate = periodEnd
+                    )
+
+                if (alreadyGenerated) {
+                    return@forEach
+                }
+
                 val recurringTransaction = transaction.copy(
                     id = 0,
                     date = now,
@@ -96,9 +150,7 @@ class RecurringTransactionWorker @AssistedInject constructor(
                     createdAt = now
                 )
 
-                repository.addRecurringTransaction(
-                    recurringTransaction
-                )
+                repository.addRecurringTransaction(recurringTransaction)
             }
 
             Result.success()

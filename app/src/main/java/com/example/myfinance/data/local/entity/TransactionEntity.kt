@@ -15,7 +15,6 @@ import androidx.room.Index
         Index(value = ["recurringSourceId"])
     ]
 )
-
 data class TransactionEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
