@@ -125,13 +125,42 @@ class FinanceRepository @Inject constructor(
     ): Boolean {
         return database.withTransaction {
 
+            val sourceId = transaction.recurringSourceId
+
+            if (sourceId != null) {
+
+                val now = transaction.date
+
+                val startOfDay = java.util.Calendar.getInstance().apply {
+                    timeInMillis = now
+                    set(java.util.Calendar.HOUR_OF_DAY, 0)
+                    set(java.util.Calendar.MINUTE, 0)
+                    set(java.util.Calendar.SECOND, 0)
+                    set(java.util.Calendar.MILLISECOND, 0)
+                }.timeInMillis
+
+                val endOfDay = startOfDay + 24 * 60 * 60 * 1000L - 1
+
+                val alreadyGenerated =
+                    transactionDao.hasRecurringTransactionInPeriod(
+                        sourceId = sourceId,
+                        startDate = startOfDay,
+                        endDate = endOfDay
+                    )
+
+                if (alreadyGenerated) {
+                    return@withTransaction false
+                }
+            }
+
             when (transaction.type) {
 
                 TransactionType.INCOME.name -> {
-                    transactionDao.insert(transaction)
 
                     val account = accountDao.getById(transaction.accountId)
-                        ?: error("Akun tidak ditemukan")
+                        ?: return@withTransaction false
+
+                    transactionDao.insert(transaction)
 
                     accountDao.update(
                         account.copy(
@@ -143,55 +172,62 @@ class FinanceRepository @Inject constructor(
                 }
 
                 TransactionType.EXPENSE.name -> {
+
                     val account = accountDao.getById(transaction.accountId)
-                        ?: error("Akun tidak ditemukan")
+                        ?: return@withTransaction false
 
                     if (account.balance < transaction.amount) {
-                        false
-                    } else {
-                        transactionDao.insert(transaction)
-
-                        accountDao.update(
-                            account.copy(
-                                balance = account.balance - transaction.amount
-                            )
-                        )
-
-                        true
+                        return@withTransaction false
                     }
+
+                    transactionDao.insert(transaction)
+
+                    accountDao.update(
+                        account.copy(
+                            balance = account.balance - transaction.amount
+                        )
+                    )
+
+                    true
                 }
 
                 TransactionType.TRANSFER.name -> {
+
                     val fromAccount = accountDao.getById(transaction.accountId)
-                        ?: error("Akun asal tidak ditemukan")
+                        ?: return@withTransaction false
+
                     val toAccountId = transaction.toAccountId
-                        ?: error("Akun tujuan tidak ditemukan")
+                        ?: return@withTransaction false
+
                     if (fromAccount.id == toAccountId) {
-                        error("Akun asal dan tujuan tidak boleh sama")
+                        return@withTransaction false
                     }
+
                     val toAccount = accountDao.getById(toAccountId)
-                        ?: error("Akun tujuan tidak ditemukan")
+                        ?: return@withTransaction false
+
                     if (fromAccount.balance < transaction.amount) {
-                        false
-                    } else {
-                        transactionDao.insert(transaction)
-                        accountDao.update(
-                            fromAccount.copy(
-                                balance = fromAccount.balance - transaction.amount
-                            )
-                        )
-                        accountDao.update(
-                            toAccount.copy(
-                                balance = toAccount.balance + transaction.amount
-                            )
-                        )
-                        true
+                        return@withTransaction false
                     }
+
+                    transactionDao.insert(transaction)
+
+                    accountDao.update(
+                        fromAccount.copy(
+                            balance = fromAccount.balance - transaction.amount
+                        )
+                    )
+
+                    accountDao.update(
+                        toAccount.copy(
+                            balance = toAccount.balance + transaction.amount
+                        )
+                    )
+
+                    true
                 }
 
-                else -> {
-                    error("Tipe transaksi tidak valid")
-                }
+                else -> false
             }
         }
     }
