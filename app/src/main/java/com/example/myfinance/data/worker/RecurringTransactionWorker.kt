@@ -15,6 +15,9 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.TimeUnit
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 @HiltWorker
 class RecurringTransactionWorker @AssistedInject constructor(
@@ -36,21 +39,44 @@ class RecurringTransactionWorker @AssistedInject constructor(
 
             val oneDayMs = 24 * 60 * 60 * 1000L
             val oneWeekMs = 7 * oneDayMs
-            val oneYearMs = 365 * oneDayMs
 
             recurringTransactions.forEach { transaction ->
 
-                val interval = when (transaction.recurringInterval) {
-                    "DAILY" -> oneDayMs
-                    "WEEKLY" -> oneWeekMs
-                    "MONTHLY" -> 30 * oneDayMs
-                    "YEARLY" -> oneYearMs
-                    else -> return@forEach
+                val shouldRun = when (transaction.recurringInterval) {
+
+                    "DAILY" -> {
+                        now - transaction.date >= oneDayMs
+                    }
+
+                    "WEEKLY" -> {
+                        now - transaction.date >= oneWeekMs
+                    }
+
+                    "MONTHLY" -> {
+                        val lastDate = Instant.ofEpochMilli(transaction.date)
+                            .atZone(ZoneId.systemDefault())
+
+                        val currentDate = Instant.ofEpochMilli(now)
+                            .atZone(ZoneId.systemDefault())
+
+                        currentDate.year > lastDate.year ||
+                                currentDate.monthValue > lastDate.monthValue
+                    }
+
+                    "YEARLY" -> {
+                        val lastDate = Instant.ofEpochMilli(transaction.date)
+                            .atZone(ZoneId.systemDefault())
+
+                        val currentDate = Instant.ofEpochMilli(now)
+                            .atZone(ZoneId.systemDefault())
+
+                        currentDate.year > lastDate.year
+                    }
+
+                    else -> false
                 }
 
-                val timeSinceLast = now - transaction.date
-
-                if (timeSinceLast >= interval) {
+                if (shouldRun) {
 
                     val recurringTransaction = TransactionEntity(
                         amount = transaction.amount,
