@@ -122,14 +122,14 @@ class FinanceRepository @Inject constructor(
 
     suspend fun addRecurringTransaction(
         transaction: TransactionEntity
-    ) {
-        database.withTransaction {
-
-            transactionDao.insert(transaction)
+    ): Boolean {
+        return database.withTransaction {
 
             when (transaction.type) {
 
                 TransactionType.INCOME.name -> {
+                    transactionDao.insert(transaction)
+
                     val account = accountDao.getById(transaction.accountId)
                         ?: error("Akun tidak ditemukan")
 
@@ -138,17 +138,27 @@ class FinanceRepository @Inject constructor(
                             balance = account.balance + transaction.amount
                         )
                     )
+
+                    true
                 }
 
                 TransactionType.EXPENSE.name -> {
                     val account = accountDao.getById(transaction.accountId)
                         ?: error("Akun tidak ditemukan")
 
-                    accountDao.update(
-                        account.copy(
-                            balance = account.balance - transaction.amount
+                    if (account.balance < transaction.amount) {
+                        false
+                    } else {
+                        transactionDao.insert(transaction)
+
+                        accountDao.update(
+                            account.copy(
+                                balance = account.balance - transaction.amount
+                            )
                         )
-                    )
+
+                        true
+                    }
                 }
 
                 TransactionType.TRANSFER.name -> {
@@ -158,17 +168,29 @@ class FinanceRepository @Inject constructor(
                     val toAccount = accountDao.getById(transaction.toAccountId!!)
                         ?: error("Akun tujuan tidak ditemukan")
 
-                    accountDao.update(
-                        fromAccount.copy(
-                            balance = fromAccount.balance - transaction.amount
-                        )
-                    )
+                    if (fromAccount.balance < transaction.amount) {
+                        false
+                    } else {
+                        transactionDao.insert(transaction)
 
-                    accountDao.update(
-                        toAccount.copy(
-                            balance = toAccount.balance + transaction.amount
+                        accountDao.update(
+                            fromAccount.copy(
+                                balance = fromAccount.balance - transaction.amount
+                            )
                         )
-                    )
+
+                        accountDao.update(
+                            toAccount.copy(
+                                balance = toAccount.balance + transaction.amount
+                            )
+                        )
+
+                        true
+                    }
+                }
+
+                else -> {
+                    error("Tipe transaksi tidak valid")
                 }
             }
         }
