@@ -2,10 +2,15 @@ package com.example.myfinance.data.worker
 
 import android.content.Context
 import androidx.hilt.work.HiltWorker
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
 import com.example.myfinance.data.local.entity.TransactionEntity
 import com.example.myfinance.data.repository.FinanceRepository
-import com.example.myfinance.domain.model.TransactionType
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
@@ -20,76 +25,85 @@ class RecurringTransactionWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         return try {
-            val allTransactions = repository.getAllTransactions().first()
-            val recurringTransactions = allTransactions.filter { it.isRecurring }
+            val allTransactions = repository
+                .getAllTransactions()
+                .first()
+
+            val recurringTransactions = allTransactions
+                .filter { it.isRecurring }
 
             val now = System.currentTimeMillis()
+
             val oneDayMs = 24 * 60 * 60 * 1000L
             val oneWeekMs = 7 * oneDayMs
-            val oneMonthMs = 30 * oneDayMs
+            val oneYearMs = 365 * oneDayMs
 
             recurringTransactions.forEach { transaction ->
+
                 val interval = when (transaction.recurringInterval) {
                     "DAILY" -> oneDayMs
                     "WEEKLY" -> oneWeekMs
-                    "MONTHLY" -> oneMonthMs
-                    "YEARLY" -> 365 * oneDayMs
+                    "MONTHLY" -> 30 * oneDayMs
+                    "YEARLY" -> oneYearMs
                     else -> return@forEach
                 }
 
                 val timeSinceLast = now - transaction.date
+
                 if (timeSinceLast >= interval) {
-                    repository.insertTransaction(
-                        TransactionEntity(
-                            amount = transaction.amount,
-                            note = transaction.note,
-                            type = transaction.type,
-                            categoryId = transaction.categoryId,
-                            accountId = transaction.accountId,
-                            date = now,
-                            isRecurring = true,
-                            recurringInterval = transaction.recurringInterval
-                        )
+
+                    val recurringTransaction = TransactionEntity(
+                        amount = transaction.amount,
+                        note = transaction.note,
+                        type = transaction.type,
+                        categoryId = transaction.categoryId,
+                        accountId = transaction.accountId,
+                        toAccountId = transaction.toAccountId,
+                        date = now,
+                        isRecurring = true,
+                        recurringInterval = transaction.recurringInterval
                     )
 
-                    val accounts = repository.getAllAccounts().first()
-                    val account = accounts.find { it.id == transaction.accountId }
-                    if (account != null) {
-                        val newBalance = if (transaction.type == TransactionType.INCOME.name) {
-                            account.balance + transaction.amount
-                        } else {
-                            account.balance - transaction.amount
-                        }
-                        repository.updateAccount(account.copy(balance = newBalance))
-                    }
+                    repository.addRecurringTransaction(
+                        recurringTransaction
+                    )
                 }
             }
 
             Result.success()
+
         } catch (_: Exception) {
             Result.failure()
         }
     }
 
     companion object {
+
         const val WORK_NAME = "recurring_transaction_work"
 
         fun schedule(context: Context) {
-            val request = PeriodicWorkRequestBuilder<RecurringTransactionWorker>(
-                1, TimeUnit.DAYS
-            )
-                .setConstraints(
-                    Constraints.Builder()
-                        .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
-                        .build()
-                )
-                .build()
 
-            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-                WORK_NAME,
-                ExistingPeriodicWorkPolicy.KEEP,
-                request
-            )
+            val request =
+                PeriodicWorkRequestBuilder<RecurringTransactionWorker>(
+                    1,
+                    TimeUnit.DAYS
+                )
+                    .setConstraints(
+                        Constraints.Builder()
+                            .setRequiredNetworkType(
+                                NetworkType.NOT_REQUIRED
+                            )
+                            .build()
+                    )
+                    .build()
+
+            WorkManager
+                .getInstance(context)
+                .enqueueUniquePeriodicWork(
+                    WORK_NAME,
+                    ExistingPeriodicWorkPolicy.KEEP,
+                    request
+                )
         }
     }
 }
