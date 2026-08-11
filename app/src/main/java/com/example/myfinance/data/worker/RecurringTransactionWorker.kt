@@ -86,8 +86,8 @@ class RecurringTransactionWorker @AssistedInject constructor(
                         accountId = transaction.accountId,
                         toAccountId = transaction.toAccountId,
                         date = now,
-                        isRecurring = true,
-                        recurringInterval = transaction.recurringInterval
+                        isRecurring = false,
+                        recurringInterval = null
                     )
 
                     repository.addRecurringTransaction(
