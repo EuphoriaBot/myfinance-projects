@@ -11,7 +11,8 @@ import androidx.room.Index
         Index(value = ["type"]),
         Index(value = ["accountId"]),
         Index(value = ["categoryId"]),
-        Index(value = ["date", "type"])
+        Index(value = ["date", "type"]),
+        Index(value = ["recurringSourceId"])
     ]
 )
 
