@@ -25,6 +25,48 @@ class RecurringTransactionWorker @AssistedInject constructor(
     private val repository: FinanceRepository
 ) : CoroutineWorker(appContext, params) {
 
+    private fun shouldRunRecurring(
+        transaction: TransactionEntity,
+        now: Long
+    ): Boolean {
+        val lastDate = Instant.ofEpochMilli(transaction.date)
+            .atZone(ZoneId.systemDefault())
+
+        val currentDate = Instant.ofEpochMilli(now)
+            .atZone(ZoneId.systemDefault())
+
+        return when (transaction.recurringInterval) {
+
+            "DAILY" -> {
+                now - transaction.date >= 24 * 60 * 60 * 1000L
+            }
+
+            "WEEKLY" -> {
+                now - transaction.date >= 7 * 24 * 60 * 60 * 1000L
+            }
+
+            "MONTHLY" -> {
+                val monthsDifference =
+                    (currentDate.year - lastDate.year) * 12 +
+                            (currentDate.monthValue - lastDate.monthValue)
+
+                monthsDifference >= 1 &&
+                        currentDate.dayOfMonth >= lastDate.dayOfMonth
+            }
+
+            "YEARLY" -> {
+                val yearsDifference =
+                    currentDate.year - lastDate.year
+
+                yearsDifference >= 1 &&
+                        currentDate.monthValue >= lastDate.monthValue &&
+                        currentDate.dayOfMonth >= lastDate.dayOfMonth
+            }
+
+            else -> false
+        }
+    }
+
     override suspend fun doWork(): Result {
         return try {
             val allTransactions = repository
@@ -41,39 +83,10 @@ class RecurringTransactionWorker @AssistedInject constructor(
 
             recurringTransactions.forEach { transaction ->
 
-                val shouldRun = when (transaction.recurringInterval) {
-
-                    "DAILY" -> {
-                        now - transaction.date >= oneDayMs
-                    }
-
-                    "WEEKLY" -> {
-                        now - transaction.date >= oneWeekMs
-                    }
-
-                    "MONTHLY" -> {
-                        val lastDate = Instant.ofEpochMilli(transaction.date)
-                            .atZone(ZoneId.systemDefault())
-
-                        val currentDate = Instant.ofEpochMilli(now)
-                            .atZone(ZoneId.systemDefault())
-
-                        currentDate.year > lastDate.year ||
-                                currentDate.monthValue > lastDate.monthValue
-                    }
-
-                    "YEARLY" -> {
-                        val lastDate = Instant.ofEpochMilli(transaction.date)
-                            .atZone(ZoneId.systemDefault())
-
-                        val currentDate = Instant.ofEpochMilli(now)
-                            .atZone(ZoneId.systemDefault())
-
-                        currentDate.year > lastDate.year
-                    }
-
-                    else -> false
-                }
+                val shouldRun = shouldRunRecurring(
+                    transaction = transaction,
+                    now = now
+                )
 
                 if (shouldRun) {
 

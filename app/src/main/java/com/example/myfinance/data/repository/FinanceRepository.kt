@@ -164,27 +164,27 @@ class FinanceRepository @Inject constructor(
                 TransactionType.TRANSFER.name -> {
                     val fromAccount = accountDao.getById(transaction.accountId)
                         ?: error("Akun asal tidak ditemukan")
-
-                    val toAccount = accountDao.getById(transaction.toAccountId!!)
+                    val toAccountId = transaction.toAccountId
                         ?: error("Akun tujuan tidak ditemukan")
-
+                    if (fromAccount.id == toAccountId) {
+                        error("Akun asal dan tujuan tidak boleh sama")
+                    }
+                    val toAccount = accountDao.getById(toAccountId)
+                        ?: error("Akun tujuan tidak ditemukan")
                     if (fromAccount.balance < transaction.amount) {
                         false
                     } else {
                         transactionDao.insert(transaction)
-
                         accountDao.update(
                             fromAccount.copy(
                                 balance = fromAccount.balance - transaction.amount
                             )
                         )
-
                         accountDao.update(
                             toAccount.copy(
                                 balance = toAccount.balance + transaction.amount
                             )
                         )
-
                         true
                     }
                 }
