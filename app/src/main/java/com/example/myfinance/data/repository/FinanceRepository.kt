@@ -120,6 +120,60 @@ class FinanceRepository @Inject constructor(
         }
     }
 
+    suspend fun addRecurringTransaction(
+        transaction: TransactionEntity
+    ) {
+        database.withTransaction {
+
+            transactionDao.insert(transaction)
+
+            when (transaction.type) {
+
+                TransactionType.INCOME.name -> {
+                    val account = accountDao.getById(transaction.accountId)
+                        ?: error("Akun tidak ditemukan")
+
+                    accountDao.update(
+                        account.copy(
+                            balance = account.balance + transaction.amount
+                        )
+                    )
+                }
+
+                TransactionType.EXPENSE.name -> {
+                    val account = accountDao.getById(transaction.accountId)
+                        ?: error("Akun tidak ditemukan")
+
+                    accountDao.update(
+                        account.copy(
+                            balance = account.balance - transaction.amount
+                        )
+                    )
+                }
+
+                TransactionType.TRANSFER.name -> {
+                    val fromAccount = accountDao.getById(transaction.accountId)
+                        ?: error("Akun asal tidak ditemukan")
+
+                    val toAccount = accountDao.getById(transaction.toAccountId!!)
+                        ?: error("Akun tujuan tidak ditemukan")
+
+                    accountDao.update(
+                        fromAccount.copy(
+                            balance = fromAccount.balance - transaction.amount
+                        )
+                    )
+
+                    accountDao.update(
+                        toAccount.copy(
+                            balance = toAccount.balance + transaction.amount
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     suspend fun updateTransaction(
         oldTransaction: TransactionEntity,
         newTransaction: TransactionEntity
