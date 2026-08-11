@@ -101,7 +101,6 @@ fun BudgetManagementScreen(
             .fillMaxSize()
             .background(DarkBackground)
     ) {
-        // Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
