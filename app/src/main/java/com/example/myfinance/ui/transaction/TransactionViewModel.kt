@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
-import com.example.myfinance.data.repository.FinanceRepository
 import com.example.myfinance.data.repository.TransactionRepository
 import com.example.myfinance.domain.model.TransactionType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -104,50 +103,6 @@ class TransactionViewModel @Inject constructor(
         return null
     }
 
-    fun validateEditTransfer(
-        amount: String,
-        oldTransaction: TransactionEntity,
-        fromAccount: AccountEntity?,
-        toAccount: AccountEntity?
-    ): String? {
-
-        val amountValue = amount.toDoubleOrNull()
-
-        if (amount.isBlank())
-            return "Jumlah tidak boleh kosong"
-
-        if (amountValue == null || amountValue <= 0)
-            return "Jumlah harus lebih dari 0"
-
-        if (fromAccount == null)
-            return "Pilih akun asal"
-
-        if (toAccount == null)
-            return "Pilih akun tujuan"
-
-        if (fromAccount.id == toAccount.id)
-            return "Akun asal dan tujuan tidak boleh sama"
-
-        var availableBalance = fromAccount.balance
-
-        when (fromAccount.id) {
-
-            oldTransaction.accountId -> {
-                availableBalance += oldTransaction.amount
-            }
-
-            oldTransaction.toAccountId -> {
-                availableBalance -= oldTransaction.amount
-            }
-        }
-
-        if (amountValue > availableBalance) {
-            return "Saldo akun tidak mencukupi"
-        }
-
-        return null
-    }
-
     fun addTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
             repository.addTransaction(transaction)
@@ -176,10 +131,6 @@ class TransactionViewModel @Inject constructor(
         viewModelScope.launch {
             repository.deleteTransaction(transaction)
         }
-    }
-
-    suspend fun getAccountById(id: Long): AccountEntity? {
-        return repository.getAccountById(id)
     }
 
     fun updateTransfer(

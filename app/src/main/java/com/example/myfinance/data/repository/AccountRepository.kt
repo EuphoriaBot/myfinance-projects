@@ -23,11 +23,6 @@ class AccountRepository @Inject constructor(
     ) =
         financeRepository.updateAccount(account)
 
-    suspend fun getAccountById(
-        id: Long
-    ) =
-        financeRepository.getAccountById(id)
-
     suspend fun softDeleteAccount(
         account: AccountEntity
     ) =

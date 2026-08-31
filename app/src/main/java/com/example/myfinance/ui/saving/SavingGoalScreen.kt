@@ -29,7 +29,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myfinance.utils.formatInputNumber
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 
 @Composable

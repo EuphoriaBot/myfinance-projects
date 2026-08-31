@@ -10,15 +10,6 @@ class TransactionRepository @Inject constructor(
     fun getAllTransactions() =
         financeRepository.getAllTransactions()
 
-    fun getRecentTransactions(limit: Int = 5) =
-        financeRepository.getRecentTransactions(limit)
-
-    fun getTransactionsByDateRange(
-        start: Long,
-        end: Long
-    ) =
-        financeRepository.getTransactionsByDateRange(start, end)
-
     fun getAllAccounts() =
         financeRepository.getAllAccounts()
 

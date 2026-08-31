@@ -61,9 +61,6 @@ class FinanceRepository @Inject constructor(
     ): Flow<Double?> =
         transactionDao.getTotalByTypeAndDateRange(type, startDate, endDate)
 
-    suspend fun insertTransaction(transaction: TransactionEntity): Long =
-        transactionDao.insert(transaction)
-
     suspend fun addTransaction(
         transaction: TransactionEntity
     ) {
@@ -332,17 +329,6 @@ class FinanceRepository @Inject constructor(
         }
     }
 
-    fun getTransactionsByCategoryAndDateRange(
-        categoryId: Long,
-        startDate: Long,
-        endDate: Long
-    ): Flow<List<TransactionEntity>> =
-        transactionDao.getTransactionsByCategoryAndDateRange(
-            categoryId,
-            startDate,
-            endDate
-        )
-
     suspend fun getSpentAmountByCategory(
         categoryId: Long,
         startDate: Long,
@@ -394,25 +380,6 @@ class FinanceRepository @Inject constructor(
 
     suspend fun getAccountById(id: Long): AccountEntity? =
         accountDao.getById(id)
-
-    suspend fun transferMoney(
-        fromAccount: AccountEntity,
-        toAccount: AccountEntity,
-        amount: Double
-    ) {
-        database.withTransaction {
-            accountDao.update(
-                fromAccount.copy(
-                    balance = fromAccount.balance - amount
-                )
-            )
-            accountDao.update(
-                toAccount.copy(
-                    balance = toAccount.balance + amount
-                )
-            )
-        }
-    }
 
     suspend fun updateTransfer(
         oldTransaction: TransactionEntity,

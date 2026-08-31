@@ -19,14 +19,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.myfinance.data.local.entity.AccountEntity
 import com.example.myfinance.data.local.entity.CategoryEntity
 import com.example.myfinance.data.local.entity.TransactionEntity
-import com.example.myfinance.domain.model.TransactionType
 import com.example.myfinance.ui.components.TransactionItem
 import com.example.myfinance.ui.components.TransactionUiModel
 import com.example.myfinance.ui.theme.*
 import com.example.myfinance.ui.components.BackgroundPattern
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myfinance.utils.toTransactionType
-import com.example.myfinance.ui.transaction.TransactionUiState
 
 @Composable
 fun TransactionScreen(

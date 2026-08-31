@@ -49,7 +49,7 @@ fun exportTransactionsToCsv(
             "${context.packageName}.fileprovider",
             file
         )
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         null
     }
 }
